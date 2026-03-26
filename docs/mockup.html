@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gold Volatility Bunseki - Design Mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --surface2: #1c2128;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #7d8590;
+      --gold:     #f0b429;
+      --gold-dim: rgba(240,180,41,0.12);
+      --red:      #ff7b72;
+      --green:    #3fb950;
+      --blue:     #58a6ff;
+      --purple:   #bc8cff;
+      --amber:    #d29922;
+      --amber-bg: rgba(210,153,34,0.12);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 220px 1fr 300px;
+      grid-template-rows: 56px 1fr;
+      overflow: hidden;
+    }
+
+    /* ============ TOP NAV ============ */
+    .topbar {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+    }
+    .topbar .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 15px; letter-spacing: -0.3px;
+    }
+    .topbar .logo .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .topbar .badge {
+      margin-left: auto;
+      font-size: 11px; color: var(--green);
+      background: rgba(63,185,80,0.1);
+      border: 1px solid rgba(63,185,80,0.3);
+      padding: 3px 10px; border-radius: 20px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .topbar .badge::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    /* ============ LEFT SIDEBAR ============ */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex; flex-direction: column; gap: 4px;
+      overflow-y: auto;
+    }
+    .sidebar-section {
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 12px 8px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 6px;
+      font-size: 13px; color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: var(--surface2); color: var(--text);
+      border-color: var(--border);
+    }
+    .nav-item.active { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-dim); }
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+    /* ============ MAIN CONTENT ============ */
+    .main {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    .main-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .main-header h1 {
+      font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+    }
+    .selector-group {
+      display: flex; gap: 8px;
+    }
+    .selector {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px; border-radius: 6px; font-size: 12px;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .selector:focus { border-color: var(--gold); }
+
+    /* ============ STATS ROW ============ */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--gold-dim); }
+    .stat-card .lbl {
+      font-size: 10px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 6px;
+    }
+    .stat-card .val {
+      font-size: 22px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace; line-height: 1;
+    }
+    .stat-card .sub {
+      font-size: 10px; margin-top: 4px;
+    }
+    .stat-card.highlight { border-color: rgba(240,180,41,0.4); background: var(--gold-dim); }
+    .stat-card.highlight .val { color: var(--gold); }
+    .val.up { color: var(--red); }
+    .val.avg { color: var(--blue); }
+    .val.avg2 { color: var(--purple); }
+
+    /* ============ CHART AREA ============ */
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+      flex: 1;
+    }
+    .chart-toolbar {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+    }
+    .chart-title {
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .event-badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      background: var(--amber-bg); color: var(--gold);
+      border: 1px solid rgba(240,180,41,0.3);
+    }
+    .chart-tabs {
+      display: flex; gap: 4px;
+    }
+    .tab {
+      font-size: 11px; padding: 4px 10px; border-radius: 5px;
+      border: 1px solid var(--border); color: var(--muted);
+      cursor: pointer; background: transparent;
+      font-family: 'Inter', sans-serif; transition: all 0.15s;
+    }
+    .tab.active { background: var(--gold-dim); color: var(--gold); border-color: rgba(240,180,41,0.4); }
+    canvas { width: 100% !important; }
+
+    /* ============ RIGHT PANEL ============ */
+    .right-panel {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 16px;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .panel-title {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.7px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* セッションカード */
+    .session-list { display: flex; flex-direction: column; gap: 8px; }
+    .session-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .session-card:hover { border-color: var(--gold); background: var(--gold-dim); }
+    .session-card.selected { border-color: var(--gold); background: var(--gold-dim); }
+    .session-card.has-event { border-color: rgba(210,153,34,0.4); }
+    .session-top {
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;
+    }
+    .session-left { display: flex; align-items: center; gap: 8px; }
+    .session-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-ny     { background: rgba(88,166,255,0.15); color: var(--blue); }
+    .badge-tokyo  { background: rgba(255,123,114,0.15); color: var(--red); }
+    .badge-london { background: rgba(188,140,255,0.15); color: var(--purple); }
+    .badge-oc     { background: rgba(125,133,144,0.15); color: var(--muted); }
+    .session-time { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .session-vola {
+      font-size: 18px; font-weight: 700; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; line-height: 1;
+    }
+    .session-vola span { font-size: 10px; color: var(--muted); }
+    .event-alert {
+      display: flex; align-items: flex-start; gap: 6px;
+      border-left: 2px solid var(--gold);
+      padding: 4px 8px; border-radius: 0 4px 4px 0;
+      background: var(--amber-bg); margin-top: 6px;
+    }
+    .event-alert .alert-icon { font-size: 11px; }
+    .event-alert .alert-text { font-size: 10px; color: var(--gold); line-height: 1.4; }
+    .event-alert .alert-text strong { display: block; font-weight: 600; }
+
+    /* 地合い分類 */
+    .condition-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+    }
+    .condition-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .condition-bars { display: flex; flex-direction: column; gap: 6px; }
+    .cbar { display: flex; align-items: center; gap: 8px; }
+    .cbar-lbl { font-size: 10px; color: var(--muted); width: 30px; }
+    .cbar-track {
+      flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+    }
+    .cbar-fill { height: 100%; border-radius: 99px; }
+    .cbar-fill.large  { background: var(--red); }
+    .cbar-fill.mid    { background: var(--gold); }
+    .cbar-fill.small  { background: var(--blue); }
+    .cbar-cnt { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; width: 40px; text-align: right; }
+
+    /* 指標選択 */
+    .indicator-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .indicator-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .indicator-item:hover { border-color: var(--gold); }
+    .indicator-item.selected { border-color: var(--gold); background: var(--gold-dim); }
+    .indicator-name { font-size: 11px; font-weight: 500; }
+    .indicator-meta { display: flex; gap: 6px; align-items: center; }
+    .importance-high { font-size: 9px; color: var(--red); background: rgba(255,123,114,0.1); border: 1px solid rgba(255,123,114,0.3); padding: 1px 6px; border-radius: 10px; }
+    .importance-mid  { font-size: 9px; color: var(--gold); background: var(--amber-bg); border: 1px solid rgba(240,180,41,0.3); padding: 1px 6px; border-radius: 10px; }
+    .count-chip { font-size: 9px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<nav class="topbar">
+  <div class="logo">
+    <div class="dot"></div>
+    Gold Volatility Bunseki
+  </div>
+  <div style="margin-left:20px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">XAU/USD · XM Server (GMT+2)</div>
+  <div class="badge">PostgreSQL DB Connected</div>
+</nav>
+
+<!-- ===== LEFT SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="sidebar-section">メニュー</div>
+  <div class="nav-item active"><span class="nav-icon">📊</span> ダッシュボード</div>
+  <div class="nav-item"><span class="nav-icon">🕒</span> セッション履歴</div>
+  <div class="nav-item"><span class="nav-icon">📅</span> 指標カレンダー</div>
+
+  <div class="sidebar-section" style="margin-top:12px;">地合いフィルター</div>
+  <div class="nav-item" id="f-all" onclick="setFilter('all')"><span class="nav-icon">🔲</span> すべて</div>
+  <div class="nav-item" id="f-large" onclick="setFilter('large')"><span class="nav-icon">🔴</span> 大 (>150pt)</div>
+  <div class="nav-item" id="f-mid" onclick="setFilter('mid')"><span class="nav-icon">🟡</span> 中 (80-150pt)</div>
+  <div class="nav-item" id="f-small" onclick="setFilter('small')"><span class="nav-icon">🔵</span> 小 (<80pt)</div>
+
+  <div class="sidebar-section" style="margin-top:12px;">時間枠</div>
+  <div class="nav-item" onclick="selectSession('Tokyo_AM')"><span class="nav-icon">🇯🇵</span> Tokyo AM</div>
+  <div class="nav-item" onclick="selectSession('London')"><span class="nav-icon">🇬🇧</span> London</div>
+  <div class="nav-item" onclick="selectSession('NY_Open')"><span class="nav-icon">🇺🇸</span> NY Open</div>
+  <div class="nav-item" onclick="selectSession('NY_Mid')"><span class="nav-icon">🌙</span> NY Mid</div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main">
+
+  <!-- ヘッダー -->
+  <div class="main-header">
+    <h1>
+      📈 過去指標チャート再現
+      <span class="event-badge">⚠️ NY_Open × ISM製造業PMI</span>
+    </h1>
+    <div class="selector-group">
+      <select class="selector" onchange="updateChart()">
+        <option>NY_Open (21:00-00:00 JST)</option>
+        <option>London (16:00-21:00 JST)</option>
+        <option>Tokyo_AM (09:00-12:00 JST)</option>
+      </select>
+      <select class="selector" onchange="updateChart()">
+        <option>ISM製造業PMI</option>
+        <option>CPI（消費者物価指数）</option>
+        <option>雇用統計（NFP）</option>
+        <option>FOMC議事録</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 統計サマリーカード -->
+  <div class="stats-row">
+    <div class="stat-card highlight">
+      <div class="lbl">前回ボラティリティ</div>
+      <div class="val up">+109.8 pt</div>
+      <div class="sub" style="color:var(--muted)">2026-03-02 NY_Open</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">過去平均（大地合い）</div>
+      <div class="val avg">127.3 pt</div>
+      <div class="sub" style="color:var(--muted)">過去8回 / 150pt超の地合い</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">過去平均（中地合い）</div>
+      <div class="val avg2">72.4 pt</div>
+      <div class="sub" style="color:var(--muted)">過去12回 / 80-150ptの地合い</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">過去平均（小地合い）</div>
+      <div class="val" style="color:var(--muted)">38.1 pt</div>
+      <div class="sub" style="color:var(--muted)">過去6回 / 80pt未満の地合い</div>
+    </div>
+  </div>
+
+  <!-- チャートエリア -->
+  <div class="chart-wrap" style="flex:1">
+    <div class="chart-toolbar">
+      <div class="chart-title">
+        前回 ISM製造業PMI 発表時 — NY_Open セッション (21:00〜24:00 JST) · 2026-03-02
+      </div>
+      <div class="chart-tabs">
+        <button class="tab active">価格推移</button>
+        <button class="tab">全履歴オーバーレイ</button>
+        <button class="tab">ボラ比較</button>
+      </div>
+    </div>
+    <canvas id="priceChart" height="260"></canvas>
+  </div>
+
+</main>
+
+<!-- ===== RIGHT PANEL ===== -->
+<aside class="right-panel">
+
+  <!-- セッション一覧 -->
+  <div class="panel-title">🔥 本日のセッション (JST)</div>
+  <div class="session-list" id="session-list">
+    <!-- JS で描画 -->
+  </div>
+
+  <!-- 地合い分類 -->
+  <div>
+    <div class="panel-title" style="margin-bottom:10px;">📐 地合い分布（過去30日）</div>
+    <div class="condition-wrap">
+      <div class="condition-title">NY_Open セッション</div>
+      <div class="condition-bars">
+        <div class="cbar">
+          <div class="cbar-lbl">大</div>
+          <div class="cbar-track"><div class="cbar-fill large" style="width:35%"></div></div>
+          <div class="cbar-cnt">8回 / 35%</div>
+        </div>
+        <div class="cbar">
+          <div class="cbar-lbl">中</div>
+          <div class="cbar-track"><div class="cbar-fill mid" style="width:52%"></div></div>
+          <div class="cbar-cnt">12回 / 52%</div>
+        </div>
+        <div class="cbar">
+          <div class="cbar-lbl">小</div>
+          <div class="cbar-track"><div class="cbar-fill small" style="width:26%"></div></div>
+          <div class="cbar-cnt">6回 / 26%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 指標一覧 -->
+  <div>
+    <div class="panel-title" style="margin-bottom:10px;">📅 このセッションの過去指標</div>
+    <div class="indicator-wrap">
+      <div class="indicator-item selected" onclick="selectIndicator(this, 'ISM製造業PMI')">
+        <div class="indicator-name">ISM製造業PMI</div>
+        <div class="indicator-meta">
+          <span class="importance-high">HIGH</span>
+          <span class="count-chip">26回</span>
+        </div>
+      </div>
+      <div class="indicator-item" onclick="selectIndicator(this, 'CPI')">
+        <div class="indicator-name">CPI（消費者物価指数）</div>
+        <div class="indicator-meta">
+          <span class="importance-high">HIGH</span>
+          <span class="count-chip">13回</span>
+        </div>
+      </div>
+      <div class="indicator-item" onclick="selectIndicator(this, '雇用統計')">
+        <div class="indicator-name">雇用統計（NFP）</div>
+        <div class="indicator-meta">
+          <span class="importance-high">HIGH</span>
+          <span class="count-chip">12回</span>
+        </div>
+      </div>
+      <div class="indicator-item" onclick="selectIndicator(this, '建設支出')">
+        <div class="indicator-name">建設支出前月比</div>
+        <div class="indicator-meta">
+          <span class="importance-mid">MED</span>
+          <span class="count-chip">11回</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<script>
+// ===== セッションダミーデータ =====
+const sessions = [
+  { name:'London', badge:'badge-london', time:'16:00-21:00', vola:364.3, hasEvent:false, event:null, condition:'large' },
+  { name:'NY_Open', badge:'badge-ny', time:'21:00-00:00', vola:175.9, hasEvent:true, event:'建設支出前月比', importance:'MED', condition:'large' },
+  { name:'NY_Mid',  badge:'badge-ny', time:'00:00-03:00', vola:135.8, hasEvent:false, event:null, condition:'large' },
+  { name:'Tokyo_AM',badge:'badge-tokyo',time:'09:00-12:00', vola:115.3, hasEvent:false, event:null, condition:'mid' },
+  { name:'Oceania', badge:'badge-oc', time:'07:00-09:00', vola:86.8, hasEvent:false, event:null, condition:'mid' },
+  { name:'NY_Close',badge:'badge-ny', time:'03:00-06:00', vola:84.1, hasEvent:false, event:null, condition:'mid' },
+];
+
+const condFilter = { all: ()=>true, large: s=>s.condition==='large', mid: s=>s.condition==='mid', small: s=>s.condition==='small' };
+let currentFilter = 'all';
+
+function renderSessions() {
+  const list = document.getElementById('session-list');
+  const filtered = sessions.filter(condFilter[currentFilter]);
+  list.innerHTML = filtered.map(s => `
+    <div class="session-card ${s.hasEvent ? 'has-event' : ''}" onclick="selectSession('${s.name}')">
+      <div class="session-top">
+        <div class="session-left">
+          <span class="session-badge ${s.badge}">${s.name}</span>
+          <span class="session-time">${s.time} JST</span>
+        </div>
+        <div class="session-vola">${s.vola.toFixed(1)}<span> pt</span></div>
+      </div>
+      ${s.hasEvent ? `
+      <div class="event-alert">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text"><strong>${s.importance === 'HIGH' ? '🔴 重要指標' : '🟡 中程度指標'}</strong>${s.event}</span>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('[id^="f-"]').forEach(el => el.classList.remove('active'));
+  document.getElementById('f-' + f)?.classList.add('active');
+  renderSessions();
+}
+
+function selectSession(name) { console.log('session selected:', name); }
+
+function selectIndicator(el, name) {
+  document.querySelectorAll('.indicator-item').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  updateChart(name);
+}
+
+// ===== Chartjs 価格チャート =====
+let chart = null;
+
+function buildPriceData(indicatorName) {
+  /* ダミー価格データ: 21:00 JST から1分ずつ180本 */
+  const labels = [];
+  const prices = [];
+  let base = 5310 + Math.random() * 20;
+  const seed = indicatorName === 'ISM製造業PMI' ? 1 : indicatorName === 'CPI' ? 2 : 3;
+  const eventAt = 30; // 30分目に指標発表（21:30 JST）
+
+  for (let i = 0; i < 180; i++) {
+    const h = Math.floor(i / 60) + 21;
+    const m = i % 60;
+    labels.push(`${String(h % 24).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+
+    let drift = (Math.random() - 0.5) * 2.5;
+    if (i === eventAt) { drift = seed % 2 === 0 ? 40 : -40; }
+    if (i > eventAt && i < eventAt + 30) { drift = (Math.random() - 0.48) * 8; }
+    base += drift;
+    prices.push(parseFloat(base.toFixed(2)));
+  }
+
+  return { labels, prices, eventAt };
+}
+
+function updateChart(indicator = 'ISM製造業PMI') {
+  const { labels, prices, eventAt } = buildPriceData(indicator);
+
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('priceChart').getContext('2d');
+
+  const evtAnnotation = {
+    type: 'line',
+    xMin: eventAt, xMax: eventAt,
+    borderColor: 'rgba(240,180,41,0.7)',
+    borderWidth: 1.5,
+    borderDash: [4, 3],
+    label: { content: '指標発表', display: true, position: 'start', color: '#f0b429', font: { size: 10 } }
+  };
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: prices,
+        borderColor: '#f0b429',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: (ctx2) => {
+          const g = ctx2.chart.ctx.createLinearGradient(0,0,0,ctx2.chart.height);
+          g.addColorStop(0, 'rgba(240,180,41,0.15)');
+          g.addColorStop(1, 'rgba(240,180,41,0)');
+          return g;
+        },
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 600 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: 'index', intersect: false,
+          displayColors: false,
+          callbacks: {
+            label: (ctx2) => `$ ${ctx2.parsed.y.toFixed(2)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#7d8590', font: { size: 9, family: 'JetBrains Mono' }, maxTicksLimit: 12 },
+          grid: { color: 'rgba(48,54,61,0.5)' }
+        },
+        y: {
+          position: 'right',
+          ticks: { color: '#7d8590', font: { size: 9, family: 'JetBrains Mono' } },
+          grid: { color: 'rgba(48,54,61,0.5)' }
+        }
+      }
+    }
+  });
+}
+
+// 初期描画
+renderSessions();
+updateChart('ISM製造業PMI');
+</script>
+</body>
+</html>
