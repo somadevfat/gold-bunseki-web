@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, ColorType, CandlestickSeries, CandlestickData, Time, ISeriesApi, createSeriesMarkers } from "lightweight-charts";
+import { createChart, ColorType, CandlestickSeries, CandlestickData, Time, ISeriesApi, createSeriesMarkers, IChartApi } from "lightweight-charts";
 
 interface Candle {
   datetimeJst: string;
@@ -42,7 +42,7 @@ interface ReplaySectionProps {
  */
 export default function ReplaySection({ data, eventName }: ReplaySectionProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<any>(null);
+  const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
   // 合計サンプル数の計算

@@ -20,21 +20,19 @@ interface SessionVolatility {
   condition: string;
 }
 
-async function fetchZigZagData() {
-  const res = await fetch("http://127.0.0.1:8787/api/v1/zigzag/calculate", { cache: "no-store" });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.points;
-}
+const getApiUrl = (path: string) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8787";
+  return `${baseUrl}${path}`;
+};
 
 async function fetchSessionsData() {
-  const res = await fetch("http://127.0.0.1:8787/api/v1/market/sessions?limit=12", { cache: "no-store" });
+  const res = await fetch(getApiUrl("/api/v1/market/sessions?limit=12"), { cache: "no-store" });
   if (!res.ok) return { currentCondition: "Unknown", sessions: [] };
   return res.json();
 }
 
 async function fetchReplayData(event: string) {
-  const res = await fetch(`http://127.0.0.1:8787/api/v1/market/replay?event=${encodeURIComponent(event)}`, { cache: "no-store" });
+  const res = await fetch(getApiUrl(`/api/v1/market/replay?event=${encodeURIComponent(event)}`), { cache: "no-store" });
   if (!res.ok) return null;
   return res.json();
 }
@@ -71,7 +69,7 @@ async function AsyncSessionFactTimeline() {
   
   return (
     <div className="space-y-1">
-      {sessions.map((s: any, i: number) => {
+      {sessions.map((s: SessionVolatility, i: number) => {
         const isNewDate = i === 0 || s.date.split('T')[0] !== sessions[i-1].date.split('T')[0];
         const dateStr = s.date.split('T')[0];
         const [y, m, d] = dateStr.split('-');

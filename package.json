@@ -8,9 +8,9 @@
   "scripts": {
     "prepare": "husky",
     "lint:frontend": "cd apps/frontend && bun run lint",
-    "lint:api": "cd apps/api && golangci-lint run",
+    "lint:backend": "cd apps/backend && bun run lint",
     "lint:analytics": "cd apps/analytics && ruff check .",
-    "lint:all": "bun run lint:frontend && bun run lint:api && bun run lint:analytics"
+    "lint:all": "bun run lint:frontend && bun run lint:backend"
   },
   "type": "module"
 }

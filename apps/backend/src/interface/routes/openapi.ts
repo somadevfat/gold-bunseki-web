@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { PriceRecordSchema } from "../../domain/entities/price";
 import { ZigZagPointSchema } from "../../domain/entities/zigzag";
-import { SessionVolatilitySchema } from "../../domain/entities/session";
+import { SessionVolatilitySchema, SessionThresholdSchema } from "../../domain/entities/session";
 import { SyncStatusSchema } from "../../domain/entities/syncStatus";
 import { ReplayDataResponseSchema } from "../../domain/entities/replay";
 
@@ -166,12 +166,12 @@ export const syncDataRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            events: z.array(z.any()),
-            sessions: z.array(z.any()),
-            candles: z.array(z.any()),
-            prices: z.array(z.any()),
-            thresholds: z.array(z.any()),
-            zigzagPoints: z.array(z.any())
+            events: z.array(z.unknown()), // 具体的なイベントスキーマがない場合はunknown推奨
+            sessions: z.array(SessionVolatilitySchema),
+            candles: z.array(z.unknown()),
+            prices: z.array(PriceRecordSchema),
+            thresholds: z.array(SessionThresholdSchema),
+            zigzagPoints: z.array(ZigZagPointSchema)
           }),
         },
       },

@@ -20,7 +20,17 @@ export class D1SessionRepository implements SessionRepositoryPort {
       LIMIT ?
     `;
 
-    const { results } = await this.db.prepare(query).bind(limit).all<any>();
+    const { results } = await this.db.prepare(query).bind(limit).all<{
+      id: number;
+      date: string;
+      session_name: string;
+      start_time_jst: string;
+      end_time_jst: string;
+      volatility_points: number;
+      has_event: number;
+      has_high_impact_event: number;
+      events_linked: string;
+    }>();
 
     return results.map(r => ({
       id: r.id,
@@ -52,7 +62,18 @@ export class D1SessionRepository implements SessionRepositoryPort {
       LIMIT 2
     `;
 
-    const { results } = await this.db.prepare(query).bind(searchName, searchName).all<any>();
+    const { results } = await this.db.prepare(query).bind(searchName, searchName).all<{
+      id: number;
+      date: string;
+      session_name: string;
+      start_time_jst: string;
+      end_time_jst: string;
+      volatility_points: number;
+      has_event: number;
+      has_high_impact_event: number;
+      events_linked: string;
+      exact_event_time: string | null;
+    }>();
     if (results.length === 0) return null;
 
     const nowJST = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -100,7 +121,11 @@ export class D1SessionRepository implements SessionRepositoryPort {
    */
   async getThresholds(): Promise<Record<string, SessionThreshold>> {
     const query = `SELECT session_name, small_threshold, large_threshold FROM session_thresholds`;
-    const { results } = await this.db.prepare(query).all<any>();
+    const { results } = await this.db.prepare(query).all<{
+      session_name: string;
+      small_threshold: number;
+      large_threshold: number;
+    }>();
 
     const map: Record<string, SessionThreshold> = {};
     results.forEach(t => {

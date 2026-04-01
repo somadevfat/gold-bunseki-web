@@ -1,3 +1,49 @@
+export interface SyncPayload {
+  events?: Array<{
+    datetimeJst: string;
+    eventName: string;
+    importance: string;
+    actual: number;
+    forecast: number;
+    previous: number;
+  }>;
+  sessions?: Array<{
+    date: string;
+    sessionName: string;
+    startTimeJst: string;
+    endTimeJst: string;
+    volatilityPoints: number;
+    hasEvent: boolean;
+    hasHighImpactEvent: boolean;
+    eventsLinked: string;
+  }>;
+  candles?: Array<{
+    datetimeJst: string;
+    sessionName: string;
+    openPrice: number;
+    highPrice: number;
+    lowPrice: number;
+    closePrice: number;
+  }>;
+  thresholds?: Array<{
+    sessionName: string;
+    smallThreshold: number;
+    largeThreshold: number;
+  }>;
+  prices?: Array<{
+    timestamp: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+  }>;
+  zigzagPoints?: Array<{
+    timestamp: string;
+    price: number;
+    type: string;
+  }>;
+}
+
 /*
  * D1BatchRepository は、Python側からPushされた解析データをD1に一括保存するリポジトリの実装です。
  * @responsibility: D1の db.batch() を活用し、イベント、セッション、ローソク足の一括Upsertを高速に行う。
@@ -10,8 +56,8 @@ export class D1BatchRepository {
    * @param payload pythonから送られたJSONデータ
    * @return 成功フラグ
    */
-  async saveAll(payload: any): Promise<boolean> {
-    const stmts: any[] = [];
+  async saveAll(payload: SyncPayload): Promise<boolean> {
+    const stmts: D1PreparedStatement[] = [];
 
     // 1. Economic Events
     if (payload.events && payload.events.length > 0) {

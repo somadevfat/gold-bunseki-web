@@ -1,7 +1,5 @@
-import { expect, describe, it } from 'bun:test';
+import { expect, describe, it, mock, beforeAll, afterAll } from 'bun:test';
 import app from '../../../index';
-import { SessionVolatilitySchema } from '../../../domain/entities/session';
-import { ReplayDataResponseSchema } from '../../../domain/entities/replay';
 
 /**
  * API Response Integrity Tests (Integration)
@@ -10,8 +8,19 @@ import { ReplayDataResponseSchema } from '../../../domain/entities/replay';
  */
 describe('API Response Integrity Tests (Integration)', () => {
 
+  let originalFetch: typeof globalThis.fetch;
+
+  beforeAll(() => {
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = mock(() => Promise.reject(new Error('fetch failed (mock)')));
+  });
+
+  afterAll(() => {
+    globalThis.fetch = originalFetch;
+  });
+
   // 汎用的な D1 モック（すべてのクエリパターンに対応）
-  const createMockEnv = (results: any[] = [], first: any = null) => ({
+  const createMockEnv = (results: unknown[] = [], first: unknown = null) => ({
     gold_vola_db: {
       prepare: () => ({
         bind: () => ({
@@ -34,11 +43,11 @@ describe('API Response Integrity Tests (Integration)', () => {
       const mockEnv = createMockEnv([]);
 
       // ## Act ##
-      const res = await app.request('/api/v1/market/sessions?limit=5', {}, mockEnv as any);
+      const res = await app.request('/api/v1/market/sessions?limit=5', {}, mockEnv as Parameters<typeof app.request>[2]);
 
       // ## Assert ##
       expect(res.status).toBe(200);
-      const body = await res.json() as any;
+      const body = await res.json() as { sessions: unknown[], currentCondition: string };
       expect(body.sessions).toBeInstanceOf(Array);
       expect(body.currentCondition).toBeDefined();
     });
@@ -46,18 +55,18 @@ describe('API Response Integrity Tests (Integration)', () => {
     it('GET /api/v1/sync/status: 同期状況がキャメルケースのプロパティで返却されること', async () => {
       // ## Arrange ##
       const mockEnv = createMockEnv([], {
-        last_candle: '2026-03-27T16:00:00Z',
-        last_session: '2026-03-27T00:00:00Z',
-        last_event: '2026-03-27T16:00:00Z',
+        last_candle: '2026-04-01T16:00:00Z',
+        last_session: '2026-04-01T00:00:00Z',
+        last_event: '2026-04-01T16:00:00Z',
         total_candles: 1250
       });
 
       // ## Act ##
-      const res = await app.request('/api/v1/sync/status', {}, mockEnv as any);
+      const res = await app.request('/api/v1/sync/status', {}, mockEnv as Parameters<typeof app.request>[2]);
 
       // ## Assert ##
       expect(res.status).toBe(200);
-      const body = await res.json() as any;
+      const body = await res.json() as { lastCandleAt: string, syncHealth: string };
       expect(body.lastCandleAt).toBeDefined();
       expect(body.syncHealth).toBe('Healthy');
     });
@@ -74,7 +83,7 @@ describe('API Response Integrity Tests (Integration)', () => {
       const mockEnv = createMockEnv([]);
 
       // ## Act ##
-      const res = await app.request('/api/v1/market/sessions?limit=abc', {}, mockEnv as any);
+      const res = await app.request('/api/v1/market/sessions?limit=abc', {}, mockEnv as Parameters<typeof app.request>[2]);
 
       // ## Assert ##
       // バリデーションで 400 を返さない実装なので、200 (空結果) を期待
@@ -86,7 +95,7 @@ describe('API Response Integrity Tests (Integration)', () => {
       const mockEnv = createMockEnv([]);
 
       // ## Act ##
-      const res = await app.request('/api/v1/market/sessions?limit=999999', {}, mockEnv as any);
+      const res = await app.request('/api/v1/market/sessions?limit=999999', {}, mockEnv as Parameters<typeof app.request>[2]);
 
       // ## Assert ##
       expect(res.status).toBe(200);
@@ -97,7 +106,7 @@ describe('API Response Integrity Tests (Integration)', () => {
       const mockEnv = createMockEnv();
 
       // ## Act ##
-      const res = await app.request('/api/v1/market/replay', {}, mockEnv as any);
+      const res = await app.request('/api/v1/market/replay', {}, mockEnv as Parameters<typeof app.request>[2]);
 
       // ## Assert ##
       expect(res.status).toBe(400); // 必須パラメータなので 400

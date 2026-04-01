@@ -1,5 +1,5 @@
 import { SessionRepositoryPort } from '../port/sessionRepositoryPort';
-import { ReplayDataResponse } from '../../domain/entities/replay';
+import { ReplayDataResponse, Candle } from '../../domain/entities/replay';
 
 /**
  * GetReplayDataUseCase は指定されたイベント（経済指標）の前回のチャートと統計データをまとめます。
@@ -15,7 +15,7 @@ export class GetReplayDataUseCase {
     // 1. 指定指標の「前回発表時」のセッション情報を取得
     const prev = await this.sessionRepo.findPreviousEvent(eventName);
 
-    let candles: any[] = [];
+    let candles: Candle[] = [];
     if (prev) {
       // 2. そのセッションの1分足を取得 (DBへの保存日時から date を逆算)
       candles = await this.sessionRepo.getCandles(prev.date, prev.sessionName);

@@ -83,9 +83,10 @@ app.openapi(routes.calculateZigZagRoute, async (c) => {
       message: 'ZigZag calculate success',
       points: points,
     }, 200);
-  } catch (err: any) {
-    console.error("[ZigZag Error]", err.message);
-    return c.json({ message: 'Error calculating ZigZag', points: [] } as any, 500);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[ZigZag Error]", error.message);
+    return c.json({ message: 'Error calculating ZigZag', points: [] }, 500);
   }
 });
 
@@ -113,8 +114,9 @@ app.openapi(routes.marketSessionsRoute, async (c) => {
         } else {
           console.warn("[Auto-Sync Warning] Failed to fetch from analytics engine:", response.status);
         }
-      } catch (syncErr: any) {
-        console.warn("[Auto-Sync Failed] Is the Python engine running?", syncErr.message);
+      } catch (syncErr: unknown) {
+        const error = syncErr instanceof Error ? syncErr : new Error(String(syncErr));
+        console.warn("[Auto-Sync Failed] Is the Python engine running?", error.message);
       }
     }
 
@@ -122,8 +124,9 @@ app.openapi(routes.marketSessionsRoute, async (c) => {
       sessions: sessions,
       currentCondition: sessions.length > 0 ? sessions[0].condition : 'Small'
     }, 200);
-  } catch (err: any) {
-    console.error("[Sessions Error]", err.message);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[Sessions Error]", error.message);
     // Auto-fallback empty array on DB error
     return c.json({ sessions: [], currentCondition: 'Unknown' }, 200); 
   }
@@ -132,16 +135,17 @@ app.openapi(routes.marketSessionsRoute, async (c) => {
 app.openapi(routes.eventReplayRoute, async (c) => {
   try {
     const { event } = c.req.valid('query');
-    if (!event) return c.json({ error: 'event is required' } as any, 400);
+    if (!event) return c.json({ error: 'event is required' }, 400);
 
     const repo = new D1SessionRepository(c.env.gold_vola_db);
     const useCase = new GetReplayDataUseCase(repo);
     const data = await useCase.execute(event);
 
     return c.json(data, 200);
-  } catch (err: any) {
-    console.error("[Replay Error]", err.message);
-    return c.json({ previousEvent: null, sessionStats: [], replayCandles: [] } as any, 200); // 簡易フォールバック
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[Replay Error]", error.message);
+    return c.json({ previousEvent: null, sessionStats: [], replayCandles: [] }, 200); // 簡易フォールバック
   }
 });
 app.openapi(routes.triggerSyncRoute, async (c) => {
@@ -159,9 +163,10 @@ app.openapi(routes.triggerSyncRoute, async (c) => {
     await repo.saveAll(payload);
     
     return c.json({ success: true, message: "同期成功 (Pull)" }, 200);
-  } catch (err: any) {
-    console.error("[Sync:Pull Error]", err.message);
-    return c.json({ success: false, message: `Pull同期失敗: ${err.message}` } as any, 500);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[Sync:Pull Error]", error.message);
+    return c.json({ success: false, message: `Pull同期失敗: ${error.message}` }, 500);
   }
 });
 
@@ -175,9 +180,10 @@ app.openapi(routes.syncDataRoute, async (c) => {
     await repo.saveAll(payload);
     
     return c.json({ success: true, message: "同期成功 (Push)" }, 200);
-  } catch (err: any) {
-    console.error("[Sync:Push Error]", err.message);
-    return c.json({ success: false, message: `Push同期失敗: ${err.message}` } as any, 500);
+  } catch (err: unknown) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error("[Sync:Push Error]", error.message);
+    return c.json({ success: false, message: `Push同期失敗: ${error.message}` }, 500);
   }
 });
 

@@ -19,9 +19,9 @@ describe('GetRecentSessionsUseCase (Unit Tests)', () => {
       // ## Arrange ##
       // 各区分（Large, Mid, Small）をシミュレートする 3 つのサンプルデータ
       const mockSessions: SessionVolatility[] = [
-        { id: 1, date: '2026-03-27', sessionName: 'A', volatilityPoints: 150.0, condition: 'Small' } as any, // 150 > 120 -> Large!
-        { id: 2, date: '2026-03-27', sessionName: 'B', volatilityPoints: 90.0, condition: 'Small' } as any, // 90 > 80 -> Mid!
-        { id: 3, date: '2026-03-27', sessionName: 'C', volatilityPoints: 50.0, condition: 'Small' } as any, // 50 < 80 -> Small!
+        { id: 1, date: '2026-03-27', sessionName: 'A', volatilityPoints: 150.0, condition: 'Small' } as unknown as SessionVolatility, // 150 > 120 -> Large!
+        { id: 2, date: '2026-03-27', sessionName: 'B', volatilityPoints: 90.0, condition: 'Small' } as unknown as SessionVolatility, // 90 > 80 -> Mid!
+        { id: 3, date: '2026-03-27', sessionName: 'C', volatilityPoints: 50.0, condition: 'Small' } as unknown as SessionVolatility, // 50 < 80 -> Small!
       ];
 
       const mockRepo: SessionRepositoryPort = {
@@ -53,7 +53,7 @@ describe('GetRecentSessionsUseCase (Unit Tests)', () => {
     it('閾値が存在しない極端な条件下でも Small へデフォルトされること (安全性の証明)', async () => {
       // ## Arrange ##
       const mockSessions: SessionVolatility[] = [
-        { id: 1, date: '2026-03-27', sessionName: 'A', volatilityPoints: 10.0, condition: 'Small' } as any,
+        { id: 1, date: '2026-03-27', sessionName: 'A', volatilityPoints: 10.0, condition: 'Small' } as unknown as SessionVolatility,
       ];
 
       const mockRepo: SessionRepositoryPort = {
