@@ -77,5 +77,6 @@ app.openapi(routes.latestPriceRoute, MarketController.getLatestPrice);
 app.openapi(routes.calculateZigZagRoute, MarketController.calculateZigZag);
 app.openapi(routes.marketSessionsRoute, MarketController.getRecentSessions);
 app.openapi(routes.eventReplayRoute, MarketController.getEventReplay);
+app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
 
 export default app;

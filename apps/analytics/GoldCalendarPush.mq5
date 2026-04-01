@@ -62,10 +62,12 @@ void WriteCalendarData()
    datetime dt_from = TimeCurrent() - (datetime)((long)InpDaysBack  * 86400);
    datetime dt_to   = TimeCurrent() + (datetime)((long)InpDaysFuture * 86400);
 
-   Print("[GoldCalendarPush] カレンダー指標を取得中...");
+   Print("[GoldCalendarPush] 全世界のカレンダー指標を取得中...");
 
    MqlCalendarValue values[];
-   int count = CalendarValueHistory(values, dt_from, dt_to, "US", "USD");
+   // 国コード(country_code) と 通貨(currency) を NULL に設定して、
+   // 米国以外の全経済指標も一括で取得するように変更。
+   int count = CalendarValueHistory(values, dt_from, dt_to, NULL, NULL);
 
    if(count < 0)
    {

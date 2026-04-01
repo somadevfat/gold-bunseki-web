@@ -49,6 +49,10 @@ export type SessionsResponse = {
   currentCondition: string;
 };
 
+export type IndicatorsResponse = {
+  indicators: string[];
+};
+
 export type Candle = {
   datetimeJst: string;
   open: number;

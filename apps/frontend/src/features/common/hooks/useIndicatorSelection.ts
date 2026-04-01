@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
  * useIndicatorSelection は経済指標の選択状態（URLパラメータ）を管理するカスタムフックです。
  * @responsibility URLパラメータの読み取りと更新、ナビゲーション制御。
  */
-export function useIndicatorSelection(defaultEvent = 'ISM製造業') {
+export function useIndicatorSelection(defaultEvent: string) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentEvent = searchParams.get('event') || defaultEvent;

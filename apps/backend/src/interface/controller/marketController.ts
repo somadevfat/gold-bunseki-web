@@ -4,12 +4,28 @@ import { GetLatestPriceUseCase } from '../../application/use_case/getLatestPrice
 import { CalculateZigZagUseCase } from '../../application/use_case/calculateZigZagUseCase';
 import { GetRecentSessionsUseCase } from '../../application/use_case/getRecentSessionsUseCase';
 import { GetReplayDataUseCase } from '../../application/use_case/getReplayDataUseCase';
+import { GetRecentEventNamesUseCase } from '../../application/use_case/getRecentEventNamesUseCase';
 import { SyncPayload } from '../../infrastructure/repository/d1BatchRepository';
 
 /**
  * MarketController はマーケットデータ（価格、ZigZag、セッション）に関するリクエストを処理します。
  */
 export class MarketController {
+  /**
+   * 指標一覧の取得
+   */
+  static async getIndicators(c: Context<{ Bindings: Bindings; Variables: AppVariables }>) {
+    try {
+      const useCase = new GetRecentEventNamesUseCase(c.get('sessionRepo'));
+      const indicators = await useCase.execute(50);
+      return c.json({ indicators }, 200);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error("[Indicators Error]", error.message);
+      return c.json({ indicators: [] }, 500);
+    }
+  }
+
   /**
    * 最新価格の取得
    */

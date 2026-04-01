@@ -30,4 +30,9 @@ export interface SessionRepositoryPort {
    * 指標別の過去平均統計を取得します。
    */
   getEventStats(eventName: string, thresholds: Record<string, SessionThreshold>): Promise<HistoricalAverage[]>;
+
+  /**
+   * 直近の有効な経済指標名リストを取得します。
+   */
+  getRecentEventNames(limit: number): Promise<string[]>;
 }

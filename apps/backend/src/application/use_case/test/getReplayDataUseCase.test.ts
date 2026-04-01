@@ -1,4 +1,4 @@
-import { expect, describe, it, mock, beforeEach, Mock } from 'bun:test';
+import { expect, describe, it, mock, beforeEach } from 'bun:test';
 import { GetReplayDataUseCase } from '../getReplayDataUseCase';
 import { SessionRepositoryPort } from '../../port/sessionRepositoryPort';
 import { SessionVolatility } from '../../../domain/entities/session';
@@ -10,22 +10,22 @@ describe('GetReplayDataUseCase', () => {
     getThresholds: mock(),
     getEventStats: mock(),
     findRecentSessions: mock(),
-  } as unknown as SessionRepositoryPort;
+  };
 
-  const useCase = new GetReplayDataUseCase(mockSessionRepo);
+  const useCase = new GetReplayDataUseCase(mockSessionRepo as unknown as SessionRepositoryPort);
 
   beforeEach(() => {
-    (mockSessionRepo.findPreviousEvent as Mock).mockClear();
-    (mockSessionRepo.getCandles as Mock).mockClear();
-    (mockSessionRepo.getThresholds as Mock).mockClear();
-    (mockSessionRepo.getEventStats as Mock).mockClear();
+    mockSessionRepo.findPreviousEvent.mockClear();
+    mockSessionRepo.getCandles.mockClear();
+    mockSessionRepo.getThresholds.mockClear();
+    mockSessionRepo.getEventStats.mockClear();
   });
 
   it('指定された指標の再現データを一括取得し、地合い判定を行うこと', async () => {
     /* ## Arrange ## */
     const eventName = 'CPI';
     const mockPrev: SessionVolatility = {
-      id: 1, date: '2026-04-01', sessionName: 'NY_Open', volatilityPoints: 150,
+      id: 1, date: '2026-04-01', sessionName: 'NY_Open', startTimeJst: '21:00:00', endTimeJst: '00:00:00', volatilityPoints: 150,
       condition: 'Small', hasEvent: true, hasHighImpactEvent: true, eventsLinked: 'CPI'
     };
     const mockCandles = [{ datetimeJst: '...' }];
@@ -34,10 +34,10 @@ describe('GetReplayDataUseCase', () => {
     };
     const mockStats = [{ eventName: 'CPI', condition: 'Large', averageVola: 140, count: 10 }];
 
-    (mockSessionRepo.findPreviousEvent as Mock).mockResolvedValue(mockPrev);
-    (mockSessionRepo.getCandles as Mock).mockResolvedValue(mockCandles);
-    (mockSessionRepo.getThresholds as Mock).mockResolvedValue(mockThresholds);
-    (mockSessionRepo.getEventStats as Mock).mockResolvedValue(mockStats);
+    mockSessionRepo.findPreviousEvent.mockResolvedValue(mockPrev);
+    mockSessionRepo.getCandles.mockResolvedValue(mockCandles);
+    mockSessionRepo.getThresholds.mockResolvedValue(mockThresholds);
+    mockSessionRepo.getEventStats.mockResolvedValue(mockStats);
 
     /* ## Act ## */
     const result = await useCase.execute(eventName);
@@ -56,9 +56,9 @@ describe('GetReplayDataUseCase', () => {
 
   it('前回イベントが存在しない場合でも、統計データと空のキャンドルを返すこと', async () => {
     /* ## Arrange ## */
-    (mockSessionRepo.findPreviousEvent as Mock).mockResolvedValue(null);
-    (mockSessionRepo.getThresholds as Mock).mockResolvedValue({});
-    (mockSessionRepo.getEventStats as Mock).mockResolvedValue([]);
+    mockSessionRepo.findPreviousEvent.mockResolvedValue(null);
+    mockSessionRepo.getThresholds.mockResolvedValue({});
+    mockSessionRepo.getEventStats.mockResolvedValue([]);
 
     /* ## Act ## */
     const result = await useCase.execute('UnknownEvent');
@@ -74,9 +74,9 @@ describe('GetReplayDataUseCase', () => {
     const mockThresholds = {
       'S1': { sessionName: 'S1', smallThreshold: 50, largeThreshold: 100 }
     };
-    (mockSessionRepo.getThresholds as Mock).mockResolvedValue(mockThresholds);
-    (mockSessionRepo.getCandles as Mock).mockResolvedValue([]);
-    (mockSessionRepo.getEventStats as Mock).mockResolvedValue([]);
+    mockSessionRepo.getThresholds.mockResolvedValue(mockThresholds);
+    mockSessionRepo.getCandles.mockResolvedValue([]);
+    mockSessionRepo.getEventStats.mockResolvedValue([]);
 
     const testCases = [
       { vola: 120, expected: 'Large' },
@@ -86,7 +86,7 @@ describe('GetReplayDataUseCase', () => {
 
     for (const tc of testCases) {
       const mockPrev = { sessionName: 'S1', volatilityPoints: tc.vola, condition: 'Small' };
-      (mockSessionRepo.findPreviousEvent as Mock).mockResolvedValue(mockPrev);
+      mockSessionRepo.findPreviousEvent.mockResolvedValue(mockPrev);
       
       const result = await useCase.execute('Test');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

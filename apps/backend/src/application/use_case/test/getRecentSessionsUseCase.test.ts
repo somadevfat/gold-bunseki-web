@@ -34,6 +34,7 @@ describe('GetRecentSessionsUseCase (Unit Tests)', () => {
           'C': { sessionName: 'C', largeThreshold: 120, smallThreshold: 80 }
         })),
         getEventStats: mock(() => Promise.resolve([])),
+        getRecentEventNames: mock(),
       };
 
       const useCase = new GetRecentSessionsUseCase(mockRepo);
@@ -62,6 +63,7 @@ describe('GetRecentSessionsUseCase (Unit Tests)', () => {
         getCandles: mock(() => Promise.resolve([])),
         getThresholds: mock(() => Promise.resolve({})), // 閾値なし
         getEventStats: mock(() => Promise.resolve([])),
+        getRecentEventNames: mock(),
       };
 
       const useCase = new GetRecentSessionsUseCase(mockRepo);

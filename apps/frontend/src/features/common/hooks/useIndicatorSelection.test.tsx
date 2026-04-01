@@ -27,7 +27,7 @@ describe("useIndicatorSelection", () => {
     getMock.mockReturnValue("CPI");
 
     /* ## Act ## */
-    const { result } = renderHook(() => useIndicatorSelection());
+    const { result } = renderHook(() => useIndicatorSelection("DefaultVal"));
 
     /* ## Assert ## */
     expect(result.current.currentEvent).toBe("CPI");
@@ -50,7 +50,7 @@ describe("useIndicatorSelection", () => {
     getMock.mockReturnValue("OldEvent");
 
     /* ## Act ## */
-    const { result } = renderHook(() => useIndicatorSelection());
+    const { result } = renderHook(() => useIndicatorSelection("DefaultVal"));
     act(() => {
       result.current.selectIndicator("NewEvent");
     });

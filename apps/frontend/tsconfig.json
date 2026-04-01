@@ -23,7 +23,8 @@
       }
     ],
     "types": [
-      "@cloudflare/workers-types"
+      "@cloudflare/workers-types",
+      "bun"
     ],
     "paths": {
       "@/*": [

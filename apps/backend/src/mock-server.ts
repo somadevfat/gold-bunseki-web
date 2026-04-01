@@ -42,6 +42,13 @@ app.get('/api/v1/market/sessions', (c) => {
   });
 });
 
+// 2.5. 指標一覧
+app.get('/api/v1/market/indicators', (c) => {
+  return c.json({
+    indicators: ['[USD] CPI', '[USD] 雇用統計', '[USD] ISM製造業PMI', '[EUR] 欧州中央銀行(ECB)政策金利'],
+  });
+});
+
 // 3. 再現データ
 app.get('/api/v1/market/replay', (c) => {
   const event = c.req.query('event') || '不明';

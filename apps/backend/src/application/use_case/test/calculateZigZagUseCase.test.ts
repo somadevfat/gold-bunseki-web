@@ -1,4 +1,4 @@
-import { expect, describe, it, mock, beforeEach, Mock } from 'bun:test';
+import { expect, describe, it, mock, beforeEach } from 'bun:test';
 import { CalculateZigZagUseCase } from '../calculateZigZagUseCase';
 import { PriceRepositoryPort } from '../../port/priceRepositoryPort';
 import { AnalyticsServicePort } from '../../port/analyticsServicePort';
@@ -9,23 +9,27 @@ describe('CalculateZigZagUseCase', () => {
   const mockPriceRepo = {
     getRecentPrices: mock(),
     getLatestPrice: mock(),
-  } as unknown as PriceRepositoryPort;
+  };
 
   const mockAnalyticsService = {
     calculateZigZag: mock(),
-  } as unknown as AnalyticsServicePort;
+  };
 
   const mockZigZagRepo = {
     savePoints: mock(),
     getLatestPoints: mock(),
-  } as unknown as ZigZagRepositoryPort;
+  };
 
-  const useCase = new CalculateZigZagUseCase(mockPriceRepo, mockAnalyticsService, mockZigZagRepo);
+  const useCase = new CalculateZigZagUseCase(
+    mockPriceRepo as unknown as PriceRepositoryPort,
+    mockAnalyticsService as unknown as AnalyticsServicePort,
+    mockZigZagRepo as unknown as ZigZagRepositoryPort
+  );
 
   beforeEach(() => {
-    (mockPriceRepo.getRecentPrices as Mock).mockClear();
-    (mockAnalyticsService.calculateZigZag as Mock).mockClear();
-    (mockZigZagRepo.savePoints as Mock).mockClear();
+    mockPriceRepo.getRecentPrices.mockClear();
+    mockAnalyticsService.calculateZigZag.mockClear();
+    mockZigZagRepo.savePoints.mockClear();
   });
 
   it('十分な価格データがある場合、計算を実行して結果を保存すること', async () => {
@@ -38,8 +42,8 @@ describe('CalculateZigZagUseCase', () => {
       { timestamp: '2026-04-01T10:00:00Z', price: 90, type: 'low' },
     ];
 
-    (mockPriceRepo.getRecentPrices as Mock).mockResolvedValue(mockPrices);
-    (mockAnalyticsService.calculateZigZag as Mock).mockResolvedValue(mockPoints);
+    mockPriceRepo.getRecentPrices.mockResolvedValue(mockPrices);
+    mockAnalyticsService.calculateZigZag.mockResolvedValue(mockPoints);
 
     /* ## Act ## */
     const result = await useCase.execute();
@@ -53,7 +57,7 @@ describe('CalculateZigZagUseCase', () => {
 
   it('価格データが不足している場合、空配列を返し計算を行わないこと', async () => {
     /* ## Arrange ## */
-    (mockPriceRepo.getRecentPrices as Mock).mockResolvedValue([{ timestamp: 'only-one' }]);
+    mockPriceRepo.getRecentPrices.mockResolvedValue([{ timestamp: 'only-one' }]);
 
     /* ## Act ## */
     const result = await useCase.execute();

@@ -62,6 +62,29 @@ export const calculateZigZagRoute = createRoute({
 });
 
 /**
+ * 指標一覧ルート
+ */
+export const marketIndicatorsRoute = createRoute({
+  method: "get",
+  path: "/api/v1/market/indicators",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            indicators: z.array(z.string().openapi({ example: "[USD] CPI" })),
+          }),
+        },
+      },
+      description: "直近の経済指標名の一覧を取得します",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
  * セッション一覧ルート
  */
 export const marketSessionsRoute = createRoute({

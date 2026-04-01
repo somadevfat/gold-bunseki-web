@@ -25,15 +25,15 @@ test.describe('Dashboard E2E (Mock Server)', () => {
 
   test('指標を切り替えた際、モックサーバーからのチャートデータと統計が表示されること', async ({ page }) => {
     /* ## Act ## */
-    // "CPI" ボタンをクリック
-    await page.getByRole('button', { name: 'CPI', exact: true }).click();
+    // "[USD] CPI" ボタンをクリック
+    await page.getByRole('button', { name: '[USD] CPI', exact: true }).click();
 
     /* ## Assert ## */
     // 1. チャートエリアの見出しを確認 (ISMからCPIに変わるのを待つ)
     const chartArea = page.locator('section').filter({ hasText: 'Market Event Context' });
     
-    // 見出しテキストが "CPI" を含むようになるまで待機（これにより RSC の更新完了を保証）
-    await expect(chartArea.locator('h3')).toContainText('CPI', { timeout: 15000 });
+    // 見出しテキストが "[USD] CPI" を含むようになるまで待機（これにより RSC の更新完了を保証）
+    await expect(chartArea.locator('h3')).toContainText('[USD] CPI', { timeout: 15000 });
 
     // 2. モックサーバーが返す Previous Date ("2026年3月1日") を確認
     await expect(page.getByText('2026年3月1日')).toBeVisible();

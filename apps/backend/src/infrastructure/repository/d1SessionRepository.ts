@@ -175,4 +175,20 @@ export class D1SessionRepository implements SessionRepositoryPort {
       count: stats[cond].count
     }));
   }
+
+  /**
+   * getRecentEventNames は直近発表されたユニークな経済指標名をリストとして返します。
+   */
+  async getRecentEventNames(limit: number): Promise<string[]> {
+    const query = `
+      SELECT event_name, MAX(datetime_jst) as last_date
+      FROM economic_events
+      GROUP BY event_name
+      ORDER BY last_date DESC
+      LIMIT ?
+    `;
+
+    const { results } = await this.db.prepare(query).bind(limit).all<{ event_name: string }>();
+    return results.map(r => r.event_name);
+  }
 }
