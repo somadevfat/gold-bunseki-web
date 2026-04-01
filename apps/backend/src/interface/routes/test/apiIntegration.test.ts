@@ -12,7 +12,7 @@ describe('API Response Integrity Tests (Integration)', () => {
 
   beforeAll(() => {
     originalFetch = globalThis.fetch;
-    globalThis.fetch = mock(() => Promise.reject(new Error('fetch failed (mock)')));
+    globalThis.fetch = mock(() => Promise.reject(new Error('fetch failed (mock)'))) as unknown as typeof fetch;
   });
 
   afterAll(() => {

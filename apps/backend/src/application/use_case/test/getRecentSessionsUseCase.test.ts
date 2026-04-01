@@ -29,9 +29,9 @@ describe('GetRecentSessionsUseCase (Unit Tests)', () => {
         findPreviousEvent: mock(() => Promise.resolve(null)),
         getCandles: mock(() => Promise.resolve([])),
         getThresholds: mock(() => Promise.resolve({
-          'A': { largeThreshold: 120, smallThreshold: 80 },
-          'B': { largeThreshold: 120, smallThreshold: 80 },
-          'C': { largeThreshold: 120, smallThreshold: 80 }
+          'A': { sessionName: 'A', largeThreshold: 120, smallThreshold: 80 },
+          'B': { sessionName: 'B', largeThreshold: 120, smallThreshold: 80 },
+          'C': { sessionName: 'C', largeThreshold: 120, smallThreshold: 80 }
         })),
         getEventStats: mock(() => Promise.resolve([])),
       };

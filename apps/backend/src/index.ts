@@ -8,7 +8,7 @@ import { D1SyncRepository } from './infrastructure/repository/d1SyncRepository';
 import { D1PriceRepository } from './infrastructure/repository/d1PriceRepository';
 import { D1ZigZagRepository } from './infrastructure/repository/d1ZigZagRepository';
 import { D1SessionRepository } from './infrastructure/repository/d1SessionRepository';
-import { D1BatchRepository } from './infrastructure/repository/d1BatchRepository';
+import { D1BatchRepository, SyncPayload } from './infrastructure/repository/d1BatchRepository';
 import { HttpAnalyticsService } from './infrastructure/external/analyticsServiceImpl';
 
 // Application
@@ -108,7 +108,7 @@ app.openapi(routes.marketSessionsRoute, async (c) => {
           const payload = await response.json();
           console.log("[Auto-Sync] Saving fetched data to D1...");
           const batchRepo = new D1BatchRepository(c.env.gold_vola_db);
-          await batchRepo.saveAll(payload);
+          await batchRepo.saveAll(payload as SyncPayload);
           sessions = await useCase.execute(count);
           console.log("[Auto-Sync] Successfully loaded fresh data.");
         } else {
@@ -160,7 +160,7 @@ app.openapi(routes.triggerSyncRoute, async (c) => {
     
     // 2. 保存
     const repo = new D1BatchRepository(c.env.gold_vola_db);
-    await repo.saveAll(payload);
+    await repo.saveAll(payload as SyncPayload);
     
     return c.json({ success: true, message: "同期成功 (Pull)" }, 200);
   } catch (err: unknown) {
@@ -177,7 +177,7 @@ app.openapi(routes.syncDataRoute, async (c) => {
     // 1. Push型: PythonがHonoにデータを送信してきた
     console.log("[Sync:Push] Received direct data push from owner...");
     const repo = new D1BatchRepository(c.env.gold_vola_db);
-    await repo.saveAll(payload);
+    await repo.saveAll(payload as SyncPayload);
     
     return c.json({ success: true, message: "同期成功 (Push)" }, 200);
   } catch (err: unknown) {
