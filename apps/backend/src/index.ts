@@ -30,7 +30,9 @@ type Bindings = {
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
-// CORS設定
+// RPC クライアント用の型定義（Bindings を除外してポータビリティを向上）
+export type AppType = typeof app;
+
 app.use('*', cors());
 
 // --- OpenAPI ドキュメント設定 ---

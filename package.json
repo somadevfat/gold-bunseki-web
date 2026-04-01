@@ -12,5 +12,8 @@
     "lint:analytics": "cd apps/analytics && ruff check .",
     "lint:all": "bun run lint:frontend && bun run lint:backend"
   },
+  "workspaces": [
+    "apps/*"
+  ],
   "type": "module"
 }

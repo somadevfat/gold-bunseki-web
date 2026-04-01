@@ -1,33 +1,43 @@
-# 🚀 Gold Volatility Bunseki - 実装状況まとめ (v3 完了)
+# Frontend Refactoring TODO List
 
-現在の「確定版要件定義 (v3)」に基づき、全機能の実装が完了しました。
+## 1. 責務の分離とディレクトリ構造の整理 (Feature-Sliced Design)
+現在の `src/components/` にすべてのコンポーネントが平置きされている状態から、機能（Feature）ごとにディレクトリを分割し、凝集度を高めます。
 
-## ✅ 完了したタスク (Done)
+- [ ] `src/features/` ディレクトリの作成
+- [ ] **Market Replay 機能 (`src/features/market-replay/`)**
+  - `components/` : `ReplaySection.tsx`, `ReplaySkeleton.tsx` などを移動
+  - `hooks/` : チャート描画ロジックなどのカスタムフックを配置
+  - `types/` : `ReplayData`, `Candle`, `HistoricalStats` などの型定義を移動
+- [ ] **Session 機能 (`src/features/sessions/`)**
+  - `components/` : `SessionFactTimeline`, `LiveStatusBadge` (現在 page.tsx 内にあるものを分離)
+  - `types/` : `SessionVolatility` などの型定義を移動
+- [ ] **共通 UI (`src/components/ui/`)**
+  - `IndicatorSelector.tsx` など、複数機能から呼ばれる可能性のある汎用コンポーネントを整理
 
-### 1. 基盤・インフラ
-- [x] **DBスキーマ拡張**: `session_thresholds` と `price_candles` テーブルの作成・連携
-- [x] **Pythonコア改修**: 過去1年の33/66%閾値の自動算出ロジックの実装
-- [x] **データ同期**: 1分足チャートデータと閾値のDB同期完了
+## 2. カスタムフックへのロジック抽出 (Custom Hooks)
+コンポーネント内にベタ書きされている副作用（`useEffect`）や状態管理ロジックを分離し、コンポーネントを純粋なViewに近づけます。
 
-### 2. バックエンド開発 (Go)
-- [x] **地合い判定ロジック**: 
-    - [x] 各セッションの「小・中・大」判定処理
-    - [x] 直前3コマの「最大地合い」を現在のステータスにするロジック
-- [x] **前回チャート再現 API**: 指定指標の「前回事実」の1分足を返すエンドポイント
-- [x] **統計データ合算 API**: 指標別・地合い別の過去平均ボラティリティ算出機能
+- [ ] `useReplayChart` フックの作成
+  - 現在 `ReplaySection.tsx` 内にある `lightweight-charts` の初期化、データ流し込み、リサイズイベント、マーカー描画のロジック（約60行）をすべてこのフックに抽出する。
+- [ ] `useIndicatorSelection` フックの作成 (任意)
+  - `IndicatorSelector.tsx` のURLパラメータ操作 (`useRouter`, `useSearchParams`) のロジックを分離。
 
-### 3. フロントエンド開発 (Next.js)
-- [x] **Premium Dark UI**: 高級感のあるダークテーマを全体に適用
-- [x] **Replay モジュール**: 指標選択、過去チャート表示、統計カード表示の一体化
-- [x] **地合いタイムライン**: 過去のセッション結果を垂直タイムラインで視覚化
+## 3. 型定義の一元化 (Type Centralization)
+現在 `page.tsx` や `ReplaySection.tsx` の上部に直接書かれている `interface` を専用の型定義ファイルに移動し、インポートして使うようにします。
+
+- [ ] `src/types/` または各 `features/*/types/` に型を移動し、重複や散らばりを防ぐ。
+
+## 4. Hono RPC を用いた型共有 (End-to-End Type Safety)
+おっしゃる通り、Hono の RPC クライアント (`hc`) を使えばバックエンドの型（Zod OpenAPI スキーマ）をそのままフロントエンドで推論できるため、手動で `interface` を書く必要がなくなります！
+- [ ] モノレポ (Bun Workspaces) の設定を有効化し、`apps/backend` を `apps/frontend` からインポートできるようにする。
+- [ ] フロントエンドに `@hono/zod-openapi` と `hono/client` を導入し、`hc<AppType>` を用いた型安全な API クライアントを構築する。
+- [ ] 既存の生の `fetch()` 呼び出しを Hono RPC クライアントに置き換える。
+
+## 5. RSC (React Server Components) の評価・維持
+現在のアーキテクチャは **RSC主軸** で適切に構築されています。
+- `page.tsx` が Server Component として直接 `fetch` を行い、データを取得してから Client Components (`IndicatorSelector`, `ReplaySection`) へ Props として渡す設計になっています。（これは Next.js App Router のベストプラクティスに沿っています）
+- 今後のリファクタリングでも、この「データフェッチはサーバー側 (RSC)」「インタラクション・描画ロジックはクライアント側 (Client Components)」という境界を崩さないようにします。
+- [ ] `page.tsx` 内の巨大な非同期コンポーネント (`AsyncSessionFactTimeline`, `AsyncLiveStatusBadge`) を別ファイルに切り出し、引き続き RSC として動作させる。
 
 ---
-
-## 🛠 今後の展望 (Remaining/Next Steps)
-
-### 4. 運用・保守
-- [ ] **定期更新の自動化**: `market_analyzer.py` を毎日実行する cron 設定（または GitHub Actions）
-- [ ] **バリエーション拡大**: XAU/USD 以外の通貨ペア（USD/JPY等）への転用
-
----
-*Last Updated: 2026-03-25*
+※このTODOリストは現状の確認用です。問題なければ実際の修正作業に入ります。
