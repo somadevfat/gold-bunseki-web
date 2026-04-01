@@ -10,7 +10,7 @@
     ],
     "types": [
       "@cloudflare/workers-types",
-      "bun-types"
+      "bun"
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
