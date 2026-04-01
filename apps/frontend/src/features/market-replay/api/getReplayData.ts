@@ -7,6 +7,8 @@ import { apiClient } from '../../../lib/api/client';
 export async function getReplayData(eventName: string) {
   const res = await apiClient.api.v1.market.replay.$get({
     query: { event: eventName },
+  }, {
+    init: { cache: 'no-store' }
   });
 
   if (!res.ok) {

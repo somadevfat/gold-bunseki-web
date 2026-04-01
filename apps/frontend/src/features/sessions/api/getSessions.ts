@@ -7,6 +7,8 @@ import { apiClient } from '../../../lib/api/client';
 export async function getSessions(limit = 12) {
   const res = await apiClient.api.v1.market.sessions.$get({
     query: { limit: limit.toString() },
+  }, {
+    init: { cache: 'no-store' }
   });
 
   if (!res.ok) {
