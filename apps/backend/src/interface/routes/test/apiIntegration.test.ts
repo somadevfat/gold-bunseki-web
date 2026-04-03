@@ -54,10 +54,15 @@ describe('API Response Integrity Tests (Integration)', () => {
 
     it('GET /api/v1/sync/status: 同期状況がキャメルケースのプロパティで返却されること', async () => {
       // ## Arrange ##
+      // 24時間以内に更新があれば Healthy と判定されるため、現在時刻から動的に生成する
+      const now = new Date();
+      const lastCandle = new Date(now.getTime() - 60 * 60 * 1000).toISOString(); // 1時間前
+      const lastSession = now.toISOString().split('T')[0]; // 今日の日付
+
       const mockEnv = createMockEnv([], {
-        last_candle: '2026-04-01T16:00:00Z',
-        last_session: '2026-04-01T00:00:00Z',
-        last_event: '2026-04-01T16:00:00Z',
+        last_candle: lastCandle,
+        last_session: lastSession,
+        last_event: lastCandle,
         total_candles: 1250
       });
 

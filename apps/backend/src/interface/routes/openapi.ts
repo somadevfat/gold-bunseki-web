@@ -1,7 +1,7 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import { PriceRecordSchema } from "../../domain/entities/price";
 import { ZigZagPointSchema } from "../../domain/entities/zigzag";
-import { SessionVolatilitySchema, SessionThresholdSchema } from "../../domain/entities/session";
+import { SessionVolatilitySchema } from "../../domain/entities/session";
 import { SyncStatusSchema } from "../../domain/entities/syncStatus";
 import { ReplayDataResponseSchema } from "../../domain/entities/replay";
 
@@ -179,6 +179,42 @@ export const triggerSyncRoute = createRoute({
 });
 
 /**
+ * 同期受取用のDTOスキーマ定義 (Pythonからの生データを受け入れるため、厳格なEntityスキーマとは分ける)
+ */
+const SyncSessionDtoSchema = z.object({
+  date: z.string(),
+  sessionName: z.string(),
+  startTimeJst: z.string(),
+  endTimeJst: z.string(),
+  highPrice: z.number().optional(),
+  lowPrice: z.number().optional(),
+  volatilityPoints: z.number(),
+  hasEvent: z.boolean(),
+  hasHighImpactEvent: z.boolean(),
+  eventsLinked: z.string(),
+});
+
+const SyncPriceDtoSchema = z.object({
+  timestamp: z.string(),
+  open: z.number(),
+  high: z.number(),
+  low: z.number(),
+  close: z.number(),
+});
+
+const SyncThresholdDtoSchema = z.object({
+  sessionName: z.string(),
+  smallThreshold: z.number(),
+  largeThreshold: z.number(),
+});
+
+const SyncZigZagDtoSchema = z.object({
+  timestamp: z.string(),
+  price: z.number(),
+  type: z.string(),
+});
+
+/**
  * データ同期(Push)受取
  */
 export const syncDataRoute = createRoute({
@@ -189,12 +225,12 @@ export const syncDataRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            events: z.array(z.unknown()), // 具体的なイベントスキーマがない場合はunknown推奨
-            sessions: z.array(SessionVolatilitySchema),
-            candles: z.array(z.unknown()),
-            prices: z.array(PriceRecordSchema),
-            thresholds: z.array(SessionThresholdSchema),
-            zigzagPoints: z.array(ZigZagPointSchema)
+            events: z.array(z.unknown()).optional(), // イベント詳細フォーマットは一旦unknownで許容
+            sessions: z.array(SyncSessionDtoSchema).optional(),
+            candles: z.array(z.unknown()).optional(),
+            prices: z.array(SyncPriceDtoSchema).optional(),
+            thresholds: z.array(SyncThresholdDtoSchema).optional(),
+            zigzagPoints: z.array(SyncZigZagDtoSchema).optional()
           }),
         },
       },

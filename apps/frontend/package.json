@@ -9,6 +9,8 @@
     "lint": "eslint",
     "dev:vinext": "vite dev --port 3001",
     "build:vinext": "vite build",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
