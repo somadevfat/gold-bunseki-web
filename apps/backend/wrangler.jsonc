@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "backend",
+  "name": "gold-vola-backend",
   "vars": {
     "ANALYTICS_SERVICE_URL": "http://127.0.0.1:8000"
   },
