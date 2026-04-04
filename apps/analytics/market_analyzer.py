@@ -4,6 +4,7 @@ import numpy as np
 from pathlib import Path
 from pytz import timezone
 import argparse
+import sqlite3
 import sys
 
 
@@ -33,20 +34,32 @@ class MarketAnalyzer:
         self.offset = xm_to_jst_offset_hours
         self.jst_tz = timezone('Asia/Tokyo')
         self.db_config = db_config or {
-            "host": "localhost",
-            "port": "5432",
-            "user": "user",
-            "password": "password",
-            "dbname": "gold_vola_db"
+            "dbname": "gold_vola.db"
         }
 
     # ===========================================================================
     # データロード系
     # ===========================================================================
 
+    def get_jst_offset(self, dt: pd.Timestamp) -> int:
+        """
+        日付に基づき、XM(EET/EEST)からJSTへの正確なオフセットを返す。
+        米国夏時間ルール: 3月第2日曜〜11月第1日曜
+        """
+        year = dt.year
+        # 3月第2日曜日
+        start_dst = pd.Timestamp(year=year, month=3, day=8) + pd.Timedelta(days=(6 - pd.Timestamp(year=year, month=3, day=8).dayofweek) % 7 + 7)
+        # 11月第1日曜日
+        end_dst = pd.Timestamp(year=year, month=11, day=1) + pd.Timedelta(days=(6 - pd.Timestamp(year=year, month=11, day=1).dayofweek) % 7)
+        
+        # 夏時間期間なら +6, 冬時間なら +7
+        if start_dst <= dt < end_dst:
+            return 6
+        return 7
+
     def load_price_data(self, csv_path: str) -> pd.DataFrame:
         """
-        XMから出力された1分足の価格データ(タブ区切り)を読み込み、JSTへ変換する。
+        XMから出力された1分足の価格データを読み込み、動的な時差補正を行う。
         """
         print(f"[Core] 価格データのロード開始: {csv_path}")
         if not Path(csv_path).exists():
@@ -56,7 +69,11 @@ class MarketAnalyzer:
         df.columns = [c.strip('<> ') for c in df.columns]
         datetime_str = df['DATE'] + ' ' + df['TIME']
         df['Datetime'] = pd.to_datetime(datetime_str, format='%Y.%m.%d %H:%M:%S')
-        df['Datetime_JST'] = df['Datetime'] + pd.Timedelta(hours=self.offset)
+        
+        # 行ごとにオフセットを計算して適用（ベクトル化して高速処理）
+        offsets = df['Datetime'].apply(self.get_jst_offset)
+        df['Datetime_JST'] = df['Datetime'] + pd.to_timedelta(offsets, unit='h')
+        
         df.set_index('Datetime_JST', inplace=True)
         return df[['OPEN', 'HIGH', 'LOW', 'CLOSE']]
 
@@ -66,7 +83,8 @@ class MarketAnalyzer:
         """
         print(f"[Core] 経済指標データのロード開始: {csv_path}")
         if not Path(csv_path).exists():
-            raise FileNotFoundError(f"Calendar CSV not found: {csv_path}")
+            # もしCSVがなければJSONキャッシュを探す
+            return pd.DataFrame()
 
         df = pd.read_csv(csv_path, encoding='cp932')
         df.replace(-9223372036854775808, np.nan, inplace=True)
@@ -123,7 +141,7 @@ class MarketAnalyzer:
         return pd.DataFrame(session_results)
 
     def compute_thresholds(self, session_df: pd.DataFrame) -> pd.DataFrame:
-        print("[Core] 地合い閾値の再考中...")
+        print("[Core] 地合い閾値の計算中...")
         thresholds = (
             session_df.groupby('SessionName', observed=True)['Volatility_Points']
             .quantile([0.33, 0.66])
@@ -132,6 +150,10 @@ class MarketAnalyzer:
             .reset_index()
         )
         return thresholds
+
+    def save_to_db(self, session_df: pd.DataFrame, calendar_df: pd.DataFrame, price_df: pd.DataFrame):
+        """ローカルSQLiteへの保存（旧互換）"""
+        print(f"[Core] ローカルDB ({self.db_config['dbname']}) への保存は現在推奨されません。API Push または CSV 出力を推奨します。")
 
     def prepare_api_payload(self, session_df: pd.DataFrame, calendar_df: pd.DataFrame, price_df: pd.DataFrame) -> dict:
         print(f"[Core] Hono同期用のAPI完全版ペイロードを構築中...")
@@ -164,34 +186,24 @@ class MarketAnalyzer:
                 "eventsLinked": str(r['EventsLinked']) if pd.notna(r['EventsLinked']) else "None"
             })
 
-        # 3. Candles & 4. Raw Prices (最適化ベクトル化: 数百万件の一分足を高速処理)
-        print("[Core] キャンドル1分足データをベクトル形式で抽出中...")
-        event_sessions = set(str(r['Date']) + "_" + str(r['SessionName']) for _, r in session_df.iterrows() if r['HasEvent'])
+        # 3. Candles & 4. Raw Prices
+        print("[Core] キャンドル1分足データを抽出中...")
         recent_threshold = price_df.index.max() - pd.Timedelta(days=7) if not price_df.empty else pd.Timestamp.min
 
-        # セッション名を高速にマッピングするための関数をベクトル化
         def map_session(t):
             for s_str, e_str, s_name in self.SESSION_BINS:
                 if s_str <= t.strftime('%H:%M') <= e_str: return s_name
             return "Unknown"
 
-        # ベクトル演算で一気にフラグ立て
-        price_df['sessionName'] = price_df.index.to_series().apply(map_session)
-        price_df['session_key'] = price_df.index.date.astype(str) + "_" + price_df['sessionName']
+        price_df_copy = price_df.copy()
+        price_df_copy['sessionName'] = price_df_copy.index.to_series().apply(map_session)
         
-        # 必要なキャンドルのみ抽出（イベント日、または直近7日）
-        mask = price_df['session_key'].isin(event_sessions) | (price_df.index >= recent_threshold)
-        filtered_df = price_df[mask]
+        # フィルタリング
+        filtered_df = price_df_copy[price_df_copy.index >= recent_threshold]
 
-        # 辞書化（高速）
-        from decimal import Decimal
-        
-        # iterrowsの代わりにto_dict("records")を使用
-        filtered_df_reset = filtered_df.reset_index()
         candles = []
         prices = []
-        for r in filtered_df_reset.to_dict('records'):
-            dt_jst = r['Datetime_JST']
+        for dt_jst, r in filtered_df.iterrows():
             candles.append({
                 "datetimeJst": dt_jst.isoformat(),
                 "sessionName": r['sessionName'],
@@ -207,9 +219,6 @@ class MarketAnalyzer:
                 "low": float(r['LOW']),
                 "close": float(r['CLOSE'])
             })
-        
-        # 不要な列を削除してお掃除
-        price_df.drop(columns=['sessionName', 'session_key'], inplace=True)
 
         # 5. Thresholds
         ths_df = self.compute_thresholds(session_df)
@@ -221,22 +230,6 @@ class MarketAnalyzer:
                 "largeThreshold": float(r['large_threshold'])
             })
 
-        # 6. ZigZag Points (簡易的な仮計算：最初と最後だけ抽出、本番ロジックはここを書き換える)
-        zigzag_points = []
-        if len(price_df) >= 2:
-            first_idx = price_df.index[0]
-            last_idx = price_df.index[-1]
-            zigzag_points.append({
-                "timestamp": first_idx.isoformat(),
-                "price": float(price_df.loc[first_idx, 'HIGH']),
-                "type": "HIGH"
-            })
-            zigzag_points.append({
-                "timestamp": last_idx.isoformat(),
-                "price": float(price_df.loc[last_idx, 'LOW']),
-                "type": "LOW"
-            })
-
         print("[Core] ペイロード構築完了")
         return {
             "events": events,
@@ -244,8 +237,64 @@ class MarketAnalyzer:
             "candles": candles,
             "prices": prices,
             "thresholds": thresholds,
-            "zigzagPoints": zigzag_points
+            "zigzagPoints": []
         }
+
+    def export_to_d1_csv(self, session_df: pd.DataFrame, calendar_df: pd.DataFrame, price_df: pd.DataFrame, output_dir: str = "seed_data"):
+        """
+        D1 インポート用の CSV ファイル群を生成する。
+        @responsibility: wrangler d1 import コマンドで本番DBに一括投入可能な形式でデータを出力する。
+        """
+        out = Path(output_dir)
+        out.mkdir(exist_ok=True)
+        print(f"[Core] D1シード用CSVを出力中 -> {out.absolute()}")
+
+        # 1. prices.csv (生価格)
+        p_df = price_df.reset_index().rename(columns={"Datetime_JST": "timestamp", "OPEN": "open", "HIGH": "high", "LOW": "low", "CLOSE": "close"})
+        p_df['timestamp'] = p_df['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        p_df[['timestamp', 'open', 'high', 'low', 'close']].to_csv(out / "prices.csv", index=False)
+
+        # 2. economic_events.csv (経済指標)
+        if not calendar_df.empty:
+            e_df = calendar_df.copy()
+            e_df['datetime_jst'] = e_df['Datetime_JST'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+            e_df = e_df.rename(columns={"EventName": "event_name", "Importance": "impact", "Actual": "actual", "Forecast": "forecast", "Prev": "previous"})
+            # IDはAutoIncrementだがwrangler importのために空列を作る必要がある場合がある
+            # ここではスキーマに合わせてIDを除いたインポートを想定
+            e_df[['datetime_jst', 'event_name', 'impact', 'actual', 'forecast', 'previous']].to_csv(out / "economic_events.csv", index=False)
+
+        # 3. session_volatilities.csv (分析結果)
+        s_df = session_df.copy()
+        s_df = s_df.rename(columns={
+            "Date": "date", "SessionName": "session_name", "StartTime_JST": "start_time_jst", "EndTime_JST": "end_time_jst",
+            "Volatility_Points": "volatility_points", "HasEvent": "has_event", "HasHighImpactEvent": "has_high_impact_event", "EventsLinked": "events_linked"
+        })
+        s_df['has_event'] = s_df['has_event'].astype(int)
+        s_df['has_high_impact_event'] = s_df['has_high_impact_event'].astype(int)
+        s_df[['date', 'session_name', 'start_time_jst', 'end_time_jst', 'volatility_points', 'has_event', 'has_high_impact_event', 'events_linked']].to_csv(out / "session_volatilities.csv", index=False)
+
+        # 4. session_thresholds.csv (地合い閾値)
+        ths_df = self.compute_thresholds(session_df)
+        ths_df = ths_df.rename(columns={"SessionName": "session_name"})
+        ths_df[['session_name', 'small_threshold', 'large_threshold']].to_csv(out / "session_thresholds.csv", index=False)
+
+        # 5. price_candles.csv (グラフ表示用)
+        def map_session(t):
+            for s_str, e_str, s_name in self.SESSION_BINS:
+                if s_str <= t.strftime('%H:%M') <= e_str: return s_name
+            return "Unknown"
+        
+        pc_df = price_df.copy()
+        pc_df['session_name'] = pc_df.index.to_series().apply(map_session)
+        pc_df = pc_df.reset_index().rename(columns={
+            "Datetime_JST": "datetime_jst", "OPEN": "open_price", "HIGH": "high_price", "LOW": "low_price", "CLOSE": "close_price"
+        })
+        pc_df['datetime_jst'] = pc_df['datetime_jst'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        pc_df[['datetime_jst', 'session_name', 'open_price', 'high_price', 'low_price', 'close_price']].to_csv(out / "price_candles.csv", index=False)
+
+        print(f"[Core] ✅ 5個のCSVファイルを出力しました。")
+        print(f"👉 次のコマンドでD1にインポートしてください:")
+        print(f"bunx wrangler d1 import gold-vola-db --remote --table price_candles seed_data/price_candles.csv")
 
     def _get_session_name(self, dt: pd.Timestamp) -> str:
         t = dt.time()
@@ -257,18 +306,23 @@ class MarketAnalyzer:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='MT5 Data Sync Script')
+    parser = argparse.ArgumentParser(description='MT5 Data Analysis Tool')
     parser.add_argument('--price', type=str, help='Path to Price M1 CSV')
     parser.add_argument('--calendar', type=str, help='Path to Calendar CSV')
-    parser.add_argument('--offset', type=int, default=7, help='XM to JST Offset (Winter: 7, Summer: 6)')
+    parser.add_argument('--offset', type=int, default=7, help='XM to JST Offset')
+    parser.add_argument('--mode', type=str, choices=['csv', 'db'], default='csv', help='Output mode')
     args = parser.parse_args()
 
-    if not args.price or not args.calendar:
-        print("Usage: python market_analyzer.py --price <path> --calendar <path>")
+    if not args.price:
+        print("Usage: python market_analyzer.py --price <path> [--calendar <path>] [--mode csv]")
         sys.exit(1)
 
     analyzer = MarketAnalyzer(xm_to_jst_offset_hours=args.offset)
     p_df = analyzer.load_price_data(args.price)
-    c_df = analyzer.load_calendar_data(args.calendar)
+    c_df = analyzer.load_calendar_data(args.calendar) if args.calendar else pd.DataFrame()
     res_df = analyzer.analyze_sessions(p_df, c_df)
-    analyzer.save_to_db(res_df, c_df, p_df)
+    
+    if args.mode == 'csv':
+        analyzer.export_to_d1_csv(res_df, c_df, p_df)
+    else:
+        print("Local DB mode is deprecated.")

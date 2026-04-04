@@ -5,20 +5,27 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
-### 2026-04-03 - バックエンドおよびフロントエンドのテストカバレッジ 100.00% 達成
+### 2026-04-03 - テストカバレッジ 100.00% 達成、および CI/CD パイプラインの完全自動化
 
 - **達成したタスク**:
-  - **Backend (Hono/D1)**: 全ファイルのラインカバレッジ 100% を達成。
-    - Repository (D1Price, D1Session, D1ZigZag, D1Batch), Controller (Market, Sync), External (AnalyticsService) のテストを完備。
-    - `apiIntegration.test.ts` における `Stale` 判定（24時間経過）によるテスト失敗を、`new Date()` を用いた動的なデータ生成に修正し、環境に依存しない安定したテストを実現。
-  - **Frontend (Next.js/Vinext)**: ロジック層（API通信, カスタムフック, APIクライアント）のラインカバレッジ 100% を達成。
-    - `bun test` を使用した高速なテスト実行環境を整備。
-    - Playwright (E2E) と `bun test` (Unit) の競合を `bunfig.toml` の `exclude` 設定で解消。
-  - **Architecture**: `architecture.md` を更新し、フロントエンドの Feature-based 構成（Features/Common/Components/Hooks/API）を明文化。
-- **対応したバグ**: `D1SyncRepository` における `Healthy/Stale` 判定ロジックがテスト実行時刻に依存していた問題を修正。実装は変えず、テスト側のモックデータを「実行時の現在時刻」から相対的に生成するように改善。
+  - **品質保証 (Testing)**: 
+    - バックエンドおよびフロントエンド（ロジック層）の全ファイルでラインカバレッジ 100.00% を達成。
+    - `rules.md` に「絶対的 any 禁止」を追記し、既存のテストコードから `any` を一掃。Lint/型チェックを完全にパスする状態へ改善。
+  - **CI/CD 構築**:
+    - GitHub Actions を導入。PR時に Lint, `bun test`, Playwright (E2E) が自動実行される CI を整備。
+    - Node.js v22 を指定することで、`vinext` ビルド時の `glob` インポートエラーを解消。
+    - フロントエンドのデプロイ先を Cloudflare Pages から **Workers with Assets** へ変更し、`wrangler deploy` による安定したデプロイを実現。
+  - **ドキュメント・整理**:
+    - `GEMINI.md` (Ground Truth) を策定し、AIが古いスタックに迷わないよう「唯一の真実」を定義。
+    - `playwright-report` 等の不要な巨大ファイルを Git から除外。GitHub の言語統計を正常化（TypeScript メイン）。
+    - ルートディレクトリを整理し、古いドキュメントを `docs/archives/` へ移動。
+- **解決した課題**: 
+  - プロジェクト名のリネーム (`gold-vola-backend`, `gold-vola-frontend`)。
+  - Cloudflare Pages における `ASSETS` 予約語衝突の回避。
 - **次回への申し送り事項**:
-  - 今後はこの 100% カバレッジを維持するため、機能追加時に必ずテストを同梱すること。
-  - UIコンポーネント（`.tsx`）は Playwright でのカバーに留める方針を継続。
+  - デプロイには GitHub Secrets の `CLOUDFLARE_API_TOKEN` が必要（設定済み）。
+  - 新機能追加時は必ず単体テストを同梱し、100% カバレッジを維持すること。
+
 
 ### 2026-04-02 - 外部データ同期(Push)用DTOの導入、デプロイ手順整備、および設計ドキュメントの最新化
 
