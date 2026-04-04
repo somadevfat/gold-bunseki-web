@@ -13,9 +13,8 @@ gold-vola-bunseki/
 │   │
 │   ├── backend/                 # ★ メイン バックエンドAPI (TypeScript / Hono)
 │   │   ├── package.json
-│   │   ├── wrangler.jsonc       # Cloudflare Workers 設定
 │   │   ├── src/
-│   │   │   ├── index.ts         # アプリケーションのエントリーポイント
+│   │   │   ├── index.ts         # アプリケーションのエントリーポイント (Bun.serve)
 │   │   │   │
 │   │   │   ├── domain/          # ── ドメイン層 (Zod スキーマ, ビジネスロジック)
 │   │   │   │   ├── entities/    # コアエンティティ（例: price.ts, zigzag.ts）
@@ -31,7 +30,7 @@ gold-vola-bunseki/
 │   │   │   │   └── validator/   # Zod による入力バリデーション
 │   │   │   │
 │   │   │   └── infrastructure/  # ── インフラストラクチャ層
-│   │   │       ├── database/    # Cloudflare D1 / KV 接続
+│   │   │       ├── database/    # PostgreSQL 接続 (Docker)
 │   │   │       ├── repository/  # portで定義したインターフェースの具体的な実装
 │   │   │       └── external/    # 外部API（Twelve Data, Python Analytics）の接続
 │   │

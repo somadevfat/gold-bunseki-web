@@ -1,93 +1,89 @@
-# 🚀 デプロイメント手順書 (Cloudflare Workers / D1)
+# 🚀 デプロイメント手順書 (VPS Backend / Cloudflare Frontend)
 
-このプロジェクトを Cloudflare の本番環境へデプロイするための公式手順書です。
-
----
-
-## ⚠️ 重要な注意事項 (Before You Deploy)
-
-- **ローカルデプロイ**: `bun run deploy` は、Git のブランチに関係なく **「現在手元にあるコード」** を本番にアップロードします。
-- **推奨フロー**: 事故を防ぐため、必ず `main` ブランチに切り替え、最新の状態を `git pull` してからデプロイすることを強く推奨します。
+このプロジェクトのハイブリッド環境（VPS上のバックエンド + Cloudflare上のフロントエンド）へデプロイするための公式手順書です。
 
 ---
 
-## 📍 1. 事前準備
+## 📍 1. アーキテクチャ構成
 
-### 1.1 Cloudflare へのログイン
-ブラウザが起動し、Cloudflare アカウントとの連携を求められます。
-```bash
-bunx wrangler login
-```
-- **解説**: CLI ツール (wrangler) があなたの Cloudflare アカウントを操作するための認証を行います。
-
-### 1.2 D1 データベースの作成（初回のみ）
-```bash
-bunx wrangler d1 create gold-vola-db
-```
-- **解説**: 本番環境用のマネージド型 SQLite データベース (D1) を作成します。
-- **database_id**: 作成時に表示される ID を `apps/backend/wrangler.jsonc` の `database_id` フィールドにコピーしてください。
+- **Frontend**: Cloudflare Pages (CDNから全世界へ高速配信)
+- **Backend API**: VPS (Bun サーバー + Nginx リバースプロキシ + Let's Encrypt SSL)
+- **Database**: VPS (Docker Compose による PostgreSQL)
 
 ---
 
-## 📍 2. バックエンドのデプロイ (apps/backend)
+## 📍 2. フロントエンドのデプロイ (Cloudflare Pages)
 
-### 2.1 データベース・マイグレーション
+フロントエンドは GitHub Actions による CI/CD パイプラインで完全自動化されています。
+
+### 2.1 自動デプロイ (推奨)
+1. `main` ブランチに変更をプッシュ（または PR をマージ）します。
+2. GitHub Actions が `apps/frontend` の変更を検知し、自動的にビルド (`bun run build:vinext`) を実行します。
+3. ビルドされた静的ファイル (`dist`) が Cloudflare Pages にデプロイされます。
+
+### 2.2 手動デプロイ (緊急時)
+GitHub の [Actions] タブから `Continuous Deployment` ワークフローを選択し、「Run workflow」ボタンを押すことでいつでも手動デプロイが可能です。
+
+※ **事前設定**: GitHub Secrets に `CLOUDFLARE_API_TOKEN` を登録しておく必要があります。
+
+---
+
+## 📍 3. バックエンド・データベースのデプロイ (VPS環境)
+
+バックエンドは専用の VPS サーバーで稼働します。初回セットアップ以降は、必要に応じて手動（または CI/CD 拡張）で更新します。
+
+### 3.1 初回セットアップ (VPS上での作業)
+1. **リポジトリのクローン**:
+   ```bash
+   git clone https://github.com/somadevfat/gold-bunseki-kun.git
+   cd gold-bunseki-kun
+   ```
+2. **データベース (PostgreSQL) の起動**:
+   Docker Compose を使用して PostgreSQL を起動します。
+   ```bash
+   docker-compose up -d db
+   ```
+3. **Bun のインストールとパッケージ同期**:
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   bun install
+   ```
+
+### 3.2 アプリケーションの起動
+VPS 上でバックエンドの Hono API を Bun で直接起動します。PM2 や systemd などのプロセス管理ツールを使用することを推奨します。
+
 ```bash
 cd apps/backend
-bunx wrangler d1 execute gold-vola-db --remote --file=./migrations/0001_initial_schema.sql
+bun run src/index.ts
 ```
-- **解説**: ローカルにある SQL ファイルを **本番用 (--remote)** データベースに実行し、テーブルを作成します。
 
-### 2.2 Workers へのデプロイ
-```bash
-cd apps/backend
-bun run deploy
+### 3.3 Nginx によるリバースプロキシ設定
+バックエンド API (デフォルトポート例: 8787) をインターネットに公開するため、Nginx を設定して 443 (HTTPS) を中継します。
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name api.yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/api.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.yourdomain.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:8787;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
-- **実際のコマンド**: `wrangler deploy --minify`
-- **解説**: TypeScript コードを Cloudflare Workers が理解できる形式にバンドルし、アップロードします。`--minify` はコードを圧縮して実行速度を最適化します。
+
+### 3.4 データベースへのシード (データ流し込み)
+ローカルの Windows 環境（Python/MT5）で `sync_direct.py` を実行し、API 経由で VPS のバックエンドへデータを POST することで初期データを構築します。
+（本番用 API エンドポイント `https://api.yourdomain.com/api/v1/sync/data` に向けます）
 
 ---
 
-## 📍 3. フロントエンドのデプロイ (apps/frontend)
+## 📍 4. 今後の拡張 (CI/CD)
 
-### 3.1 vinext のビルド
-```bash
-cd apps/frontend
-bun run build:vinext
-```
-- **実際のコマンド**: `vite build`
-- **解説**: React コンポーネントやアセットを最適化された静的ファイル（HTML/JS/CSS）に変換し、`dist/client` ディレクトリに出力します。
-
-### 3.2 Workers へのデプロイ
-```bash
-cd apps/frontend
-bunx wrangler deploy
-```
-- **解説**: ビルドされた静的ファイルと、エッジで動作する `worker/index.ts` を Cloudflare にアップロードします。Cloudflare Workers の「Assets」機能により、静的サイトとして公開されます。
-
----
-
-## 📍 4. 環境変数の設定 (Secrets)
-
-デプロイ後、API キーなどの機密情報を設定します。
-
-```bash
-bunx wrangler vars put ANALYTICS_SERVICE_URL --name backend
-```
-- **解説**: `wrangler.jsonc` に書けない機密情報を Cloudflare のサーバー側に安全に保存します。バックエンドが外部の分析エンジンと通信するために必要です。
-
----
-
-## 📍 5. 運用・トラブルシューティング
-
-### リアルタイムログの確認
-```bash
-# 本番環境で今まさに起きているエラーを監視
-cd apps/backend && bunx wrangler tail
-```
-
-### データベースの直接操作
-```bash
-# 本番のデータを直接 SQL で確認
-cd apps/backend && bunx wrangler d1 execute gold-vola-db --remote --command="SELECT count(*) FROM prices;"
-```
+バックエンドの VPS デプロイも GitHub Actions で自動化する場合は、`.github/workflows/cd.yml` に「SSH で VPS に接続し、`git pull` と `pm2 restart` を実行する」ステップを追加してください。

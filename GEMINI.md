@@ -2,19 +2,19 @@
 
 > [!IMPORTANT]
 > このファイルはプロジェクトの技術スタック、アーキテクチャ、およびエンジニアリング基準の「唯一の真実」です。
-> AIエージェントは常にこのファイルを最優先し、いかなる場合も古いスタック（Go, Postgres, Vite単体など）を提案・採用してはいけません。
+> AIエージェントは常にこのファイルを最優先すること。
 
 ## 📍 1. 技術スタック (Standard Stack)
 
 - **Runtime**: `Bun` (Node.js ではなく Bun を使用すること)
-- **Backend**: `TypeScript`, `Hono`, `Cloudflare D1` (SQLite)
-- **Frontend**: `React 19`, `Next.js 15 (Vinext経由)`, `Tailwind CSS 4`
+- **Backend (VPS)**: `TypeScript`, `Hono`, `Bun.serve`, `PostgreSQL` (Docker), `Nginx` (Reverse Proxy)
+- **Frontend (Cloudflare Pages)**: `React 19`, `Next.js 15 (Vinext経由)`, `Tailwind CSS 4`
 - **Analytics**: `Python` (Market Analysis Engine)
 
 ## 📍 2. アーキテクチャ (Architecture)
 
-- **Backend**: `Clean Architecture` (Domain, Application, Interface, Infrastructure)
-- **Frontend**: `Feature-based Architecture` (src/features/ 配下に UI, Hooks, API を垂直分割)
+- **Backend**: `Clean Architecture` (Domain, Application, Interface, Infrastructure)。VPS上のBunで直接起動。
+- **Frontend**: `Feature-based Architecture` (src/features/ 配下に UI, Hooks, API を垂直分割)。Cloudflare CDNから高速配信。
 - **Communications**: `Hono Zod OpenAPI` による型安全な RPC 通信
 
 ## 📍 3. 品質基準 (Quality Standards)

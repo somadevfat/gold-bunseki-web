@@ -9,7 +9,7 @@ MT5(MetaTrader 5)から取得したGOLD(XAUUSD)の価格データと経済指標
 ```mermaid
 graph LR
     MT5[MT5 (Windows)] -->|CSV出力| Python[Analytics Engine (Python)]
-    Python -->|HTTP POST| Hono[Backend API (Hono/D1)]
+    Python -->|HTTP POST| Hono[Backend API (Hono/PostgreSQL)]
     Hono -->|RPC / REST| Frontend[Frontend (Next.js/Vinext)]
 ```
 
@@ -18,14 +18,14 @@ graph LR
 - **実行**: ローカルのWindows環境（MT5動作環境）で常駐。
 
 ### 2. Backend API (`apps/backend/`)
-- **責務**: 分析データの永続化（Cloudflare D1）、フロントエンド向けAPIの提供、ZigZagチャートデータの計算依頼。
+- **責務**: 分析データの永続化（PostgreSQL）、フロントエンド向けAPIの提供、ZigZagチャートデータの計算依頼。
 - **アーキテクチャ**: Clean Architecture (Domain, Application, Interface, Infrastructure)。
-- **デプロイ**: Cloudflare Workers。
+- **デプロイ**: VPS (Bun.serve + Nginxリバースプロキシ + PostgreSQL Docker)。
 
 ### 3. Frontend (`apps/frontend/`)
 - **責務**: 分析結果の可視化（Lightweight Charts、ボラティリティダッシュボード、セッション比較）。
 - **アーキテクチャ**: Feature-based Architecture (機能ごとの垂直分割)。
-- **デプロイ**: Cloudflare Pages / Workers (Vinext経由)。
+- **デプロイ**: Cloudflare Pages (CDN配信)。
 
 ## 🛠️ 開発ガイドライン (Development)
 
