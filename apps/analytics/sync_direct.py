@@ -49,25 +49,40 @@ def sync_from_mt5(years: int, mode: str):
         price_df.set_index('Datetime_JST', inplace=True)
         price_df = price_df[['OPEN', 'HIGH', 'LOW', 'CLOSE']]
 
-        # --- (B) 指標データの取得 (期間指定) ---
-        print(f"📥 過去 {years} 年分 + 未来 30 日の経済指標カレンダーを取得中...")
-        utc_from = datetime.now(timezone.utc) - timedelta(days=years * 365)
-        utc_to = datetime.now(timezone.utc) + timedelta(days=30)
+        # --- (B) 指標データの取得 (MQL5出力のJSONから読み込み) ---
+        print("📥 経済指標カレンダー（USD）を MQL5 キャッシュファイルから読み込み中...")
+        import os
+        import json
         
-        calendar_data = mt5.calendar_get(datetime_from=utc_from, datetime_to=utc_to, country="US")
-        if calendar_data is None or len(calendar_data) == 0:
-            print("⚠️ 指標データの取得に失敗しました。")
+        # MT5の共通フォルダを探す
+        appdata = os.environ.get('APPDATA', '')
+        mt5_common_dir = Path(appdata) / "MetaQuotes" / "Terminal" / "Common" / "Files"
+        calendar_cache_file = mt5_common_dir / "gold_calendar_cache.json"
+        
+        if not calendar_cache_file.exists():
+            print(f"❌ カレンダーファイルが見つかりません。MQL5 (GoldCalendarPush.mq5) を実行してください。")
+            print(f"   パス: {calendar_cache_file}")
+            return
+            
+        with open(calendar_cache_file, 'r', encoding='utf-8') as f:
+            calendar_data = json.load(f)
+            
+        if not calendar_data or len(calendar_data) == 0:
+            print("⚠️ キャッシュファイルが空です。")
             calendar_df = pd.DataFrame()
         else:
             calendar_df = pd.DataFrame(calendar_data)
+            # 必要なカラム名へ調整
             calendar_df = calendar_df.rename(columns={
                 'name': 'EventName', 'time': 'Time', 'importance': 'Importance',
                 'actual': 'Actual', 'forecast': 'Forecast', 'prev': 'Prev'
             })
-            calendar_df['Importance'] = calendar_df['Importance'].map({1: 'LOW', 2: 'MEDIUM', 3: 'HIGH'})
-            calendar_df['Time'] = pd.to_datetime(calendar_df['Time'], unit='s')
-            calendar_df['Datetime_JST'] = calendar_df['Time'] + pd.Timedelta(hours=9)
-            print(f"✅ {len(calendar_df)} 件の指標を取得しました。")
+            # JSONの日付文字列(例: "2026-04-03T15:30:00")をパース
+            calendar_df['Time'] = pd.to_datetime(calendar_df['Time'])
+            # MQL5出力時点でサーバー時間の可能性もあるが、通常JST相当に補正するか、JSONの仕様に従う
+            # (GoldCalendarPush.mq5 は MT5 のサーバー時間を JST などの形でそのまま出している前提)
+            calendar_df['Datetime_JST'] = calendar_df['Time']
+            print(f"✅ {len(calendar_df)} 件の指標をキャッシュから取得しました。")
 
         # --- (C) 解析および出力 ---
         print(f"🔄 解析開始 (データ量に基づき時間がかかる場合があります)...")
