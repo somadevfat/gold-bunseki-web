@@ -330,18 +330,29 @@ class MarketAnalyzer:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='MT5 Data Analysis Tool')
     parser.add_argument('--price', type=str, help='Path to Price M1 CSV')
-    parser.add_argument('--calendar', type=str, help='Path to Calendar CSV')
+    parser.add_argument('--calendar', type=str, default='auto', help='Path to Calendar CSV/JSON or "auto" to detect MT5 common folder')
     parser.add_argument('--offset', type=int, default=7, help='XM to JST Offset')
     parser.add_argument('--mode', type=str, choices=['csv', 'db'], default='csv', help='Output mode')
     args = parser.parse_args()
 
     if not args.price:
-        print("Usage: python market_analyzer.py --price <path> [--calendar <path>] [--mode csv]")
+        print("Usage: python market_analyzer.py --price <path> [--calendar <path|auto>] [--mode csv]")
         sys.exit(1)
+
+    # MT5の共通フォルダを自動検出
+    calendar_path = args.calendar
+    if calendar_path == 'auto':
+        import os
+        if 'APPDATA' in os.environ:
+            calendar_path = str(Path(os.environ['APPDATA']) / "MetaQuotes" / "Terminal" / "Common" / "Files" / "gold_calendar_cache.json")
+            print(f"[Auto-Detect] 経済指標パスを自動設定しました: {calendar_path}")
+        else:
+            print("[Warning] APPDATA environment variable not found. Calendar processing will be skipped.")
+            calendar_path = ""
 
     analyzer = MarketAnalyzer(xm_to_jst_offset_hours=args.offset)
     p_df = analyzer.load_price_data(args.price)
-    c_df = analyzer.load_calendar_data(args.calendar) if args.calendar else pd.DataFrame()
+    c_df = analyzer.load_calendar_data(calendar_path) if calendar_path else pd.DataFrame()
     res_df = analyzer.analyze_sessions(p_df, c_df)
     
     if args.mode == 'csv':
