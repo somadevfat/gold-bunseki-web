@@ -3,52 +3,30 @@ import { swaggerUI } from '@hono/swagger-ui';
 import * as routes from './interface/routes/openapi';
 import { cors } from 'hono/cors';
 
-// Infrastructure
-import { D1SyncRepository } from './infrastructure/repository/d1SyncRepository';
-import { D1PriceRepository } from './infrastructure/repository/d1PriceRepository';
-import { D1ZigZagRepository } from './infrastructure/repository/d1ZigZagRepository';
-import { D1SessionRepository } from './infrastructure/repository/d1SessionRepository';
-import { D1BatchRepository } from './infrastructure/repository/d1BatchRepository';
-import { HttpAnalyticsService } from './infrastructure/external/analyticsServiceImpl';
+// Middleware / Config
+import { diMiddleware } from './interface/middleware/diMiddleware';
+import { Bindings, AppVariables } from './interface/types';
 
 // Controllers
 import { MarketController } from './interface/controller/marketController';
 import { SyncController } from './interface/controller/syncController';
-import { Bindings, AppVariables } from './interface/types';
 
 /**
- * Gold Volatility Bunseki API (Hono / workerd)
- * @responsibility: エントリポイントとして全ルートを集約し、DIミドルウェアとルーティングを管理する。
+ * Gold Volatility Bunseki API (Hono / Bun.serve)
+ * @responsibility: アプリケーションのエントリポイント。各コンポーネントを組み立て、APIを起動する。
  */
 
 const app = new OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>();
 
 export type AppType = typeof app;
 
-// CORS設定
+// 1. グローバル設定 (CORS)
 app.use('*', cors());
 
-// ==========================================
-// 1. DI (Dependency Injection) Middleware
-// ==========================================
-app.use('*', async (c, next) => {
-  const db = c.env.gold_vola_db;
-  const analyticsUrl = c.env.ANALYTICS_SERVICE_URL || 'http://127.0.0.1:8000';
+// 2. DI ミドルウェア (依存オブジェクトの注入)
+app.use('*', diMiddleware());
 
-  // 各リポジトリ・サービスをインスタンス化してコンテキストにセット
-  c.set('priceRepo', new D1PriceRepository(db));
-  c.set('zigzagRepo', new D1ZigZagRepository(db));
-  c.set('sessionRepo', new D1SessionRepository(db));
-  c.set('syncRepo', new D1SyncRepository(db));
-  c.set('batchRepo', new D1BatchRepository(db));
-  c.set('analyticsService', new HttpAnalyticsService(analyticsUrl));
-
-  await next();
-});
-
-// ==========================================
-// 2. OpenAPI / Swagger Documentation
-// ==========================================
+// 3. OpenAPI / Swagger 設定
 app.doc('/doc', {
   openapi: '3.0.0',
   info: {
@@ -57,15 +35,13 @@ app.doc('/doc', {
     description: 'Goldボラティリティ分析ツールのバックエンドAPI',
   },
 });
-
 app.get('/swagger', swaggerUI({ url: '/doc' }));
 
-// ==========================================
-// 3. Routes / Handlers
+// 4. ルーティングの登録
 // ==========================================
 
 // Health Check
-app.openapi(routes.healthRoute, (c) => c.json({ status: 'ok', server: 'Hono/workerd' }));
+app.openapi(routes.healthRoute, (c) => c.json({ status: 'ok', server: 'Hono/Bun' }));
 
 // Sync Status & Operations
 app.openapi(routes.syncStatusRoute, SyncController.getSyncStatus);

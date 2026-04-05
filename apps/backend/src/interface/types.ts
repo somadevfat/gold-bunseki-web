@@ -3,13 +3,13 @@ import { PriceRepositoryPort } from '../application/port/priceRepositoryPort';
 import { ZigZagRepositoryPort } from '../application/port/zigzagRepositoryPort';
 import { SessionRepositoryPort } from '../application/port/sessionRepositoryPort';
 import { AnalyticsServicePort } from '../application/port/analyticsServicePort';
-import { D1BatchRepository } from '../infrastructure/repository/d1BatchRepository';
+import { DrizzleBatchRepository } from '../infrastructure/repository/drizzleBatchRepository';
 
 /**
- * Bindings は Cloudflare Workers の環境変数や D1 などの定義です。
+ * Bindings は 環境変数などの定義です。
  */
 export type Bindings = {
-  gold_vola_db: D1Database;
+  DATABASE_URL: string;
   ANALYTICS_SERVICE_URL: string;
 };
 
@@ -21,6 +21,6 @@ export type AppVariables = {
   priceRepo: PriceRepositoryPort;
   zigzagRepo: ZigZagRepositoryPort;
   sessionRepo: SessionRepositoryPort;
-  batchRepo: D1BatchRepository;
+  batchRepo: DrizzleBatchRepository;
   analyticsService: AnalyticsServicePort;
 };
