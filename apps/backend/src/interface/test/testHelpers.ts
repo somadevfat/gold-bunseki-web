@@ -1,27 +1,34 @@
 import { mock } from 'bun:test';
 import { Context } from 'hono';
 import { Bindings, AppVariables } from '../types';
+import { DbType } from '../../infrastructure/database/db';
 
 /**
- * createMockD1 は D1Database をモックします。
- * @responsibility: テストコードで D1 に対する SQL 実行をシミュレートする。
- * @param results SQL の all() が返す結果
- * @param first SQL の first() が返す結果
- * @return D1Database のモック
+ * createMockDrizzle は Drizzle ORM (PostgresJS) をモックします。
+ * @responsibility: テストコードで Drizzle のチェーンメソッドとデータ取得をシミュレートする。
  */
-export const createMockD1 = (results: unknown[] = [], first: unknown = null) => {
-  return {
-    prepare: () => ({
-      bind: () => ({
-        all: () => Promise.resolve({ results }),
-        first: () => Promise.resolve(first),
-      }),
-      all: () => Promise.resolve({ results }),
-      first: () => Promise.resolve(first),
-    }),
-    batch: mock(() => Promise.resolve()),
-  } as unknown as D1Database;
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export const createMockDrizzle = (results: any[] = []) => {
+  const queryMock = {
+    select: mock(() => queryMock),
+    from: mock(() => queryMock),
+    where: mock(() => queryMock),
+    orderBy: mock(() => queryMock),
+    limit: mock(() => queryMock),
+    offset: mock(() => queryMock),
+    groupBy: mock(() => queryMock),
+    insert: mock(() => queryMock),
+    values: mock(() => queryMock),
+    onConflictDoNothing: mock(() => queryMock),
+    onConflictUpdate: mock(() => queryMock),
+    as: mock(() => queryMock),
+    transaction: mock(async (cb: any) => await cb(queryMock)),
+    // Promise.resolve に thenable なオブジェクトを返すことで await 可能にする
+    then: (resolve: any) => resolve(results),
+  };
+  return queryMock as unknown as DbType;
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * createMockContext は Hono の Context をモックします。
