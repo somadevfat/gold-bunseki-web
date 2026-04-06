@@ -11,6 +11,39 @@
 - **Frontend (Cloudflare Pages)**: `React 19`, `Next.js 15 (Vinext経由)`, `Tailwind CSS 4`
 - **Analytics**: `Python` (Market Analysis Engine)
 
+## 📍 1.5. アーキテクチャ・マップ (Architecture Map)
+
+- **Backend API (VPS)**: `Hono` (Port 3000) / Bun.serve
+- **Frontend (Cloudflare)**: `Next.js 15` (Port 3001) / Vinext
+- **Database (VPS Docker)**: `PostgreSQL 16` (Port 5432)
+- **Data Source (Local PC)**: `MetaTrader 5` (MT5) -> `Python` (Analysis)
+
+## 📍 1.6. 標準コマンド (Standard Commands)
+
+プロジェクトの操作はすべてルートの `Makefile` を経由すること。
+
+- `make dev`: バックエンド・フロントエンドを同時起動（開発用）
+- `make backend`: バックエンド API のみ起動
+- `make frontend`: フロントエンドのみ起動
+- `make db-migrate`: DBマイグレーション（PostgreSQL）の実行
+- `make test`: バックエンドのテスト実行（カバレッジ確認含む）
+- `make dev-mock`: モックサーバーモードでバックエンドを起動
+
+## 📍 1.7. データフロー (Data Flow)
+
+データの同期は、役割に応じて2つの独立した Python スクリプトと API エンドポイントを使用します。
+
+1.  **初回シード (Seed)**: 
+    - スクリプト: `apps/analytics/seed.py`
+    - API: `POST /api/v1/sync/seed`
+    - 内容: 過去数年分の大量のデータを一括で取得・解析し、バックエンド (PostgreSQL) へ初期投入します。
+2.  **常用同期 (Incremental Sync)**: 
+    - スクリプト: `apps/analytics/sync.py`
+    - API: `POST /api/v1/sync/data`
+    - 内容: 直近のデータ（数十分〜数時間分）のみを取得し、1分ごとの差分更新として高速にバックエンドへ送信します。
+3.  **データソース**: MT5 の `GoldCalendarPush.mq5` が出力した JSON カレンダー (`%APPDATA%` 内) と、Python ライブラリ経由の 1分足価格データを自動マージします。
+4.  **永続化**: バックエンドが `Drizzle ORM` を通じて `PostgreSQL` にデータを保存（UPSERT）します。
+
 ## 📍 2. アーキテクチャ (Architecture)
 
 - **Backend**: `Clean Architecture` (Domain, Application, Interface, Infrastructure)。VPS上のBunで直接起動。

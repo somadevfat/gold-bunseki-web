@@ -39,19 +39,36 @@ export class SyncController {
   }
 
   /**
-   * 同期データ受取 (Push型)
+   * 同期データ受取 (Push型) - 常用
    */
   static async receiveSyncData(c: Context<{ Bindings: Bindings; Variables: AppVariables }>) {
     try {
       const payload = await c.req.valid('json' as never) as SyncPayload;
-      console.log("[Sync:Push] Received direct data push...");
+      console.log("[Sync:Push] Received direct data push (Incremental)...");
       await c.get('batchRepo').saveAll(payload);
       
-      return c.json({ success: true, message: "同期成功 (Push)" }, 200);
+      return c.json({ success: true, message: "差分同期成功 (Push)" }, 200);
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       console.error("[Sync:Push Error]", error.message);
-      return c.json({ success: false, message: `Push同期失敗: ${error.message}` }, 500);
+      return c.json({ success: false, message: `差分Push同期失敗: ${error.message}` }, 500);
+    }
+  }
+
+  /**
+   * シードデータ受取 (Push型) - 初回大量データ用
+   */
+  static async receiveSeedData(c: Context<{ Bindings: Bindings; Variables: AppVariables }>) {
+    try {
+      const payload = await c.req.valid('json' as never) as SyncPayload;
+      console.log("[Sync:Seed] Received massive seed data push...");
+      await c.get('batchRepo').saveAll(payload);
+      
+      return c.json({ success: true, message: "シードデータ保存成功" }, 200);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error("[Sync:Seed Error]", error.message);
+      return c.json({ success: false, message: `シードデータ保存失敗: ${error.message}` }, 500);
     }
   }
 }

@@ -215,7 +215,7 @@ const SyncZigZagDtoSchema = z.object({
 });
 
 /**
- * データ同期(Push)受取
+ * データ同期(Push)受取 - 常用 (1分毎の差分同期など)
  */
 export const syncDataRoute = createRoute({
   method: "post",
@@ -239,10 +239,44 @@ export const syncDataRoute = createRoute({
   responses: {
     200: {
       content: { "application/json": { schema: z.object({ success: z.boolean(), message: z.string() }) } },
-      description: "同期成功",
+      description: "差分同期成功",
     },
     500: {
       description: "同期失敗",
     }
   },
 });
+
+/**
+ * データ同期(Push)受取 - シード用 (過去数年分の一括同期など)
+ */
+export const syncSeedRoute = createRoute({
+  method: "post",
+  path: "/api/v1/sync/seed",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            events: z.array(z.unknown()).optional(),
+            sessions: z.array(SyncSessionDtoSchema).optional(),
+            candles: z.array(z.unknown()).optional(),
+            prices: z.array(SyncPriceDtoSchema).optional(),
+            thresholds: z.array(SyncThresholdDtoSchema).optional(),
+            zigzagPoints: z.array(SyncZigZagDtoSchema).optional()
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ success: z.boolean(), message: z.string() }) } },
+      description: "シードデータ保存成功",
+    },
+    500: {
+      description: "シード失敗",
+    }
+  },
+});
+

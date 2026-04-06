@@ -47,6 +47,7 @@ app.openapi(routes.healthRoute, (c) => c.json({ status: 'ok', server: 'Hono/Bun'
 app.openapi(routes.syncStatusRoute, SyncController.getSyncStatus);
 app.openapi(routes.triggerSyncRoute, SyncController.triggerSync);
 app.openapi(routes.syncDataRoute, SyncController.receiveSyncData);
+app.openapi(routes.syncSeedRoute, SyncController.receiveSeedData);
 
 // Market Data (Price, ZigZag, Sessions)
 app.openapi(routes.latestPriceRoute, MarketController.getLatestPrice);
