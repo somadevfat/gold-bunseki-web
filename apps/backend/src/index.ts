@@ -45,7 +45,7 @@ app.openapi(routes.healthRoute, (c) => c.json({ status: 'ok', server: 'Hono/Bun'
 
 // Sync Status & Operations
 app.openapi(routes.syncStatusRoute, SyncController.getSyncStatus);
-app.openapi(routes.triggerSyncRoute, SyncController.triggerSync);
+
 app.openapi(routes.syncDataRoute, SyncController.receiveSyncData);
 app.openapi(routes.syncSeedRoute, SyncController.receiveSeedData);
 
@@ -56,4 +56,10 @@ app.openapi(routes.marketSessionsRoute, MarketController.getRecentSessions);
 app.openapi(routes.eventReplayRoute, MarketController.getEventReplay);
 app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
 
-export default app;
+/* Bun.serve でHTTPサーバーを起動 (Docker/VPS環境用) */
+const port = parseInt(process.env.PORT ?? '3000', 10);
+
+export default {
+  port,
+  fetch: app.fetch,
+};

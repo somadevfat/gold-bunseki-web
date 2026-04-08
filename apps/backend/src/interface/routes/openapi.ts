@@ -160,23 +160,6 @@ export const syncStatusRoute = createRoute({
   },
 });
 
-/**
- * 同期実行トリガールート (Pull型)
- * フロントエンドからの「今すぐ同期」ボタンなどで使用
- */
-export const triggerSyncRoute = createRoute({
-  method: "post",
-  path: "/api/v1/sync/trigger",
-  responses: {
-    200: {
-      content: { "application/json": { schema: z.object({ success: z.boolean(), message: z.string() }) } },
-      description: "同期完了",
-    },
-    500: {
-      description: "同期失敗",
-    }
-  },
-});
 
 /**
  * 同期受取用のDTOスキーマ定義 (Pythonからの生データを受け入れるため、厳格なEntityスキーマとは分ける)

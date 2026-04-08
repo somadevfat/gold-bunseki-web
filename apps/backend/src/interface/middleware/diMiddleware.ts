@@ -7,7 +7,6 @@ import { DrizzlePriceRepository } from '../../infrastructure/repository/drizzleP
 import { DrizzleZigZagRepository } from '../../infrastructure/repository/drizzleZigZagRepository';
 import { DrizzleSessionRepository } from '../../infrastructure/repository/drizzleSessionRepository';
 import { DrizzleBatchRepository } from '../../infrastructure/repository/drizzleBatchRepository';
-import { HttpAnalyticsService } from '../../infrastructure/external/analyticsServiceImpl';
 
 /**
  * diMiddleware は、リクエスト毎に必要な依存オブジェクトを Context に注入します。
@@ -15,7 +14,6 @@ import { HttpAnalyticsService } from '../../infrastructure/external/analyticsSer
  */
 export const diMiddleware = (): MiddlewareHandler => {
   return async (c, next) => {
-    const analyticsUrl = process.env.ANALYTICS_SERVICE_URL || 'http://127.0.0.1:8000';
 
     // 依存オブジェクトの注入
     // Note: パフォーマンス向上のため、必要に応じてシングルトン化を検討可能ですが、
@@ -25,7 +23,6 @@ export const diMiddleware = (): MiddlewareHandler => {
     c.set('sessionRepo', new DrizzleSessionRepository(db));
     c.set('syncRepo', new DrizzleSyncRepository(db));
     c.set('batchRepo', new DrizzleBatchRepository(db));
-    c.set('analyticsService', new HttpAnalyticsService(analyticsUrl));
 
     await next();
   };

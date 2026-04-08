@@ -16,27 +16,6 @@ export class SyncController {
     return c.json(status, 200);
   }
 
-  /**
-   * 同期実行 (Pull型)
-   */
-  static async triggerSync(c: Context<{ Bindings: Bindings; Variables: AppVariables }>) {
-    const analyticsUrl = c.env.ANALYTICS_SERVICE_URL || 'http://127.0.0.1:8000';
-    
-    try {
-      console.log("[Sync:Pull] Fetching from analytics engine:", analyticsUrl);
-      const response = await fetch(`${analyticsUrl}/analyze/sync`, { method: 'POST' });
-      if (!response.ok) throw new Error(`Analytics engine error: ${response.status}`);
-      
-      const payload = await response.json() as SyncPayload;
-      await c.get('batchRepo').saveAll(payload);
-      
-      return c.json({ success: true, message: "同期成功 (Pull)" }, 200);
-    } catch (err: unknown) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error("[Sync:Pull Error]", error.message);
-      return c.json({ success: false, message: `Pull同期失敗: ${error.message}` }, 500);
-    }
-  }
 
   /**
    * 同期データ受取 (Push型) - 常用

@@ -2,7 +2,6 @@ import { SyncRepositoryPort } from '../application/port/syncRepositoryPort';
 import { PriceRepositoryPort } from '../application/port/priceRepositoryPort';
 import { ZigZagRepositoryPort } from '../application/port/zigzagRepositoryPort';
 import { SessionRepositoryPort } from '../application/port/sessionRepositoryPort';
-import { AnalyticsServicePort } from '../application/port/analyticsServicePort';
 import { DrizzleBatchRepository } from '../infrastructure/repository/drizzleBatchRepository';
 
 /**
@@ -10,7 +9,6 @@ import { DrizzleBatchRepository } from '../infrastructure/repository/drizzleBatc
  */
 export type Bindings = {
   DATABASE_URL: string;
-  ANALYTICS_SERVICE_URL: string;
 };
 
 /**
@@ -22,5 +20,4 @@ export type AppVariables = {
   zigzagRepo: ZigZagRepositoryPort;
   sessionRepo: SessionRepositoryPort;
   batchRepo: DrizzleBatchRepository;
-  analyticsService: AnalyticsServicePort;
 };
