@@ -48,10 +48,8 @@ describe('GetReplayDataUseCase', () => {
     
     // 150 > 120 (Large) なので Condition が Large に更新されていること
     expect(result.previousEvent?.condition).toBe('Large');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(result.candles).toEqual(mockCandles as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(result.historicalStats).toEqual(mockStats as any);
+    expect(result.candles).toEqual(mockCandles as unknown as typeof result.candles);
+    expect(result.historicalStats).toEqual(mockStats as unknown as typeof result.historicalStats);
   });
 
   it('前回イベントが存在しない場合でも、統計データと空のキャンドルを返すこと', async () => {
@@ -89,8 +87,7 @@ describe('GetReplayDataUseCase', () => {
       mockSessionRepo.findPreviousEvent.mockResolvedValue(mockPrev);
       
       const result = await useCase.execute('Test');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect(result.previousEvent?.condition).toBe(tc.expected as any);
+      expect(result.previousEvent?.condition).toBe(tc.expected as 'Large' | 'Mid' | 'Small');
     }
   });
 });

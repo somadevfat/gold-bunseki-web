@@ -15,7 +15,7 @@ describe('DrizzleSyncRepository', () => {
       
       let callCount = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockDb.then = (resolve: any) => {
+      mockDb.then = (resolve: (val: unknown[]) => void) => {
         callCount++;
         if (callCount === 1) resolve([{ lastCandle: '2026-03-27 16:00:00', totalCandles: 1000 }]);
         if (callCount === 2) resolve([{ lastSession: '2026-03-27' }]);

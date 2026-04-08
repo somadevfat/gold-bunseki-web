@@ -8,7 +8,6 @@
     "start": "bun src/index.ts",
     "test": "bun test",
     "lint": "eslint .",
-    "dev:mock": "bun run src/mock-server.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push"

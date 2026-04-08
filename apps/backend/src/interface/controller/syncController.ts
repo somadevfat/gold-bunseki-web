@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { Bindings, AppVariables } from '../types';
 import { GetSyncStatusUseCase } from '../../application/use_case/getSyncStatusUseCase';
-import { SyncPayload } from '../../infrastructure/repository/d1BatchRepository';
+import { SyncPayload } from '../../infrastructure/repository/drizzleBatchRepository';
 
 /**
  * SyncController はデータの同期ステータス確認および同期実行リクエストを処理します。

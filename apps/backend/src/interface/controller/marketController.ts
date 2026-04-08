@@ -5,7 +5,7 @@ import { CalculateZigZagUseCase } from '../../application/use_case/calculateZigZ
 import { GetRecentSessionsUseCase } from '../../application/use_case/getRecentSessionsUseCase';
 import { GetReplayDataUseCase } from '../../application/use_case/getReplayDataUseCase';
 import { GetRecentEventNamesUseCase } from '../../application/use_case/getRecentEventNamesUseCase';
-import { SyncPayload } from '../../infrastructure/repository/d1BatchRepository';
+import { SyncPayload } from '../../infrastructure/repository/drizzleBatchRepository';
 
 /**
  * MarketController はマーケットデータ（価格、ZigZag、セッション）に関するリクエストを処理します。
@@ -67,7 +67,7 @@ export class MarketController {
 
       if (sessions.length === 0) {
         const analyticsUrl = c.env.ANALYTICS_SERVICE_URL || 'http://127.0.0.1:8000';
-        console.log("[Auto-Sync] D1 is empty. Triggering automatic sync...");
+        console.log("[Auto-Sync] Database is empty. Triggering automatic sync...");
         try {
           const response = await fetch(`${analyticsUrl}/analyze/sync`, { method: 'POST' });
           if (response.ok) {

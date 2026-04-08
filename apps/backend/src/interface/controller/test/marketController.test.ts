@@ -97,7 +97,7 @@ describe('MarketController', () => {
           'NY': { sessionName: 'NY', smallThreshold: 50, largeThreshold: 100 }
         }));
         mockRepos.sessionRepo.findRecentSessions = mock(() => Promise.resolve([
-          { sessionName: 'NY', volatilityPoints: 150, condition: 'Small' }
+          { id: 1, date: '2026-03-27', sessionName: 'NY', startTimeJst: '09:00', endTimeJst: '15:00', volatilityPoints: 150, hasEvent: false, hasHighImpactEvent: false, eventsLinked: '', condition: 'Small' as const }
         ]));
       }
 

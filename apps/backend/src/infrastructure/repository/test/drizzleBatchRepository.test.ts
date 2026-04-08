@@ -40,7 +40,7 @@ describe('DrizzleBatchRepository', () => {
       // トランザクション内で各メソッドが呼ばれることを確認
       expect(mockDb.insert).toHaveBeenCalledTimes(6);
       expect(mockDb.onConflictDoNothing).toHaveBeenCalledTimes(3); // events, candles, prices
-      expect(mockDb.onConflictUpdate).toHaveBeenCalledTimes(3); // sessions, thresholds, zigzag
+      expect(mockDb.onConflictDoUpdate).toHaveBeenCalledTimes(3); // sessions, thresholds, zigzag
     });
 
     it('一部のデータが空の場合、そのテーブルへの insert はスキップされること', async () => {

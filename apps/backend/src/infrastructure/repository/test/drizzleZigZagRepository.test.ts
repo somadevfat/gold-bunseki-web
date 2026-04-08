@@ -11,8 +11,8 @@ describe('DrizzleZigZagRepository', () => {
   describe('savePoints', () => {
     it('複数の転換点が正常に保存されること', async () => {
       const mockPoints: ZigZagPoint[] = [
-        { timestamp: '2026-03-27T16:00:00Z', price: 2300.0, type: 'High' },
-        { timestamp: '2026-03-27T16:05:00Z', price: 2290.0, type: 'Low' },
+        { timestamp: '2026-03-27T16:00:00Z', price: 2300.0, type: 'high' },
+        { timestamp: '2026-03-27T16:05:00Z', price: 2290.0, type: 'low' },
       ];
 
       const mockDb = createMockDrizzle([]);

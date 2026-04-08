@@ -95,7 +95,7 @@ export class DrizzleBatchRepository {
           }));
           await tx.insert(sessionVolatilities)
             .values(values)
-            .onConflictUpdate({
+            .onConflictDoUpdate({
               target: [sessionVolatilities.date, sessionVolatilities.sessionName],
               set: {
                 volatilityPoints: sql`EXCLUDED.volatility_points`,
@@ -128,7 +128,7 @@ export class DrizzleBatchRepository {
           }));
           await tx.insert(sessionThresholds)
             .values(values)
-            .onConflictUpdate({
+            .onConflictDoUpdate({
               target: [sessionThresholds.sessionName],
               set: {
                 smallThreshold: sql`EXCLUDED.small_threshold`,
@@ -158,7 +158,7 @@ export class DrizzleBatchRepository {
           }));
           await tx.insert(zigzagPoints)
             .values(values)
-            .onConflictUpdate({
+            .onConflictDoUpdate({
               target: [zigzagPoints.timestamp],
               set: {
                 price: sql`EXCLUDED.price`,

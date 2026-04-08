@@ -31,7 +31,7 @@ export class DrizzleSessionRepository implements SessionRepositoryPort {
       volatilityPoints: r.volatilityPoints,
       hasEvent: r.hasEvent,
       hasHighImpactEvent: r.hasHighImpactEvent,
-      eventsLinked: r.eventsLinked ?? undefined,
+      eventsLinked: r.eventsLinked ?? '',
       condition: 'Small' // Default, will be calculated in use case if needed
     }));
   }
@@ -89,7 +89,7 @@ export class DrizzleSessionRepository implements SessionRepositoryPort {
       volatilityPoints: target.volatilityPoints,
       hasEvent: target.hasEvent,
       hasHighImpactEvent: target.hasHighImpactEvent,
-      eventsLinked: target.eventsLinked ?? undefined,
+      eventsLinked: target.eventsLinked ?? '',
       exactEventTimeJst: target.exactEventTime || undefined,
       condition: 'Small'
     };

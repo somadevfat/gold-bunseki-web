@@ -3,12 +3,29 @@ import { Context } from 'hono';
 import { Bindings, AppVariables } from '../types';
 import { DbType } from '../../infrastructure/database/db';
 
+type MockQueryBuilder = {
+  select: ReturnType<typeof mock>;
+  from: ReturnType<typeof mock>;
+  where: ReturnType<typeof mock>;
+  orderBy: ReturnType<typeof mock>;
+  limit: ReturnType<typeof mock>;
+  offset: ReturnType<typeof mock>;
+  groupBy: ReturnType<typeof mock>;
+  insert: ReturnType<typeof mock>;
+  values: ReturnType<typeof mock>;
+  onConflictDoNothing: ReturnType<typeof mock>;
+  onConflictUpdate: ReturnType<typeof mock>;
+  onConflictDoUpdate: ReturnType<typeof mock>;
+  as: ReturnType<typeof mock>;
+  transaction: ReturnType<typeof mock>;
+  then: (resolve: (val: unknown[]) => void) => void;
+};
+
 /**
  * createMockDrizzle は Drizzle ORM (PostgresJS) をモックします。
  * @responsibility: テストコードで Drizzle のチェーンメソッドとデータ取得をシミュレートする。
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const createMockDrizzle = (results: any[] = []) => {
+export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
   const queryMock = {
     select: mock(() => queryMock),
     from: mock(() => queryMock),
@@ -21,14 +38,14 @@ export const createMockDrizzle = (results: any[] = []) => {
     values: mock(() => queryMock),
     onConflictDoNothing: mock(() => queryMock),
     onConflictUpdate: mock(() => queryMock),
+    onConflictDoUpdate: mock(() => queryMock),
     as: mock(() => queryMock),
-    transaction: mock(async (cb: any) => await cb(queryMock)),
+    transaction: mock(async (cb: (db: unknown) => Promise<unknown>) => await cb(queryMock)),
     // Promise.resolve に thenable なオブジェクトを返すことで await 可能にする
-    then: (resolve: any) => resolve(results),
+    then: (resolve: (val: T[]) => void) => resolve(results),
   };
-  return queryMock as unknown as DbType;
+  return queryMock as unknown as DbType & MockQueryBuilder;
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * createMockContext は Hono の Context をモックします。
