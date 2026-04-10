@@ -21,11 +21,16 @@ const app = new OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>();
 export type AppType = typeof app;
 
 // 1. グローバル設定 (CORS)
+const defaultOrigins = [
+  'http://localhost:3001',
+  'https://gold-vola-frontend.somahiranodev.workers.dev'
+];
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : defaultOrigins;
+
 app.use('*', cors({
-  origin: [
-    'http://localhost:3001',
-    'https://gold-vola-frontend.somahiranodev.workers.dev'
-  ],
+  origin: allowedOrigins,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }));
 
