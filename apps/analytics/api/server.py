@@ -57,7 +57,11 @@ def run_analysis_and_push(symbol: str = "GOLD", fetch_count: int = 500):
         
         # 5. Hono DBへPOST送信
         print(f"[Sync] Honoバックエンド ({HONO_SYNC_URL}) へ POST 送信中...")
-        res = requests.post(HONO_SYNC_URL, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
+        headers = {"Content-Type": "application/json"}
+        api_token = os.environ.get("API_TOKEN", "local-dev-token-please-change")
+        headers["Authorization"] = f"Bearer {api_token}"
+        
+        res = requests.post(HONO_SYNC_URL, json=payload, headers=headers, timeout=30)
         
         if res.status_code == 200:
             print(f"[Sync] ✅ HonoへのPush同期が完了しました！ (HTTP 200)")

@@ -2,6 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import * as routes from './interface/routes/openapi';
 import { cors } from 'hono/cors';
+import { bearerAuth } from 'hono/bearer-auth';
 
 // Middleware / Config
 import { diMiddleware } from './interface/middleware/diMiddleware';
@@ -36,6 +37,12 @@ app.use('*', cors({
 
 // 2. DI ミドルウェア (依存オブジェクトの注入)
 app.use('*', diMiddleware());
+
+// 2.5 APIキー認証 (データ同期APIの保護)
+app.use('/api/v1/sync/*', (c, next) => {
+  const token = process.env.API_TOKEN || 'local-dev-token-please-change';
+  return bearerAuth({ token })(c, next);
+});
 
 // 3. OpenAPI / Swagger 設定
 app.doc('/doc', {
