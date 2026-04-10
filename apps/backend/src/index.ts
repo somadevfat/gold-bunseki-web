@@ -21,7 +21,13 @@ const app = new OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>();
 export type AppType = typeof app;
 
 // 1. グローバル設定 (CORS)
-app.use('*', cors());
+app.use('*', cors({
+  origin: [
+    'http://localhost:3001',
+    'https://gold-vola-frontend.somahiranodev.workers.dev'
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 // 2. DI ミドルウェア (依存オブジェクトの注入)
 app.use('*', diMiddleware());
