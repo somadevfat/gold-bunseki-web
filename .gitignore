@@ -57,3 +57,7 @@ htmlcov/
 docs/development-logs/*.log
 tmp/
 apps/api/api
+
+# --- Data ---
+apps/analytics/seed_data/*.csv
+apps/analytics/seed_data/*.sql

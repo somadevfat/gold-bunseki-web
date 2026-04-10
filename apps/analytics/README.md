@@ -25,20 +25,44 @@
   ```
 
 ### 1. 初回のデータ投入 (CSVシード)
-DB構築時など、過去の大量のデータを投入したい場合に使用します。
+DB構築時など、過去の大量のデータを一括で投入したい場合に使用します。
+MT5からサーバーの過去データを取得し、CSVとして出力します。
+
 ```bash
-# 実行すると apps/analytics/seed_data/ に CSVファイルが生成されます
-python scripts/generate_seed_csv.py
+# 過去データの取得とCSV生成 (--count は 1分足の取得件数)
+# 例: 1500000件 ≒ 約3年分
+python scripts/generate_seed_csv.py --count 1500000
 ```
-生成されたCSVは、PostgreSQLの `COPY` コマンド等を使用して手動でDBに流し込んでください。
+
+生成されたCSV群は `apps/analytics/seed_data/` に出力されます。
+これらをPostgreSQLコンテナへ投入するには、以下のコマンド（psqlクライアントのルート機能）を実行します。
+
+```bash
+cd apps/analytics/seed_data
+
+# DBの接続情報をセット
+export PGUSER="user"
+export PGPASSWORD="password"
+export PGDATABASE="gold_vola_db"
+export PGHOST="localhost"
+export PGPORT="5432"
+
+# \copy コマンドでCSVをサーバ内PostgreSQLへバルクインサートする
+psql -c "\copy prices(timestamp, open, high, low, close) FROM 'prices.csv' DELIMITER ',' CSV HEADER;"
+psql -c "\copy economic_events(datetime_jst, event_name, impact, actual, forecast, previous) FROM 'economic_events.csv' DELIMITER ',' CSV HEADER;"
+psql -c "\copy session_volatilities(date, session_name, start_time_jst, end_time_jst, volatility_points, has_event, has_high_impact_event, events_linked) FROM 'session_volatilities.csv' DELIMITER ',' CSV HEADER;"
+psql -c "\copy session_thresholds(session_name, small_threshold, large_threshold) FROM 'session_thresholds.csv' DELIMITER ',' CSV HEADER;"
+psql -c "\copy price_candles(datetime_jst, session_name, open_price, high_price, low_price, close_price) FROM 'price_candles.csv' DELIMITER ',' CSV HEADER;"
+```
 
 ### 2. 運用時の差分同期 (FastAPIサーバー)
-日々の運用で、最新のデータをHonoバックエンドへPushする場合に使用します。
+日々の運用で、最新のデータをHonoバックエンドへAPI経由でPush（送信）する場合に使用します。
+
 ```bash
 # FastAPIサーバーを起動（デフォルト: ポート8000）
 python api/server.py
 ```
-サーバー起動後、定期的に以下のエンドポイントを叩くことで、差分データがHono(Port 3000)へPushされます。
+サーバー起動後、タスクスケジューラなどで定期的に以下のエンドポイントを叩くことで、差分データがVPS上のHonoへPushされます。
 ```bash
 curl -X POST http://localhost:8000/api/sync
 ```

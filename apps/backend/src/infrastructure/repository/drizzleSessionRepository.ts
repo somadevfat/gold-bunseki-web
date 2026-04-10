@@ -185,7 +185,7 @@ export class DrizzleSessionRepository implements SessionRepositoryPort {
       })
       .from(economicEvents)
       .groupBy(economicEvents.eventName)
-      .orderBy(desc(sql`last_date`))
+      .orderBy(desc(sql`MAX(${economicEvents.datetimeJst})`))
       .limit(limit);
 
     return results.map(r => r.eventName);

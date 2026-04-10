@@ -80,8 +80,15 @@ void WriteCalendarData()
       return;
    }
 
-   // JSON配列を構築
-   string json = "[";
+   // ファイル出力 (全MT5共通のAppDataフォルダ)
+   int handle = FileOpen(OUT_FILENAME, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_COMMON);
+   if(handle == INVALID_HANDLE)
+   {
+      Print("[GoldCalendarPush] ❌ ファイル出力失敗 - エラーコード: ", GetLastError());
+      return;
+   }
+
+   FileWriteString(handle, "[");
    bool first = true;
    int  skipped = 0;
 
@@ -120,31 +127,24 @@ void WriteCalendarData()
       StringReplace(dt_str, " ", "T");   
       dt_str += ":00";
 
-      if(!first) json += ",";
+      string json_item = "";
+      if(!first) json_item += ",";
       first = false;
 
-      json += "{";
-      json += "\"event_id\":"    + IntegerToString(values[i].event_id) + ",";
-      json += "\"time\":\""      + dt_str + "\",";
-      json += "\"name\":\""      + name + "\",";
-      json += "\"importance\":\"" + importance + "\",";
-      json += "\"actual\":"      + actual + ",";
-      json += "\"forecast\":"    + forecast + ",";
-      json += "\"prev\":"        + prev_val;
-      json += "}";
-   }
-   json += "]";
+      json_item += "{";
+      json_item += "\"event_id\":"    + IntegerToString(values[i].event_id) + ",";
+      json_item += "\"time\":\""      + dt_str + "\",";
+      json_item += "\"name\":\""      + name + "\",";
+      json_item += "\"importance\":\"" + importance + "\",";
+      json_item += "\"actual\":"      + actual + ",";
+      json_item += "\"forecast\":"    + forecast + ",";
+      json_item += "\"prev\":"        + prev_val;
+      json_item += "}";
 
-   // ファイル出力 (全MT5共通のAppDataフォルダ)
-   int handle = FileOpen(OUT_FILENAME, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_COMMON);
-   if(handle != INVALID_HANDLE)
-   {
-      FileWriteString(handle, json);
-      FileClose(handle);
-      Print("[GoldCalendarPush] ✅ カレンダー保存成功 (", count, "件) -> ", OUT_FILENAME);
+      FileWriteString(handle, json_item);
    }
-   else
-   {
-      Print("[GoldCalendarPush] ❌ ファイル出力失敗 - エラーコード: ", GetLastError());
-   }
+
+   FileWriteString(handle, "]");
+   FileClose(handle);
+   Print("[GoldCalendarPush] ✅ カレンダー保存成功 (", (count - skipped), "件 / ", count, "件中) -> ", OUT_FILENAME);
 }

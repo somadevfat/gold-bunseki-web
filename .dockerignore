@@ -1,0 +1,17 @@
+# --- IDE / System ---
+.vscode/
+.idea/
+.DS_Store
+
+# --- Dependencies & Build ---
+node_modules/
+bun.lockb
+.next/
+out/
+tmp/
+
+# --- Data (Heavy Files) ---
+apps/analytics/seed_data/*.csv
+apps/analytics/seed_data/*.sql
+*.db
+*.sqlite3
