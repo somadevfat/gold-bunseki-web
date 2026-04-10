@@ -39,10 +39,14 @@ app.use('*', cors({
 app.use('*', diMiddleware());
 
 // 2.5 APIキー認証 (データ同期APIの保護)
-app.use('/api/v1/sync/*', (c, next) => {
-  const token = process.env.API_TOKEN || 'local-dev-token-please-change';
-  return bearerAuth({ token })(c, next);
-});
+const apiToken = process.env.API_TOKEN;
+if (!apiToken) {
+  console.error("💣 FATAL ERROR: API_TOKEN environment variable is not set.");
+  console.error("Please set API_TOKEN in your environment (e.g. .env) to secure the API.");
+  process.exit(1);
+}
+
+app.use('/api/v1/sync/*', bearerAuth({ token: apiToken }));
 
 // 3. OpenAPI / Swagger 設定
 app.doc('/doc', {
