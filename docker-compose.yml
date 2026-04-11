@@ -5,9 +5,9 @@ services:
     image: postgres:16-alpine
     container_name: gold-vola-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: gold_vola_db
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-gold_vola_db}
       TZ: Asia/Tokyo
     ports:
       - "127.0.0.1:5432:5432"
@@ -20,12 +20,16 @@ services:
       context: ./apps/backend
     container_name: gold-vola-backend
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/gold_vola_db
+      DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-gold_vola_db}
+      API_TOKEN: ${API_TOKEN}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       TZ: Asia/Tokyo
     ports:
       - "3000:3000"
     depends_on:
       - db
+    env_file:
+      - .env
     restart: unless-stopped
 
 volumes:
