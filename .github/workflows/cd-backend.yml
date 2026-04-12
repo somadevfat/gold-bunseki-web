@@ -1,0 +1,67 @@
+name: CD Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/backend/**"
+      - "docker-compose.yml"
+      - ".github/workflows/cd-backend.yml"
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [main]
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCR_IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/gold-vola-backend
+
+jobs:
+  deploy-backend:
+    name: Build & Deploy Backend
+    runs-on: ubuntu-latest
+    # CIが成功した時のみデプロイする
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Workload Identity Federation で認証（JSON キー不要）
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker --quiet
+
+      # ビルド & GCR へ Push
+      - name: Build and Push Docker image
+        run: |
+          docker build \
+            -t ${{ env.GCR_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.GCR_IMAGE }}:latest \
+            ./apps/backend
+          docker push ${{ env.GCR_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.GCR_IMAGE }}:latest
+
+      - name: Deploy to GCE
+        run: |
+          gcloud compute ssh ${{ secrets.GCE_USER }}@${{ secrets.GCE_INSTANCE_NAME }} \
+            --zone=${{ secrets.GCE_ZONE }} \
+            --tunnel-through-iap \
+            --command="
+              cd ~/gold-bunseki-web &&
+              gcloud auth configure-docker --quiet &&
+              export BACKEND_IMAGE=${{ env.GCR_IMAGE }}:${{ github.sha }} &&
+              sudo -E docker-compose pull backend &&
+              sudo -E docker-compose up -d backend
+            "
