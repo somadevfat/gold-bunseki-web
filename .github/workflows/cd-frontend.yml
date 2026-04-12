@@ -10,6 +10,7 @@ on:
     workflows: ["Continuous Integration"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:  # 手動デプロイボタン
 
 jobs:
   deploy-frontend:

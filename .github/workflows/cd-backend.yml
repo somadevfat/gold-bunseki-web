@@ -11,6 +11,7 @@ on:
     workflows: ["Continuous Integration"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:  # 手動デプロイボタン
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
