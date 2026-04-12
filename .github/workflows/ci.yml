@@ -5,7 +5,7 @@ on:
     branches: [main]
   push:
     branches: [main]
-  workflow_dispatch:  # 手動実行ボタン
+  workflow_dispatch: # 手動実行ボタン
 
 jobs:
   lint-and-test:
