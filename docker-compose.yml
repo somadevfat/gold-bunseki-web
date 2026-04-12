@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: ${BACKEND_IMAGE:-gcr.io/YOUR_GCP_PROJECT_ID/gold-vola-backend:latest}
+    image: ${BACKEND_IMAGE:?BACKEND_IMAGE is not set. Run via CD workflow or set manually.}
     container_name: gold-vola-backend
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-gold_vola_db}
