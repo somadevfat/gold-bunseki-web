@@ -15,17 +15,75 @@ graph LR
 
 ### 1. Analytics Engine (`apps/analytics/`)
 - **責務**: MT5データの監視、セッション分割（東京・ロンドン・NY等）、ボラティリティ計算、およびバックエンドへのデータPush。
-- **実行**: ローカルのWindows環境（MT5動作環境）で常駐。
+- **実行**: ローカル（Windows）や専用VPSなどのPython環境。
 
 ### 2. Backend API (`apps/backend/`)
-- **責務**: 分析データの永続化（PostgreSQL）、フロントエンド向けAPIの提供、ZigZagチャートデータの計算依頼。
+- **責務**: 分析データの永続化（PostgreSQL）、フロントエンド向けAPIの提供、同期処理の認証管理。
 - **アーキテクチャ**: Clean Architecture (Domain, Application, Interface, Infrastructure)。
-- **デプロイ**: VPS (Bun.serve + Nginxリバースプロキシ + PostgreSQL Docker)。
+- **デプロイ**: GCP Compute Engine (Docker Compose) / Cloudflare D1等への拡張も対応設計。
 
 ### 3. Frontend (`apps/frontend/`)
-- **責務**: 分析結果の可視化（Lightweight Charts、ボラティリティダッシュボード、セッション比較）。
-- **アーキテクチャ**: Feature-based Architecture (機能ごとの垂直分割)。
-- **デプロイ**: Cloudflare Pages (CDN配信)。
+- **責務**: 分析結果の可視化（Lightweight Charts、ボラティリティダッシュボード）。
+- **デプロイ**: Cloudflare Workers (Vinextを用いた超低レイテンシ・エッジ配信)。
+
+## 📊 データベース設計 (ER Diagram)
+
+バックエンドの PostgreSQL は以下のスキーマで構成されています。
+
+```mermaid
+erDiagram
+    prices {
+        string timestamp PK
+        real open
+        real high
+        real low
+        real close
+    }
+    price_candles {
+        string datetime_jst PK
+        string session_name
+        real open_price
+        real high_price
+        real low_price
+        real close_price
+    }
+    zigzag_points {
+        string timestamp PK
+        real price
+        string type
+    }
+    session_volatilities {
+        int id PK
+        string date "UNIQUE"
+        string session_name "UNIQUE"
+        string start_time_jst
+        string end_time_jst
+        real volatility_points
+        boolean has_event
+        boolean has_high_impact_event
+        string events_linked
+    }
+    session_thresholds {
+        string session_name PK
+        real small_threshold
+        real large_threshold
+    }
+    economic_events {
+        int id PK
+        string datetime_jst "UNIQUE"
+        string event_name "UNIQUE"
+        string impact
+        string actual
+        string forecast
+    }
+    sync_status {
+        int id PK
+        string last_candle_at
+        string last_session_at
+        string total_candles
+        string sync_health
+    }
+```
 
 ## 🛠️ 開発ガイドライン (Development)
 
