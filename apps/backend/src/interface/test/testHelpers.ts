@@ -1,7 +1,7 @@
-import { mock } from 'bun:test';
-import { Context } from 'hono';
-import { Bindings, AppVariables } from '../types';
-import { DbType } from '../../infrastructure/database/db';
+import { mock } from "bun:test";
+import { Context } from "hono";
+import { Bindings, AppVariables } from "../types";
+import { DbType } from "../../infrastructure/database/db";
 
 type MockQueryBuilder = {
   select: ReturnType<typeof mock>;
@@ -9,14 +9,11 @@ type MockQueryBuilder = {
   where: ReturnType<typeof mock>;
   orderBy: ReturnType<typeof mock>;
   limit: ReturnType<typeof mock>;
-  offset: ReturnType<typeof mock>;
   groupBy: ReturnType<typeof mock>;
   insert: ReturnType<typeof mock>;
   values: ReturnType<typeof mock>;
   onConflictDoNothing: ReturnType<typeof mock>;
-  onConflictUpdate: ReturnType<typeof mock>;
   onConflictDoUpdate: ReturnType<typeof mock>;
-  as: ReturnType<typeof mock>;
   transaction: ReturnType<typeof mock>;
   then: (resolve: (val: unknown[]) => void) => void;
 };
@@ -32,15 +29,12 @@ export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
     where: mock(() => queryMock),
     orderBy: mock(() => queryMock),
     limit: mock(() => queryMock),
-    offset: mock(() => queryMock),
     groupBy: mock(() => queryMock),
     insert: mock(() => queryMock),
     values: mock(() => queryMock),
     onConflictDoNothing: mock(() => queryMock),
-    onConflictUpdate: mock(() => queryMock),
     onConflictDoUpdate: mock(() => queryMock),
-    as: mock(() => queryMock),
-    transaction: mock(async (cb: (db: unknown) => Promise<unknown>) => await cb(queryMock)),
+    transaction: mock((cb: (db: unknown) => Promise<unknown>) => cb(queryMock)),
     // Promise.resolve に thenable なオブジェクトを返すことで await 可能にする
     then: (resolve: (val: T[]) => void) => resolve(results),
   };
@@ -52,16 +46,16 @@ export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
  * @responsibility: コントローラーのテストで Hono のリクエスト・レスポンスをシミュレートする。
  */
 export const createMockContext = (
-  repos: Partial<AppVariables>, 
-  env: Partial<Bindings> = {}, 
-  queryData: Record<string, string> = {}
+  repos: Partial<AppVariables>,
+  env: Partial<Bindings> = {},
+  queryData: Record<string, string> = {},
 ) => {
   return {
     get: (key: keyof AppVariables) => repos[key],
     json: mock((body: unknown, status: number) => ({ body, status })),
     req: {
-      valid: () => queryData
+      valid: () => queryData,
     },
-    env: env
+    env: env,
   } as unknown as Context<{ Bindings: Bindings; Variables: AppVariables }>;
 };

@@ -10,7 +10,7 @@
     "dev:mock": "bun run tests/mocks/http-server.ts",
     "deploy": "wrangler deploy",
     "test": "bun test src/",
-    "test:coverage": "bun test src/ --coverage",
+    "test:coverage": "bun test src/ --coverage --coverageThreshold=1.0",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

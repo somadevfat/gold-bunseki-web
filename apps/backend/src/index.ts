@@ -44,14 +44,18 @@ app.use(
 app.use("*", diMiddleware());
 
 // 2.5 APIキー認証 (データ同期APIの保護)
-const apiToken = process.env.API_TOKEN;
-if (!apiToken) {
-  console.error("💣 FATAL ERROR: API_TOKEN environment variable is not set.");
-  console.error(
-    "Please set API_TOKEN in your environment (e.g. .env) to secure the API.",
-  );
-  process.exit(1);
+export function validateStartupEnv(): void {
+  const apiToken = process.env.API_TOKEN;
+  if (!apiToken) {
+    console.error("💣 FATAL ERROR: API_TOKEN environment variable is not set.");
+    console.error(
+      "Please set API_TOKEN in your environment (e.g. .env) to secure the API.",
+    );
+    process.exit(1);
+  }
 }
+validateStartupEnv();
+const apiToken = process.env.API_TOKEN as string;
 
 app.use("/api/v1/sync/*", bearerAuth({ token: apiToken }));
 
@@ -89,6 +93,8 @@ app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
 
 /* Bun.serve でHTTPサーバーを起動 (Docker/VPS環境用) */
 const port = parseInt(process.env.PORT ?? "3000", 10);
+
+export { app };
 
 export default {
   port,

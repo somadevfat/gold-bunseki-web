@@ -1,0 +1,4 @@
+[test]
+preload = ["./src/testSetup.ts"]
+coverageThreshold = 1.0
+coverageIgnorePatterns = ["src/interface/test/testHelpers.ts"]

@@ -1,3 +1,4 @@
+import "../../../../tests/setup";
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { render } from "@testing-library/react";
 import React from "react";
@@ -31,16 +32,38 @@ mock.module("lightweight-charts", () => ({
 }));
 
 /* テスト用コンポーネント */
-function TestChartComponent({ candles, exactEventTimeJst }: { candles: unknown[], exactEventTimeJst?: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { chartContainerRef } = useReplayChart({ candles: candles as any, exactEventTimeJst });
-  return <div ref={chartContainerRef} style={{ width: '800px' }} />;
+import type { Candle } from "@/lib/api/client";
+
+function TestChartComponent({
+  candles,
+  exactEventTimeJst,
+}: {
+  candles: Candle[];
+  exactEventTimeJst?: string;
+}) {
+  const { chartContainerRef } = useReplayChart({
+    candles,
+    exactEventTimeJst,
+  });
+  return <div ref={chartContainerRef} style={{ width: "800px" }} />;
 }
 
 describe("useReplayChart", () => {
   const mockCandles = [
-    { datetimeJst: "2026-04-01T10:00:00Z", open: 100, high: 110, low: 90, close: 105 },
-    { datetimeJst: "2026-04-01T10:01:00Z", open: 105, high: 115, low: 100, close: 110 },
+    {
+      datetimeJst: "2026-04-01T10:00:00Z",
+      open: 100,
+      high: 110,
+      low: 90,
+      close: 105,
+    },
+    {
+      datetimeJst: "2026-04-01T10:01:00Z",
+      open: 105,
+      high: 115,
+      low: 100,
+      close: 110,
+    },
   ];
 
   beforeEach(() => {
@@ -58,7 +81,9 @@ describe("useReplayChart", () => {
     /* ## Assert ## */
     expect(setDataMock).toHaveBeenCalled();
     const callArgs = setDataMock.mock.calls[0][0] as unknown[];
-    expect((callArgs[0] as { time: number }).time).toBe(new Date(mockCandles[0].datetimeJst).getTime() / 1000);
+    expect((callArgs[0] as { time: number }).time).toBe(
+      new Date(mockCandles[0].datetimeJst).getTime() / 1000,
+    );
     expect(fitContentMock).toHaveBeenCalled();
   });
 
@@ -67,11 +92,18 @@ describe("useReplayChart", () => {
     const exactEventTimeJst = mockCandles[0].datetimeJst;
 
     /* ## Act ## */
-    render(<TestChartComponent candles={mockCandles} exactEventTimeJst={exactEventTimeJst} />);
+    render(
+      <TestChartComponent
+        candles={mockCandles}
+        exactEventTimeJst={exactEventTimeJst}
+      />,
+    );
 
     /* ## Assert ## */
     expect(createSeriesMarkersMock).toHaveBeenCalled();
-    const markerArgs = createSeriesMarkersMock.mock.calls[0][1] as { text: string }[];
+    const markerArgs = createSeriesMarkersMock.mock.calls[0][1] as {
+      text: string;
+    }[];
     expect(markerArgs[0].text).toBe("発表時刻");
   });
 
