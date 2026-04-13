@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Build
+        run: cd apps/frontend && bun run build
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
