@@ -7,8 +7,7 @@ import { SyncPayload } from "../../infrastructure/repository/drizzleBatchReposit
  * SyncController はデータの同期ステータス確認および同期実行リクエストを処理します。
  */
 export class SyncController {
-  /* c8 ignore next 2 */
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  /* c8 ignore next */
   constructor() {}
 
   /**

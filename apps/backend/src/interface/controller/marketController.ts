@@ -11,8 +11,7 @@ import { SyncPayload } from "../../infrastructure/repository/drizzleBatchReposit
  * MarketController はマーケットデータ（価格、ZigZag、セッション）に関するリクエストを処理します。
  */
 export class MarketController {
-  /* c8 ignore next 2 */
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  /* c8 ignore next */
   constructor() {}
 
   /**
