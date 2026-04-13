@@ -34,7 +34,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: 'bun run dev:vinext',
+      command: 'bun run dev',
       url: 'http://localhost:3001',
       reuseExistingServer: !process.env.CI,
       env: {
