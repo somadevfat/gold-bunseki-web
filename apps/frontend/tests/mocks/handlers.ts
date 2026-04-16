@@ -68,4 +68,45 @@ export const handlers = [
       ],
     });
   }),
+
+  // 4. 認証 (better-auth)
+  http.get(`${baseUrl}/api/auth/get-session`, ({ request }) => {
+    // リクエストの Cookie からセッショントークンを取得
+    const cookie = request.headers.get('cookie');
+    
+    if (cookie && cookie.includes('mock_session_token')) {
+      return HttpResponse.json({
+        user: {
+          id: 'mock-user-id',
+          name: 'Somah (Mock)',
+          email: 'somah@example.com',
+          image: 'https://avatars.githubusercontent.com/u/1?v=4',
+          emailVerified: true,
+          createdAt: '2026-04-01T00:00:00Z',
+          updatedAt: '2026-04-01T00:00:00Z',
+        },
+        session: {
+          id: 'mock-session-id',
+          expiresAt: '2030-01-01T00:00:00Z',
+          token: 'mock_session_token',
+          createdAt: '2026-04-01T00:00:00Z',
+          updatedAt: '2026-04-01T00:00:00Z',
+          ipAddress: '127.0.0.1',
+          userAgent: 'Playwright Mock',
+          userId: 'mock-user-id',
+        }
+      });
+    }
+    // 未ログインの場合は null レスポンス
+    return HttpResponse.json(null);
+  }),
+
+  http.post(`${baseUrl}/api/auth/sign-out`, () => {
+    // ログアウト成功
+    return HttpResponse.json({ success: true }, {
+      headers: {
+        'Set-Cookie': 'better-auth.session_token=; Max-Age=0; Path=/',
+      }
+    });
+  }),
 ];

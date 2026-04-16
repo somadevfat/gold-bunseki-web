@@ -5,6 +5,7 @@ import ReplaySkeleton from '@/features/market-replay/components/ReplaySkeleton';
 import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
 import { SessionFactTimeline } from '@/features/sessions/components/SessionFactTimeline';
 import { getIndicators } from '@/features/common/api/getIndicators';
+import { AuthUI } from '@/features/auth/components/AuthUI';
 
 /**
  * DashboardPage はアプリケーションのメインダッシュボード画面です。
@@ -29,11 +30,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       <main className="w-full max-w-7xl px-4 sm:px-8 py-10 md:py-20 text-slate-900">
         {/* === Header === */}
         <header className="mb-16 md:mb-24">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
-            <span className="text-4xl drop-shadow-sm select-none">💰</span>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-              Gold Volatility
-            </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <span className="text-4xl drop-shadow-sm select-none">💰</span>
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+                Gold Volatility
+              </h1>
+            </div>
+            
+            <AuthUI />
           </div>
 
           <div className="flex items-center gap-6 py-8 border-b border-slate-100">
