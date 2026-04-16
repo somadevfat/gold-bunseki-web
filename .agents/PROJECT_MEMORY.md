@@ -5,6 +5,27 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-16 - better-auth を用いた認証基盤の導入とテスト稼働
+
+- **達成したタスク**:
+  - `apps/backend` 及び `apps/frontend` に次世代認証ライブラリ `better-auth` を導入。
+  - Drizzle ORM の `schema.ts` に OAuth対応用のコアテーブル群（`user`, `session`, `account`, `verification`）を追加し、`bun run db:push` にてDBに適用。
+  - Hono バックエンド側に `/api/auth/**` をリッスンするエンドポイントを構築し、フロントエンド側には `createAuthClient` を用いた認証クライアントフック基盤を整備。
+- **検証内容**:
+  - `apps/backend/src/infrastructure/auth/authHandler.test.ts` を作成し、Honoのミドルウェアが `better-auth` のハンドラーに正しくリクエストをルーティングできていることを統合テストで証明。さらに全60テストが既存の影響を受けずにパスすることを確認。
+- **次回への申し送り事項**:
+  - ユーザー環境の `.env` ファイルに `GITHUB_CLIENT_ID` と `GITHUB_CLIENT_SECRET` を設定後、フロントエンドに「GitHubでログイン」および「ログアウト」ボタン等のUIを追加し、動作確認を行うこと。
+
+### 2026-04-15 - Cloudflare frontend build failure の修正と main への push
+
+- **達成したタスク**:
+  - Cloudflare の frontend build で発生していた `vinext` の `node:fs/promises.glob` 解決エラーに対し、`apps/frontend` のデプロイワークフローへ Node.js 22 のセットアップを追加した。
+  - 変更を `fix(frontend): require Node.js 22 for Cloudflare builds` としてコミットし、`origin/main` へ push した。
+- **対応したバグ**:
+  - GitHub Actions の実行環境が Node.js 20 のままだと `vinext` のビルドが失敗するため、`actions/setup-node@v4` を挿入して Node.js 22 を明示した。
+- **次回への申し送り事項**:
+  - `apps/frontend/playwright.config.ts` には今回触っていない既存の整形差分が残っているため、必要なら別タスクで扱うこと。
+
 ### 2026-04-03 (ORM導入・引き継ぎ) - VPS化に向けた PostgreSQL および Drizzle ORM のセットアップ進行中
 
 - **達成したタスク**:

@@ -59,6 +59,10 @@ const apiToken = process.env.API_TOKEN as string;
 
 app.use("/api/v1/sync/*", bearerAuth({ token: apiToken }));
 
+// 2.8 Auth 関連 (better-auth)
+import { auth } from "./infrastructure/auth/auth";
+app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
+
 // 3. OpenAPI / Swagger 設定
 app.doc("/doc", {
   openapi: "3.0.0",
