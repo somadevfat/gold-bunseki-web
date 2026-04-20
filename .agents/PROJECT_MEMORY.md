@@ -5,16 +5,21 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
-### 2026-04-16 - better-auth を用いた認証基盤の導入とテスト稼働
+### 2026-04-16 - 認証UIの統合、E2Eテストの堅牢化、および Git Flow の導入
 
 - **達成したタスク**:
-  - `apps/backend` 及び `apps/frontend` に次世代認証ライブラリ `better-auth` を導入。
-  - Drizzle ORM の `schema.ts` に OAuth対応用のコアテーブル群（`user`, `session`, `account`, `verification`）を追加し、`bun run db:push` にてDBに適用。
-  - Hono バックエンド側に `/api/auth/**` をリッスンするエンドポイントを構築し、フロントエンド側には `createAuthClient` を用いた認証クライアントフック基盤を整備。
-- **検証内容**:
-  - `apps/backend/src/infrastructure/auth/authHandler.test.ts` を作成し、Honoのミドルウェアが `better-auth` のハンドラーに正しくリクエストをルーティングできていることを統合テストで証明。さらに全60テストが既存の影響を受けずにパスすることを確認。
+  - **認証UIの完成**: `AuthUI` コンポーネントを実装し、`better-auth` と連動してログイン/ログアウトを切り替えるUIをフロントエンド（ダッシュボード）に統合。
+  - **E2Eテストの堅牢化**: 
+    - MSWスタンドアロンサーバーに「動的シナリオ（500エラー、空データ）」のシミュレート機能を搭載。
+    - API故障時の Error Boundary (`error.tsx`) およびデータ不在時の案内表示を実装し、それらを検証する `error-handling.spec.ts` を追加。
+    - `playwright.config.ts` を最適化し、`bun run test:e2e` 一発でモックサーバーとフロントエンドが連動して起動・自動終了するクリーンなテストDXを確立。
+  - **バージョン管理戦略**: `develop` ブランチを作成し、Git Flow に基づく開発運用を開始。
+- **設計判断**:
+  - **RSCのテスト戦略**: サーバーサイドフェッチをキャッチするため、ブラウザ内MSWではなく、Playwrightが管理するスタンドアロン・サーバー構成を堅牢な最終形態とした。
 - **次回への申し送り事項**:
-  - ユーザー環境の `.env` ファイルに `GITHUB_CLIENT_ID` と `GITHUB_CLIENT_SECRET` を設定後、フロントエンドに「GitHubでログイン」および「ログアウト」ボタン等のUIを追加し、動作確認を行うこと。
+  - 今後の機能開発（自分のお気に入り保存、履歴検索など）は `features/` ブランチを作成し、`develop` ブランチに向けたプルリクエスト形式で進めること。
+
+### 2026-04-16 - better-auth を用いた認証基盤の導入とテスト稼働（先行分）
 
 ### 2026-04-15 - Cloudflare frontend build failure の修正と main への push
 

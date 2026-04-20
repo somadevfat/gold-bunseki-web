@@ -1,12 +1,29 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('認証機能 (Authentication) E2E', () => {
-  test('未ログイン状態では「GitHubでログイン」ボタンが表示される', async ({ page }) => {
+  test('未ログイン状態では「Googleでログイン」ボタンが表示される', async ({ page }) => {
     await page.goto('/');
     
     // ログインボタンが存在することを確認
-    const loginBtn = page.getByRole('button', { name: /GitHubでログイン/ });
+    const loginBtn = page.getByRole('button', { name: /Googleでログイン/ });
     await expect(loginBtn).toBeVisible();
+  });
+
+  test('「Googleでログイン」ボタンをクリックすると、適切な認証APIが呼び出されること', async ({ page }) => {
+    await page.goto('/');
+    
+    // モックサーバーへの送信としてインターセプトするか、リクエスト送信自体を検知する
+    const requestPromise = page.waitForRequest(request => 
+      request.url().includes('/api/auth/sign-in/social') && request.method() === 'POST'
+    );
+    
+    // ボタンをクリック
+    await page.getByRole('button', { name: /Googleでログイン/ }).click();
+    
+    // API呼び出しが正しく行われたことを確認
+    const request = await requestPromise;
+    const postData = request.postDataJSON();
+    expect(postData.provider).toBe('google');
   });
 
   test('ログイン状態ではユーザー名と「ログアウト」ボタンが表示される', async ({ page, context }) => {

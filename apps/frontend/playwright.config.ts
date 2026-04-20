@@ -26,21 +26,24 @@ export default defineConfig({
     },
   ],
 
-  /* テスト実行前に「モックバックエンド」と「フロントエンド」を自動起動する */
+  /* テスト実行時にモックとフロントエンドを自動起動する（配列形式の公式推奨設定） */
   webServer: [
     {
       command: "bun run dev:mock",
       port: 8788,
       reuseExistingServer: !process.env.CI,
+      stdout: "pipe",
+      stderr: "pipe",
     },
     {
       command: "bun run dev",
-      url: "http://localhost:3001",
+      port: 3001, // urlでの疎通確認を避け、ポート開放のみで判定させることでハングを防ぐ
       reuseExistingServer: !process.env.CI,
       env: {
-        /* フロントエンドの API 接続先をモックサーバーに向ける */
         NEXT_PUBLIC_API_URL: "http://localhost:8788",
       },
+      stdout: "pipe",
+      stderr: "pipe",
     },
   ],
 });

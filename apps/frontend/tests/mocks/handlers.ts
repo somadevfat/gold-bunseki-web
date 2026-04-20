@@ -4,7 +4,12 @@ const baseUrl = '*';
 
 export const handlers = [
   // 1. 同期ステータス
-  http.get(`${baseUrl}/api/v1/sync/status`, () => {
+  http.get(`${baseUrl}/api/v1/sync/status`, ({ request }) => {
+    // シナリオチェック: エラーシミュレーション
+    if (request.headers.get('x-test-scenario') === 'error') {
+      return new HttpResponse(null, { status: 500 });
+    }
+
     return HttpResponse.json({
       lastCandleAt: '2026-04-01T10:00:00Z',
       lastSessionAt: '2026-04-01',
@@ -15,7 +20,20 @@ export const handlers = [
   }),
 
   // 2. セッション一覧
-  http.get(`${baseUrl}/api/v1/market/sessions`, () => {
+  http.get(`${baseUrl}/api/v1/market/sessions`, ({ request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+
+    if (scenario === 'error') {
+      return new HttpResponse(null, { status: 500 });
+    }
+
+    if (scenario === 'empty') {
+      return HttpResponse.json({
+        sessions: [],
+        currentCondition: 'Small',
+      });
+    }
+
     return HttpResponse.json({
       sessions: [
         {

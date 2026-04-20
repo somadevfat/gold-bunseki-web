@@ -35,8 +35,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   "*",
   cors({
-    origin: allowedOrigins,
+    origin: (origin) => (origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0]),
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization", "Accept"],
+    credentials: true,
   }),
 );
 
