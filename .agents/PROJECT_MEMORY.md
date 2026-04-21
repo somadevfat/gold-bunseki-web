@@ -5,6 +5,41 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-21 - アジャイルチケット分割・GitHub Issue一括登録スキル (agile-issue) の作成
+
+- **達成したタスク**:
+  - `docs/タスク分け方.md` を元に、AIがINVEST/SPIDR原則に基づいてタスクを分割し、GitHub Issueとして登録する `agile-issue` スキルを新規作成。
+  - 開発者が手動でIssueを作成する際に選べるGitHub公式のIssueテンプレート（`Story`, `Task`, `Spike`, `Bug`）を `.github/ISSUE_TEMPLATE/` 配下に設定。
+  - スキルが自動生成する際の参照用テンプレート群を `.agents/skills/agile-issue/references/` 配下に作成。
+  - スプリント管理やチケットの種別確認で用いる各種ラベルを一括作成する `scripts/setup-github-labels.sh` を追加。
+- **次回への申し送り事項**:
+  - 本格的な開発チケットを切る前に `bash scripts/setup-github-labels.sh <owner> <repo>` を実行してラベルを用意しておくこと。
+
+
+### 2026-04-20 - Google OAuth 認証の実装、CORS/CSRF問題の解決、およびUIのプレミアム化
+
+- **達成したタスク**:
+  - **Google OAuth 認証の完全実装**: `better-auth` を使用し、GitHub ログインから Google プロバイダーへ移行。GCP コンソールでのクライアント ID 発行からバックエンドの実装までを完了。
+  - **CORS/CSRF デバッグ**: 
+    - フロントエンド(3001)とバックエンド(3000)間のクロスオリジン認証における `credentials: true` 設定および `trustedOrigins` の不整合を解消。
+    - Vite 環境下で `process.env` が参照できず JS がクラッシュする問題を、`vite.config.ts` の `define` 設定によるポリフィルで解決。
+  - **Auth UI のプレミアム化**: 
+    - Google 公式風のクリーンで高級感のあるログインボタンを実装。
+    - ログイン後にユーザー名・アバター・ステータスを表示する「プロフィールカプセル」デザインを導入。
+  - **デプロイ準備**: 本番環境における環境変数管理（GitHub Secrets vs GCP VM .env）の戦略を策定。
+- **対応したバグ**:
+  - ログインボタンがクリックできない（`process is not defined` エラー）の修正。
+  - Google からの戻り時に発生する `401: invalid_client` および `State mismatch` エラーの解消。
+- **主要な変更ファイル**:
+  - `apps/backend/src/infrastructure/auth/auth.ts`: Better-auth 構成。
+  - `apps/backend/src/index.ts`: CORS ミドルウェア設定の強化。
+  - `apps/frontend/src/features/auth/components/AuthUI.tsx`: プレミアムUI実装。
+  - `apps/frontend/vite.config.ts`: `process.env` ポリフィルの追加。
+- **次回への申し送り事項**:
+  - 認証基盤が整ったため、次はユーザーIDに紐づいた「お気に入りチャート保存」や「パーソナライズ設定」の開発が可能。
+  - 本番デプロイ時は `BETTER_AUTH_SECRET` の刷新と `BETTER_AUTH_URL` の HTTPS 化を忘れずに行うこと。
+
+
 ### 2026-04-16 - 認証UIの統合、E2Eテストの堅牢化、および Git Flow の導入
 
 - **達成したタスク**:
