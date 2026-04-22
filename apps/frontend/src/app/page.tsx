@@ -2,10 +2,10 @@ import { Suspense } from 'react';
 import IndicatorSelector from '@/features/common/components/IndicatorSelector';
 import { ReplayArea } from '@/features/market-replay/components/ReplayArea';
 import ReplaySkeleton from '@/features/market-replay/components/ReplaySkeleton';
-import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
 import { SessionFactTimeline } from '@/features/sessions/components/SessionFactTimeline';
 import { getIndicators } from '@/features/common/api/getIndicators';
-import { AuthUI } from '@/features/auth/components/AuthUI';
+import { SiteHeader } from '@/features/common/components/SiteHeader';
+import { SiteFooter } from '@/features/common/components/SiteFooter';
 
 /**
  * DashboardPage はアプリケーションのメインダッシュボード画面です。
@@ -18,40 +18,18 @@ interface PageProps {
 
 export default async function DashboardPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
-  
-  // 指標一覧をバックエンドから動的に取得
+
+  /* 指標一覧をバックエンドから動的に取得 */
   const { indicators } = await getIndicators();
   const defaultEvent = indicators.length > 0 ? indicators[0] : 'No Data';
   const currentEvent = resolvedParams.event || defaultEvent;
-  const displayEventName = currentEvent;
 
   return (
     <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-100 flex flex-col items-center">
       <main className="w-full max-w-7xl px-4 sm:px-8 py-10 md:py-20 text-slate-900">
-        {/* === Header === */}
-        <header className="mb-16 md:mb-24">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl drop-shadow-sm select-none">💰</span>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-                Gold Volatility
-              </h1>
-            </div>
-            
-            <AuthUI />
-          </div>
 
-          <div className="flex items-center gap-6 py-8 border-b border-slate-100">
-            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded border border-slate-100">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                Live Status
-              </span>
-              <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
-                <LiveStatusBadge />
-              </Suspense>
-            </div>
-          </div>
-        </header>
+        {/* === 共通ヘッダー: タイトル・認証UI・ライブステータス === */}
+        <SiteHeader />
 
         {/* === Primary Content: Market Event Context === */}
         <section className="mb-24 md:mb-32">
@@ -62,7 +40,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
           <div className="bg-white border border-slate-100 rounded shadow-2xl shadow-slate-200/30 overflow-hidden">
             <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
-              <ReplayArea eventName={currentEvent} displayEventName={displayEventName} />
+              <ReplayArea eventName={currentEvent} displayEventName={currentEvent} />
             </Suspense>
           </div>
         </section>
@@ -88,23 +66,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </div>
         </section>
 
-        {/* Global Footer */}
-        <footer className="mt-40 pt-16 border-t border-slate-100 text-slate-400 text-xs flex flex-col xl:flex-row justify-between uppercase tracking-widest font-bold gap-12">
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-slate-900">&copy; 2026 Gold Volatility Analyzer</p>
-          </div>
-          <div className="flex flex-wrap gap-x-10 items-start">
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              Privacy & Security
-            </span>
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              Status
-            </span>
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              API
-            </span>
-          </div>
-        </footer>
+        {/* === 共通フッター === */}
+        <SiteFooter />
       </main>
     </div>
   );

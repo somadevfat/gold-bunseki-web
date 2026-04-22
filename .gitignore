@@ -61,3 +61,13 @@ apps/api/api
 # --- Data ---
 apps/analytics/seed_data/*.csv
 apps/analytics/seed_data/*.sql
+
+# --- Test Artifacts ---
+# Playwrightのテスト成果物（実行環境依存のため除外）
+apps/frontend/test-results/
+apps/frontend/playwright-report/
+# カバレッジレポート（HTML）
+apps/frontend/coverage/
+# HTML形式のレポートファイル全般（テスト・ビルド出力）
+*.html
+!public/**/*.html
