@@ -1,6 +1,7 @@
 'use client';
 
 import { useReplayChart } from '../hooks/useReplayChart';
+import { PropertyItem } from './PropertyItem';
 import type { ReplayDataResponse } from '@/lib/api/client';
 
 interface ReplaySectionProps {
@@ -119,42 +120,6 @@ export default function ReplaySection({ data, eventName }: ReplaySectionProps) {
           ))}
         </div>
       </section>
-    </div>
-  );
-}
-
-/* 内部補助コンポーネント: プロパティ表示項目 */
-function PropertyItem({
-  label,
-  value,
-  subValue,
-  highlight,
-  isStatus,
-}: {
-  label: string;
-  value: string;
-  subValue?: string;
-  highlight?: boolean;
-  isStatus?: boolean;
-}) {
-  return (
-    <div className="space-y-2">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-      <div className="flex flex-wrap items-baseline gap-3">
-        <p
-          className={`text-xl font-bold tracking-tight ${
-            highlight ? 'text-slate-900 border-b-2 border-slate-100 pb-1' : 'text-slate-700'
-          } ${isStatus ? 'flex items-center gap-2' : ''}`}
-        >
-          {isStatus && <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>}
-          {value}
-        </p>
-        {subValue && (
-          <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
-            {subValue}
-          </span>
-        )}
-      </div>
     </div>
   );
 }
