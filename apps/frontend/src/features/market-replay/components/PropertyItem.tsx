@@ -7,19 +7,22 @@
  * @param highlight 強調表示フラグ
  * @param isStatus ステータスドット（●）を表示するフラグ
  */
+/** PropertyItem コンポーネントのプロパティ定義 */
+export interface PropertyItemProps {
+  label: string;
+  value: string;
+  subValue?: string;
+  highlight?: boolean;
+  isStatus?: boolean;
+}
+
 export function PropertyItem({
   label,
   value,
   subValue,
   highlight,
   isStatus,
-}: {
-  label: string;
-  value: string;
-  subValue?: string;
-  highlight?: boolean;
-  isStatus?: boolean;
-}) {
+}: PropertyItemProps) {
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>

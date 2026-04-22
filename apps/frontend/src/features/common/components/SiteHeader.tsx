@@ -3,10 +3,10 @@ import { AuthUI } from "@/features/auth/components/AuthUI";
 import { LiveStatusBadge } from "@/features/sessions/components/LiveStatusBadge";
 
 /**
- * SiteHeader はアプリケーション共通のヘッダーコンポーネントです（RSC）。
+ * SiteHeader はアプリケーション共通のヘッダーコンポーネントです。
  * @responsibility アプリタイトル、認証UI、ライブステータスバッジを統合して表示する。
  */
-export async function SiteHeader() {
+export function SiteHeader() {
   return (
     <header className="mb-16 md:mb-24">
       {/* タイトルと認証UIを横並び */}
