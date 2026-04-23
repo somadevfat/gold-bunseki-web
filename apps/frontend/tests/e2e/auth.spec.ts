@@ -5,7 +5,7 @@ test.describe('認証機能 (Authentication) E2E', () => {
     await page.goto('/');
     
     // ログインボタンが存在することを確認
-    const loginBtn = page.getByRole('button', { name: /Googleでログイン/ });
+    const loginBtn = page.getByRole('button', { name: /Google でログイン/ });
     await expect(loginBtn).toBeVisible();
   });
 
@@ -18,7 +18,7 @@ test.describe('認証機能 (Authentication) E2E', () => {
     );
     
     // ボタンをクリック
-    await page.getByRole('button', { name: /Googleでログイン/ }).click();
+    await page.getByRole('button', { name: /Google でログイン/ }).click();
     
     // API呼び出しが正しく行われたことを確認
     const request = await requestPromise;
@@ -32,7 +32,7 @@ test.describe('認証機能 (Authentication) E2E', () => {
       {
         name: 'better-auth.session_token',
         value: 'mock_session_token',
-        domain: 'localhost',
+        domain: '127.0.0.1',
         path: '/',
       }
     ]);

@@ -14,7 +14,7 @@ export default defineConfig({
   reporter: "list",
 
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: "http://127.0.0.1:3001",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -26,24 +26,14 @@ export default defineConfig({
     },
   ],
 
-  /* テスト実行時にモックとフロントエンドを自動起動する（配列形式の公式推奨設定） */
-  webServer: [
-    {
-      command: "bun run dev:mock",
-      port: 8788,
-      reuseExistingServer: !process.env.CI,
-      stdout: "pipe",
-      stderr: "pipe",
-    },
-    {
-      command: "bun run dev",
-      port: 3001, // urlでの疎通確認を避け、ポート開放のみで判定させることでハングを防ぐ
-      reuseExistingServer: !process.env.CI,
-      env: {
-        NEXT_PUBLIC_API_URL: "http://localhost:8788",
-      },
-      stdout: "pipe",
-      stderr: "pipe",
-    },
-  ],
+  webServer: {
+    /* モックサーバーの /health でReadyを確認し、Viteはその後起動済みになる */
+    command: "bash scripts/start-e2e-servers.sh",
+    url: "http://127.0.0.1:8788/health",
+    timeout: 60 * 1000,
+    /* trueにすると既存サーバー確認で最大2分ブロックされるため常にfalse */
+    reuseExistingServer: false,
+    stdout: "pipe",
+    stderr: "pipe",
+  },
 });

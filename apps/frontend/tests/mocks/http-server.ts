@@ -24,6 +24,12 @@ const server = Bun.serve({
       });
     }
 
+    // Health check endpoint for Playwright
+    const url = new URL(req.url);
+    if (url.pathname === '/health') {
+      return new Response('OK', { status: 200 });
+    }
+
     // 2. MSW のハンドラーを順に評価してリクエストを処理する
     for (const handler of handlers) {
       try {

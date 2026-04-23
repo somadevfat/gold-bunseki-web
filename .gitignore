@@ -71,3 +71,7 @@ apps/frontend/coverage/
 # HTML形式のレポートファイル全般（テスト・ビルド出力）
 *.html
 !public/**/*.html
+# デバッグ・開発時の一時ログファイル
+apps/frontend/mock.log
+apps/frontend/vite.log
+apps/frontend/debug.ts

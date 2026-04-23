@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite dev --port 3001",
+    "dev": "vite dev --host 127.0.0.1 --port 3001",
     "build": "vite build",
     "start": "wrangler dev",
     "lint": "eslint",
     "dev:mock": "bun run tests/mocks/http-server.ts",
+    "dev:e2e": "bun run tests/mocks/http-server.ts & sleep 3 && NEXT_PUBLIC_API_URL=http://127.0.0.1:8788 vite dev --host 127.0.0.1 --port 3001",
     "deploy": "wrangler deploy",
     "test": "bun test src/",
     "test:coverage": "bun test src/ --coverage --coverageThreshold=1.0",
