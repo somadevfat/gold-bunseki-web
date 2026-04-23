@@ -1,6 +1,11 @@
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { getReplayData } from "./getReplayData";
 
+/* next/headers のモック化 */
+mock.module("next/headers", () => ({
+  headers: () => Promise.resolve(new Headers()),
+}));
+
 /* apiClient のモック化 */
 const getMock = mock();
 mock.module("../../../lib/api/client", () => ({
@@ -40,16 +45,13 @@ describe("getReplayData", () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it("API 呼び出しがエラー（ok: false）の場合、null を返すこと", async () => {
+  it("API 呼び出しがエラー（ok: false）の場合、Error をスローすること", async () => {
     /* ## Arrange ## */
     getMock.mockResolvedValue({
       ok: false,
     });
 
-  /* ## Act ## */
-    const result = await getReplayData("BadEvent");
-
-    /* ## Assert ## */
-    expect(result).toBeNull();
+  /* ## Act & Assert ## */
+    expect(getReplayData("BadEvent")).rejects.toThrow("再現データの取得に失敗しました");
   });
 });
