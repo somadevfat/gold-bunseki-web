@@ -5,7 +5,37 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
-### 2026-04-23 - E2Eテストおよびバックエンド統合テストの安定化と環境変数管理の改善
+### 2026-04-25 - E2Eテスト廃止・ユニットテスト体制への集約
+
+- **背景と判断**:
+  - vinext (RSC) + Cloudflare Workers + Playwright + MSW モックサーバーの組み合わせが
+    ローカル・CI双方で安定しない状態が続いたため、E2Eテストを全廃してユニットテストのみの体制に移行。
+  - 現プロジェクト規模（auth / sessions / market-replay）であれば、hooks・api のユニットテスト 100% で
+    機能保証は十分と判断（ADR 相当の設計決定）。
+
+- **実施した変更**:
+  - `apps/frontend/tests/e2e/` (auth, smoke, error-handling 3ファイル) を削除。
+  - `apps/frontend/tests/mocks/` (http-server, server, handlers) を削除。
+  - `apps/frontend/playwright.config.ts` を削除。
+  - `apps/frontend/scripts/start-e2e-servers.sh` を削除。
+  - `apps/frontend/public/health.html` を削除。
+  - MSW ハンドラー・サーバー・setup をユニットテスト専用として `src/test/` 配下に再配置。
+  - `bunfig.toml` の `preload` パスを `./tests/setup.ts` → `./src/test/setup.ts` に変更。
+  - `package.json` から E2E 系スクリプト（test:e2e / dev:mock / dev:e2e）と `@playwright/test` を削除。
+  - `ci.yml` から Playwright ブラウザインストールと E2E 実行ステップを削除。
+
+- **現在のテスト体制**:
+  - `bun test src/` = ユニットテスト 18件（フロントエンド hooks / api）
+  - `bun run test:all` = フロントエンド + バックエンドのユニットテスト
+  - E2E は廃止（将来的に Vitest Browser Mode で再挑戦する余地あり）
+
+- **テスト結果**: 18 pass / 0 fail ✅
+
+- **次回への申し送り事項**:
+  - 機能追加時は `src/test/handlers.ts` に必要なモックレスポンスを追加しながら、
+    対応する hooks / api テストを同梱すること（100% カバレッジを維持）。
+  - E2Eを将来再導入する場合は Vitest Browser Mode + Cloudflare Miniflare の Spike を行うこと。
+
 
 - **達成したタスク**:
   - **E2Eテストの安定化**:
