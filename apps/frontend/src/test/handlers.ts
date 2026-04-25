@@ -1,15 +1,16 @@
 import { http, HttpResponse } from 'msw';
 
+/* ユニットテスト用の MSW ハンドラー定義
+ * @responsibility 各APIエンドポイントのモックレスポンスを定義し、ユニットテストの外部依存を排除する。 */
+
 const baseUrl = '*';
 
 export const handlers = [
-  // 1. 同期ステータス
+  /* 同期ステータス */
   http.get(`${baseUrl}/api/v1/sync/status`, ({ request }) => {
-    // シナリオチェック: エラーシミュレーション
     if (request.headers.get('x-test-scenario') === 'error') {
       return new HttpResponse(null, { status: 500 });
     }
-
     return HttpResponse.json({
       lastCandleAt: '2026-04-01T10:00:00Z',
       lastSessionAt: '2026-04-01',
@@ -19,19 +20,15 @@ export const handlers = [
     });
   }),
 
-  // 2. セッション一覧
+  /* セッション一覧 */
   http.get(`${baseUrl}/api/v1/market/sessions`, ({ request }) => {
     const scenario = request.headers.get('x-test-scenario');
 
     if (scenario === 'error') {
       return new HttpResponse(null, { status: 500 });
     }
-
     if (scenario === 'empty') {
-      return HttpResponse.json({
-        sessions: [],
-        currentCondition: 'Small',
-      });
+      return HttpResponse.json({ sessions: [], currentCondition: 'Small' });
     }
 
     return HttpResponse.json({
@@ -53,18 +50,18 @@ export const handlers = [
     });
   }),
 
-  // 2.5. 指標一覧
+  /* 指標一覧 */
   http.get(`${baseUrl}/api/v1/market/indicators`, () => {
     return HttpResponse.json({
       indicators: ['[USD] CPI', '[USD] 雇用統計', '[USD] ISM製造業PMI', '[EUR] 欧州中央銀行(ECB)政策金利'],
     });
   }),
 
-  // 3. 再現データ
+  /* 再現データ */
   http.get(`${baseUrl}/api/v1/market/replay`, ({ request }) => {
     const url = new URL(request.url);
     const event = url.searchParams.get('event') || '不明';
-    
+
     return HttpResponse.json({
       previousEvent: {
         date: '2026-03-01',
@@ -87,11 +84,9 @@ export const handlers = [
     });
   }),
 
-  // 4. 認証 (better-auth)
+  /* 認証 (better-auth) - セッション取得 */
   http.get(`${baseUrl}/api/auth/get-session`, ({ request }) => {
-    // リクエストの Cookie からセッショントークンを取得
     const cookie = request.headers.get('cookie');
-    
     if (cookie && cookie.includes('mock_session_token')) {
       return HttpResponse.json({
         user: {
@@ -112,19 +107,17 @@ export const handlers = [
           ipAddress: '127.0.0.1',
           userAgent: 'Playwright Mock',
           userId: 'mock-user-id',
-        }
+        },
       });
     }
-    // 未ログインの場合は null レスポンス
+    /* 未ログイン状態では null を返す */
     return HttpResponse.json(null);
   }),
 
+  /* 認証 - サインアウト */
   http.post(`${baseUrl}/api/auth/sign-out`, () => {
-    // ログアウト成功
     return HttpResponse.json({ success: true }, {
-      headers: {
-        'Set-Cookie': 'better-auth.session_token=; Max-Age=0; Path=/',
-      }
+      headers: { 'Set-Cookie': 'better-auth.session_token=; Max-Age=0; Path=/' },
     });
   }),
 ];
