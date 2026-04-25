@@ -26,10 +26,12 @@ export function AuthUI() {
         className="flex items-center gap-2 p-1 pr-3 bg-white border border-slate-200 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200"
       >
         {session.user.image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- OAuth profile images are provider-hosted and require no referrer.
           <img
             src={session.user.image}
             alt="Avatar"
             className="w-8 h-8 rounded-full border border-slate-100 object-cover"
+            referrerPolicy="no-referrer"
           />
         ) : (
           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">

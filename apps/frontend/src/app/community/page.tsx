@@ -25,6 +25,10 @@ const discussionTopics = [
   },
 ];
 
+/**
+ * CommunityPage はユーザー掲示板のモックページを表示するコンポーネントです。
+ * @responsibility XAUUSD分析に関するユーザー間の情報共有の場（モック）を提供する。
+ */
 export default function CommunityPage() {
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">

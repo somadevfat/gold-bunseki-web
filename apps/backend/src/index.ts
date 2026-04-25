@@ -3,6 +3,9 @@ import { swaggerUI } from "@hono/swagger-ui";
 import * as routes from "./interface/routes/openapi";
 import { cors } from "hono/cors";
 import { bearerAuth } from "hono/bearer-auth";
+import { secureHeaders } from "hono/secure-headers";
+import { auth } from "./infrastructure/auth/auth";
+import { getAllowedOrigins } from "./infrastructure/security/origins";
 
 // Middleware / Config
 import { diMiddleware } from "./interface/middleware/diMiddleware";
@@ -21,21 +24,23 @@ const app = new OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>();
 
 export type AppType = typeof app;
 
-// 1. グローバル設定 (CORS)
-const defaultOrigins = [
-  "http://localhost:3001",
-  "https://gold-vola-frontend.somahiranodev.workers.dev",
-  "https://fanda-dev.com",
-  "https://www.fanda-dev.com",
-];
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : defaultOrigins;
+// 1. グローバル設定 (Security Headers / CORS)
+const allowedOrigins = getAllowedOrigins();
+
+/**
+ * resolveCorsOrigin はリクエスト Origin が許可済みかを判定します。
+ * @responsibility 未知の Origin に CORS 許可ヘッダーを返さない fail-closed な制御を行う。
+ */
+export function resolveCorsOrigin(origin: string | undefined): string | undefined {
+  return origin && allowedOrigins.includes(origin) ? origin : undefined;
+}
+
+app.use("*", secureHeaders());
 
 app.use(
   "*",
   cors({
-    origin: (origin) => (origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0]),
+    origin: (origin) => resolveCorsOrigin(origin),
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "Accept"],
     credentials: true,
@@ -46,6 +51,10 @@ app.use(
 app.use("*", diMiddleware());
 
 // 2.5 APIキー認証 (データ同期APIの保護)
+/**
+ * validateStartupEnv はAPI起動に必要な環境変数を検証する関数です。
+ * @responsibility APIトークン未設定のまま同期APIを公開しないよう起動を停止する。
+ */
 export function validateStartupEnv(): void {
   const apiToken = process.env.API_TOKEN;
   if (!apiToken) {
@@ -62,7 +71,6 @@ const apiToken = process.env.API_TOKEN as string;
 app.use("/api/v1/sync/*", bearerAuth({ token: apiToken }));
 
 // 2.8 Auth 関連 (better-auth)
-import { auth } from "./infrastructure/auth/auth";
 app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
 // 3. OpenAPI / Swagger 設定

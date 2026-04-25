@@ -5,6 +5,25 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-25 - 認証・Honoセキュリティ強化PR
+
+- **達成したタスク**:
+  - GitHub Issue #24 `[BE/FE] [Task] 認証とHono周辺のセキュリティ設定を強化する` を作成。
+  - `feature/issue-24-security-hardening` ブランチを `develop` から作成し、PR #25 を `develop` 向けに作成。
+  - Better Auth の `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` / Google OAuth env を `readRequiredEnv` で起動時必須に変更し、ハードコードされたシークレットフォールバックを削除。
+  - Hono CORS と Better Auth `trustedOrigins` の許可 Origin を `getAllowedOrigins` に共通化し、未使用の `http://localhost:5173` をデフォルト許可から除外。
+  - CORS は未知 Origin に許可済み Origin を返さない fail-closed 挙動へ変更し、`secureHeaders` による基本セキュリティヘッダーを追加。
+  - Playwright 廃止後に残っていた `apps/frontend/playwright-local.config.ts` を削除し、`.agents/skills/execute-task/SKILL.md` の E2E 参照をユニットテスト方針に更新。
+  - OAuth プロフィール画像に `referrerPolicy="no-referrer"` を追加し、SEO関連ページ/関数へ `@responsibility` JSDoc を追加。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass（frontend 18件、backend 68件）
+
+- **次回への申し送り事項**:
+  - デプロイ環境では `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `API_TOKEN` の設定が必須。
+  - 追加の許可 Origin が必要な場合は `ALLOWED_ORIGINS` にカンマ区切りで明示する。
+
 ### 2026-04-25 - FEナビゲーション/トップ導線とSEO初期対応
 
 - **達成したタスク**:
