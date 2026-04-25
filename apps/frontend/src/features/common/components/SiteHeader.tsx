@@ -16,19 +16,12 @@ export function SiteHeader() {
     <header className="mb-10 rounded-3xl border border-slate-200/80 bg-white/75 px-5 py-4 shadow-sm shadow-slate-200/50 backdrop-blur md:mb-12 md:px-6">
       {/* タイトルと認証UIを横並び */}
       <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold tracking-tight text-white">
-            fd
-          </div>
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-amber-700">
-              fanda-dev.com
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-              fanda-dev
-            </h1>
-          </div>
-        </div>
+        <Link
+          href="/"
+          className="text-xl font-semibold tracking-[-0.03em] text-slate-950 transition-colors hover:text-amber-700"
+        >
+          fanda-dev.com
+        </Link>
 
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
           <nav
