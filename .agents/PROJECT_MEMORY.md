@@ -22,6 +22,9 @@
   - `SiteFooter` も同じトーンに合わせて、軽い説明文と控えめなリンク表現へ変更。
   - 追加修正でアプリ名を `fanda-dev` に統一し、SEO文言を「XAUUSD分析」「GOLD分析」寄りに変更。
   - UI配置を、サービス説明のヒーロー、Research Focus、Analysis Workspace、チャート主役＋セッションタイムライン補助の2カラム構成へ再設計。
+  - Live Statusをヘッダーから外し、Market Replayチャートカードの近くへ移動。
+  - ヘッダーナビゲーションをページ単位の導線（ダッシュボード / 掲示板 / 考察ブログ）へ変更。
+  - `apps/frontend/src/app/community/page.tsx` と `apps/frontend/src/app/insights/page.tsx` を追加し、掲示板・考察ブログのモックページを作成。
 
 - **検証結果**:
   - `bun run lint`: pass（既存の `AuthUI.tsx` の `<img>` warning が1件残存）

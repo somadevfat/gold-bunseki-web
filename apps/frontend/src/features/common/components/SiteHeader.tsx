@@ -1,18 +1,15 @@
-import { Suspense } from "react";
+import Link from "next/link";
 import { AuthUI } from "@/features/auth/components/AuthUI";
-import { LiveStatusBadge } from "@/features/sessions/components/LiveStatusBadge";
 
 const navigationItems = [
-  { href: "#overview", label: "Overview" },
-  { href: "#dashboard", label: "Dashboard" },
-  { href: "#market-replay", label: "Replay" },
-  { href: "#session-timeline", label: "Timeline" },
-  { href: "#status", label: "Status" },
+  { href: "/", label: "ダッシュボード" },
+  { href: "/community", label: "掲示板" },
+  { href: "/insights", label: "考察ブログ" },
 ];
 
 /**
  * SiteHeader はアプリケーション共通のヘッダーコンポーネントです。
- * @responsibility アプリタイトル、認証UI、ライブステータスバッジを統合して表示する。
+ * @responsibility アプリタイトル、ページナビゲーション、認証UIを統合して表示する。
  */
 export function SiteHeader() {
   return (
@@ -39,27 +36,17 @@ export function SiteHeader() {
             className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
           >
             {navigationItems.map((item) => (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className="font-medium text-slate-500 transition-colors hover:text-slate-950"
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-3">
-            <div id="status" className="scroll-mt-8">
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Live
-                </span>
-                <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
-                  <LiveStatusBadge />
-                </Suspense>
-              </div>
-            </div>
             <AuthUI />
           </div>
         </div>

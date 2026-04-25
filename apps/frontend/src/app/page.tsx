@@ -6,6 +6,7 @@ import { SessionFactTimeline } from '@/features/sessions/components/SessionFactT
 import { getIndicators } from '@/features/common/api/getIndicators';
 import { SiteHeader } from '@/features/common/components/SiteHeader';
 import { SiteFooter } from '@/features/common/components/SiteFooter';
+import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
 
 const valueHighlights = [
   {
@@ -76,20 +77,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 ))}
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#dashboard"
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-                >
-                  ダッシュボードを見る
-                </a>
-                <a
-                  href="#session-timeline"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-950"
-                >
-                  セッション反応を見る
-                </a>
-              </div>
+              <a
+                href="#dashboard"
+                className="inline-flex w-fit items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                ダッシュボードを見る
+              </a>
             </div>
 
             <aside className="border-t border-slate-200 bg-slate-950 p-6 text-white sm:p-8 lg:border-l lg:border-t-0 lg:p-8">
@@ -132,7 +125,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             {/* === Primary Content: Market Event Context === */}
             <section id="market-replay" className="scroll-mt-8">
               <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60">
-                <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
                       Market Replay
@@ -141,7 +134,17 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                       指標発表前後の値動き
                     </h3>
                   </div>
-                  <p className="text-sm text-slate-500">{currentEvent}</p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <p className="text-sm text-slate-500">{currentEvent}</p>
+                    <div className="flex w-fit items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Live
+                      </span>
+                      <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
+                        <LiveStatusBadge />
+                      </Suspense>
+                    </div>
+                  </div>
                 </div>
                 <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
                   <ReplayArea eventName={currentEvent} displayEventName={currentEvent} />
