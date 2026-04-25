@@ -5,6 +5,62 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-25 - E2Eテスト廃止・ユニットテスト体制への集約
+
+- **背景と判断**:
+  - vinext (RSC) + Cloudflare Workers + Playwright + MSW モックサーバーの組み合わせが
+    ローカル・CI双方で安定しない状態が続いたため、E2Eテストを全廃してユニットテストのみの体制に移行。
+  - 現プロジェクト規模（auth / sessions / market-replay）であれば、hooks・api のユニットテスト 100% で
+    機能保証は十分と判断（ADR 相当の設計決定）。
+
+- **実施した変更**:
+  - `apps/frontend/tests/e2e/` (auth, smoke, error-handling 3ファイル) を削除。
+  - `apps/frontend/tests/mocks/` (http-server, server, handlers) を削除。
+  - `apps/frontend/playwright.config.ts` を削除。
+  - `apps/frontend/scripts/start-e2e-servers.sh` を削除。
+  - `apps/frontend/public/health.html` を削除。
+  - MSW ハンドラー・サーバー・setup をユニットテスト専用として `src/test/` 配下に再配置。
+  - `bunfig.toml` の `preload` パスを `./tests/setup.ts` → `./src/test/setup.ts` に変更。
+  - `package.json` から E2E 系スクリプト（test:e2e / dev:mock / dev:e2e）と `@playwright/test` を削除。
+  - `ci.yml` から Playwright ブラウザインストールと E2E 実行ステップを削除。
+
+- **現在のテスト体制**:
+  - `bun test src/` = ユニットテスト 18件（フロントエンド hooks / api）
+  - `bun run test:all` = フロントエンド + バックエンドのユニットテスト
+  - E2E は廃止（将来的に Vitest Browser Mode で再挑戦する余地あり）
+
+- **テスト結果**: 18 pass / 0 fail ✅
+
+- **次回への申し送り事項**:
+  - 機能追加時は `src/test/handlers.ts` に必要なモックレスポンスを追加しながら、
+    対応する hooks / api テストを同梱すること（100% カバレッジを維持）。
+  - E2Eを将来再導入する場合は Vitest Browser Mode + Cloudflare Miniflare の Spike を行うこと。
+
+
+- **達成したタスク**:
+  - **E2Eテストの安定化**:
+    - `playwright.config.ts` の待機対象を Vite サーバー (ポート 3001) の専用ヘルスチェック用静的ファイル (`/health.html`) に変更。これにより、アプリケーションが完全にロードされる前にテストが開始され接続エラーになる問題を解消。
+    - サーバー起動スクリプト `apps/frontend/scripts/start-e2e-servers.sh` を修正し、ポートの開放待ちを確実に行うように改善。
+  - **バックエンド統合テストの修正**:
+    - `apps/backend/src/testSetup.ts` を導入し、テスト実行時に `API_TOKEN` 環境変数を `ci-test-token` に強制固定。ローカルの `.env` の値に依存せず、CI環境と同一の認証トークンを使用するように統一。
+    - `apiIntegration.test.ts` でハードコーディングされていた認証処理を修正。
+  - **テスト品質の向上**:
+    - `drizzleBatchRepository.test.ts` で発生していた DB エラーハンドリングのテストが、非同期例外をキャッチしきれずテスト終了後に漏れ出す問題を修正（`expect(promise).rejects.toThrow()` による適切な待機）。
+    - これにより、`bun run test:all` で全テスト（Frontend/Backend/E2E）が安定してパスする状態を達成。
+- **対応したバグ**:
+  - E2Eテスト開始時の `ECONNREFUSED` エラーの解消。
+  - バックエンド統合テストでの `401 Unauthorized` エラーの解消。
+- **主要な変更ファイル**:
+  - `apps/frontend/playwright.config.ts`
+  - `apps/frontend/public/health.html`
+  - `apps/backend/src/testSetup.ts`
+  - `apps/backend/src/interface/routes/test/apiIntegration.test.ts`
+  - `apps/backend/src/infrastructure/repository/test/drizzleBatchRepository.test.ts`
+- **次回への申し送り事項**:
+  - テスト環境が極めて安定したため、機能追加時に `bun run test:all` を実行することでデグレを確実に防げる。
+  - CI (GitHub Actions) での `API_TOKEN` 設定が不要（コード内で `ci-test-token` に固定）になったため、Secrets 管理が簡略化された。
+
+
 ### 2026-04-21 - アジャイルチケット分割・GitHub Issue一括登録スキル (agile-issue) の作成
 
 - **達成したタスク**:

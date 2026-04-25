@@ -1,4 +1,3 @@
-import "../../../../tests/setup";
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { render } from "@testing-library/react";
 import React from "react";

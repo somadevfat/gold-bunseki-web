@@ -1,6 +1,11 @@
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { getIndicators } from "./getIndicators";
 
+/* next/headers のモック化 */
+mock.module("next/headers", () => ({
+  headers: () => Promise.resolve(new Headers()),
+}));
+
 /* apiClient のモック化 */
 const getMock = mock();
 mock.module("../../../lib/api/client", () => ({
@@ -38,16 +43,13 @@ describe("getIndicators", () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it("API 呼び出しが失敗した場合、空のデフォルト値を返すこと", async () => {
+  it("API 呼び出しが失敗した場合、Error をスローすること", async () => {
     /* ## Arrange ## */
     getMock.mockResolvedValue({
       ok: false,
     });
 
-    /* ## Act ## */
-    const result = await getIndicators();
-
-    /* ## Assert ## */
-    expect(result).toEqual({ indicators: [] });
+    /* ## Act & Assert ## */
+    expect(getIndicators()).rejects.toThrow("指標データの取得に失敗しました");
   });
 });

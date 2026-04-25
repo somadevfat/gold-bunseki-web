@@ -3,18 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite dev --port 3001",
+    "dev": "vite dev --host 127.0.0.1 --port 3001",
     "build": "vite build",
     "start": "wrangler dev",
     "lint": "eslint",
-    "dev:mock": "bun run tests/mocks/http-server.ts",
     "deploy": "wrangler deploy",
     "test": "bun test src/",
-    "test:coverage": "bun test src/ --coverage --coverageThreshold=1.0",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:coverage": "bun test src/ --coverage --coverageThreshold=1.0"
   },
   "dependencies": {
     "better-auth": "^1.6.4",
@@ -29,7 +24,6 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.30.3",
     "@cloudflare/workers-types": "^4.20260401.1",
-    "@playwright/test": "^1.59.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -58,10 +52,5 @@
     "sharp",
     "unrs-resolver"
   ],
-  "type": "module",
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
-  }
+  "type": "module"
 }

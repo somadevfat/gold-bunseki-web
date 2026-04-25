@@ -1,4 +1,3 @@
-import "../../../../tests/setup";
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { renderHook, act } from "@testing-library/react";
 import { useIndicatorSelection } from "./useIndicatorSelection";
