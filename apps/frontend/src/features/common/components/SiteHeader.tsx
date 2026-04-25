@@ -1,35 +1,47 @@
-import { Suspense } from "react";
+import Link from "next/link";
 import { AuthUI } from "@/features/auth/components/AuthUI";
-import { LiveStatusBadge } from "@/features/sessions/components/LiveStatusBadge";
+
+const navigationItems = [
+  { href: "/", label: "ダッシュボード" },
+  { href: "/community", label: "掲示板" },
+  { href: "/insights", label: "考察ブログ" },
+];
 
 /**
  * SiteHeader はアプリケーション共通のヘッダーコンポーネントです。
- * @responsibility アプリタイトル、認証UI、ライブステータスバッジを統合して表示する。
+ * @responsibility アプリタイトル、ページナビゲーション、認証UIを統合して表示する。
  */
 export function SiteHeader() {
   return (
-    <header className="mb-16 md:mb-24">
+    <header className="mb-10 rounded-3xl border border-slate-200/80 bg-white/75 px-5 py-4 shadow-sm shadow-slate-200/50 backdrop-blur md:mb-12 md:px-6">
       {/* タイトルと認証UIを横並び */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <span className="text-4xl drop-shadow-sm select-none">💰</span>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-            Gold Volatility
-          </h1>
-        </div>
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+        <Link
+          href="/"
+          className="text-xl font-semibold tracking-[-0.03em] text-slate-950 transition-colors hover:text-amber-700"
+        >
+          fanda-dev.com
+        </Link>
 
-        <AuthUI />
-      </div>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+          <nav
+            aria-label="Primary navigation"
+            className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm"
+          >
+            {navigationItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="font-medium text-slate-500 transition-colors hover:text-slate-950"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-      {/* ライブステータスバッジ */}
-      <div className="flex items-center gap-6 py-8 border-b border-slate-100">
-        <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded border border-slate-100">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-            Live Status
-          </span>
-          <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
-            <LiveStatusBadge />
-          </Suspense>
+          <div className="flex items-center gap-3">
+            <AuthUI />
+          </div>
         </div>
       </div>
     </header>

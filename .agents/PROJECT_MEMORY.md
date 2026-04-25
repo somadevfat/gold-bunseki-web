@@ -5,6 +5,39 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-25 - FEナビゲーション/トップ導線とSEO初期対応
+
+- **達成したタスク**:
+  - GitHub Issueを4件作成:
+    - #18 `[FE] ユーザーが主要機能へ迷わず移動できるナビゲーション付きUIを使える`
+    - #19 `[FE] 初見ユーザーがアプリの価値を理解できるトップ導線を表示する`
+    - #20 `[SEO] Googleにインデックスされる最低限のSEO設定を完了する`
+    - #21 `[SEO] SNS共有向けのOGPとTwitter Cardを整備する`
+  - `feature/issues-18-21-fe-seo` ブランチを `develop` から作成。
+  - `apps/frontend/src/app/layout.tsx` に検索向けのtitle/description、canonical、robots、Open Graph、Twitter Cardの基本メタ情報を追加。
+  - `apps/frontend/src/app/robots.ts` と `apps/frontend/src/app/sitemap.ts` を追加し、Google Search Consoleへ送信できる最低限のクロール/サイトマップ設定を整備。
+  - `SiteHeader` にOverview / Market Replay / Timeline / Statusのアンカーナビを追加。
+  - 絵文字ロゴを廃止し、`GV` の控えめなワードマーク、細い罫線、抑えた余白/配色によるシンプルで安っぽくないUIへ調整。
+  - `page.tsx` に初見ユーザー向けのヒーロー、CTA、価値訴求カードを追加し、過度な影や強い丸ボタンを抑えたデザインに更新。
+  - `SiteFooter` も同じトーンに合わせて、軽い説明文と控えめなリンク表現へ変更。
+  - 追加修正でアプリ名を `fanda-dev` に統一し、SEO文言を「XAUUSD分析」「GOLD分析」寄りに変更。
+  - UI配置を、サービス説明のヒーロー、Research Focus、Analysis Workspace、チャート主役＋セッションタイムライン補助の2カラム構成へ再設計。
+  - Live Statusをヘッダーから外し、Market Replayチャートカードの近くへ移動。
+  - ヘッダーナビゲーションをページ単位の導線（ダッシュボード / 掲示板 / 考察ブログ）へ変更。
+  - `apps/frontend/src/app/community/page.tsx` と `apps/frontend/src/app/insights/page.tsx` を追加し、掲示板・考察ブログのモックページを作成。
+
+- **検証結果**:
+  - `bun run lint`: pass（既存の `AuthUI.tsx` の `<img>` warning が1件残存）
+  - `bunx tsc --noEmit`: pass
+  - `bun test src/`: 18 pass / 0 fail
+  - `bun run build`: Node.js 20.18.2 のため失敗。Vite 8 / vinext が Node.js 20.19+ または 22.12+ を要求し、`node:fs/promises.glob` が利用できない。
+
+- **次回への申し送り事項**:
+  - 本番URLは暫定で `https://fanda-dev.com` を `NEXT_PUBLIC_SITE_URL` のフォールバックにしている。実デプロイURLが異なる場合は環境変数 `NEXT_PUBLIC_SITE_URL` を設定すること。
+  - Search Console登録とインデックス登録リクエストはコード外作業として実施が必要。
+  - OGP画像はまだ未作成。#21で専用画像または `opengraph-image.tsx` の導入を検討する。
+  - ローカルビルド確認には Node.js 22 系、または少なくとも 20.19+ が必要。
+
 ### 2026-04-25 - E2Eテスト廃止・ユニットテスト体制への集約
 
 - **背景と判断**:

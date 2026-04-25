@@ -1,8 +1,44 @@
 import "./globals.css";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Gold Volatility Analyzer",
-  description: "ゴールド（XAUUSD）のボラティリティを経済指標ごとに分析・可視化するツールです。",
+const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanda-dev.com");
+const siteTitle = "fanda-dev | XAUUSD分析・GOLD分析ダッシュボード";
+const siteDescription =
+  "fanda-devは、XAUUSD（ゴールド）の経済指標前後の値動き、セッション別ボラティリティ、過去イベントの反応を確認できるGOLD分析ダッシュボードです。";
+
+export const metadata: Metadata = {
+  metadataBase: siteUrl,
+  title: {
+    default: siteTitle,
+    template: "%s | fanda-dev",
+  },
+  description: siteDescription,
+  applicationName: "fanda-dev",
+  keywords: ["XAUUSD分析", "GOLD分析", "ゴールド分析", "経済指標", "ボラティリティ分析"],
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    url: "/",
+    siteName: "fanda-dev",
+    title: siteTitle,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary",
+    title: siteTitle,
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({
