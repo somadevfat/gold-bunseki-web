@@ -61,10 +61,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   XAUUSD analysis / GOLD analysis
                 </p>
                 <h2 className="text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-slate-950 md:text-6xl">
-                  fanda-devは、ゴールドの指標反応を整理する分析ダッシュボードです。
+                  指標発表時のボラティリティを把握し、無理なエントリーを減らす。
                 </h2>
                 <p className="max-w-2xl text-base leading-8 text-slate-600">
-                  XAUUSDの経済指標前後の値動き、セッション別ボラティリティ、過去イベントの反応を一画面に集約。GOLD分析の振り返りと次のトレード準備に使える情報を、迷わず確認できます。
+                  fanda-devは、XAUUSDの経済指標発表前後の値動きとセッション別ボラティリティを整理し、トレード戦略を立てる手間を軽くするアプリです。相場が安定しない時間帯を事前に見極め、手を出さない判断にも使えます。
                 </p>
               </div>
 
