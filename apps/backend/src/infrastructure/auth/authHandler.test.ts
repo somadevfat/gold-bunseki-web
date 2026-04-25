@@ -5,8 +5,8 @@ describe("Better Auth Hono Integration", () => {
   beforeAll(() => {
     // 環境変数モック (index.ts 通過用)
     process.env.API_TOKEN = "test-session-token";
-    process.env.GITHUB_CLIENT_ID = "mock-client";
-    process.env.GITHUB_CLIENT_SECRET = "mock-secret";
+    process.env.GOOGLE_CLIENT_ID = "mock-client";
+    process.env.GOOGLE_CLIENT_SECRET = "mock-secret";
   });
 
   it("should mount better-auth handler at /api/auth/**", async () => {

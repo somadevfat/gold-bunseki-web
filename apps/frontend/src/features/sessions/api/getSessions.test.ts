@@ -1,6 +1,11 @@
 import { expect, it, describe, mock, beforeEach } from "bun:test";
 import { getSessions } from "./getSessions";
 
+/* next/headers のモック化 */
+mock.module("next/headers", () => ({
+  headers: () => Promise.resolve(new Headers()),
+}));
+
 /* apiClient のモック化 */
 const getMock = mock();
 mock.module("../../../lib/api/client", () => ({
@@ -39,16 +44,13 @@ describe("getSessions", () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it("API 呼び出しが失敗した場合、空のデフォルト値を返すこと", async () => {
+  it("API 呼び出しが失敗した場合、Error をスローすること", async () => {
     /* ## Arrange ## */
     getMock.mockResolvedValue({
       ok: false,
     });
 
-    /* ## Act ## */
-    const result = await getSessions();
-
-    /* ## Assert ## */
-    expect(result).toEqual({ currentCondition: "Unknown", sessions: [] });
+    /* ## Act & Assert ## */
+    expect(getSessions()).rejects.toThrow("セッションデータの取得に失敗しました");
   });
 });

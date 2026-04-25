@@ -2,10 +2,32 @@ import { Suspense } from 'react';
 import IndicatorSelector from '@/features/common/components/IndicatorSelector';
 import { ReplayArea } from '@/features/market-replay/components/ReplayArea';
 import ReplaySkeleton from '@/features/market-replay/components/ReplaySkeleton';
-import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
 import { SessionFactTimeline } from '@/features/sessions/components/SessionFactTimeline';
 import { getIndicators } from '@/features/common/api/getIndicators';
-import { AuthUI } from '@/features/auth/components/AuthUI';
+import { SiteHeader } from '@/features/common/components/SiteHeader';
+import { SiteFooter } from '@/features/common/components/SiteFooter';
+import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
+
+const valueHighlights = [
+  {
+    title: 'XAUUSD分析',
+    description: '経済指標前後のゴールドの値動きを、リプレイで振り返る。',
+  },
+  {
+    title: 'GOLD分析',
+    description: '東京・ロンドン・NYのセッション別に、荒れやすい時間帯を整理する。',
+  },
+  {
+    title: '指標リサーチ',
+    description: '雇用統計やCPIなど、過去イベントの反応を次の準備に使う。',
+  },
+];
+
+const workflowSteps = [
+  '指標を選ぶ',
+  '発表前後の値動きを見る',
+  'セッションの荒れ方を確認する',
+];
 
 /**
  * DashboardPage はアプリケーションのメインダッシュボード画面です。
@@ -18,93 +40,149 @@ interface PageProps {
 
 export default async function DashboardPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
-  
-  // 指標一覧をバックエンドから動的に取得
+
+  /* 指標一覧をバックエンドから動的に取得 */
   const { indicators } = await getIndicators();
   const defaultEvent = indicators.length > 0 ? indicators[0] : 'No Data';
   const currentEvent = resolvedParams.event || defaultEvent;
-  const displayEventName = currentEvent;
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-100 flex flex-col items-center">
-      <main className="w-full max-w-7xl px-4 sm:px-8 py-10 md:py-20 text-slate-900">
-        {/* === Header === */}
-        <header className="mb-16 md:mb-24">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl drop-shadow-sm select-none">💰</span>
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-                Gold Volatility
-              </h1>
-            </div>
-            
-            <AuthUI />
-          </div>
+    <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
+      <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
 
-          <div className="flex items-center gap-6 py-8 border-b border-slate-100">
-            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded border border-slate-100">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                Live Status
-              </span>
-              <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
-                <LiveStatusBadge />
-              </Suspense>
-            </div>
-          </div>
-        </header>
+        {/* === 共通ヘッダー: タイトル・認証UI・ライブステータス === */}
+        <SiteHeader />
 
-        {/* === Primary Content: Market Event Context === */}
-        <section className="mb-24 md:mb-32">
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8 px-1">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Market Event Context</h2>
+        <section id="overview" className="mb-8 scroll-mt-8">
+          <div className="grid overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
+            <div className="space-y-10 p-6 sm:p-8 lg:p-10">
+              <div className="max-w-4xl space-y-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
+                  XAUUSD analysis / GOLD analysis
+                </p>
+                <h2 className="text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-slate-950 md:text-6xl">
+                  指標発表時のボラティリティを把握し、無理なエントリーを減らす。
+                </h2>
+                <p className="max-w-2xl text-base leading-8 text-slate-600">
+                  fanda-devは、XAUUSDの経済指標発表前後の値動きとセッション別ボラティリティを整理し、トレード戦略を立てる手間を軽くするアプリです。相場が安定しない時間帯を事前に見極め、手を出さない判断にも使えます。
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {workflowSteps.map((step, index) => (
+                  <div key={step} className="rounded-2xl border border-slate-200 bg-[#fbfaf7] p-4">
+                    <p className="mb-3 text-xs font-semibold text-amber-700">0{index + 1}</p>
+                    <p className="text-sm font-semibold text-slate-900">{step}</p>
+                  </div>
+                ))}
+              </div>
+
+              <a
+                href="#dashboard"
+                className="inline-flex w-fit items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              >
+                ダッシュボードを見る
+              </a>
+            </div>
+
+            <aside className="border-t border-slate-200 bg-slate-950 p-6 text-white sm:p-8 lg:border-l lg:border-t-0 lg:p-8">
+              <div className="mb-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-300">
+                  Research Focus
+                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  検索流入では「XAUUSD分析」「GOLD分析」で見つけてもらい、画面上ではすぐ分析に入れる構成にしています。
+                </p>
+              </div>
+              <div className="grid gap-3">
+                {valueHighlights.map((item) => (
+                  <article key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+                    <h3 className="mb-2 text-sm font-semibold text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm leading-6 text-slate-300">{item.description}</p>
+                  </article>
+                ))}
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="dashboard" className="scroll-mt-8">
+          <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm shadow-slate-200/50 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                Analysis Workspace
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                XAUUSD / GOLD 分析
+              </h2>
+            </div>
             <IndicatorSelector indicators={indicators} />
           </div>
 
-          <div className="bg-white border border-slate-100 rounded shadow-2xl shadow-slate-200/30 overflow-hidden">
-            <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
-              <ReplayArea eventName={currentEvent} displayEventName={displayEventName} />
-            </Suspense>
-          </div>
-        </section>
-
-        {/* === Secondary Content: Session Fact Timeline === */}
-        <section className="border-t border-slate-100 pt-20 max-w-4xl">
-          <div className="space-y-10">
-            <div className="px-1">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10">
-                Session Fact Timeline
-              </h3>
-              <Suspense
-                fallback={
-                  <div className="animate-pulse space-y-4 pt-4">
-                    <div className="h-10 bg-slate-100 rounded w-full"></div>
-                    <div className="h-10 bg-slate-100 rounded w-full"></div>
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            {/* === Primary Content: Market Event Context === */}
+            <section id="market-replay" className="scroll-mt-8">
+              <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60">
+                <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
+                      Market Replay
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-slate-950">
+                      指標発表前後の値動き
+                    </h3>
                   </div>
-                }
-              >
-                <SessionFactTimeline />
-              </Suspense>
-            </div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <p className="text-sm text-slate-500">{currentEvent}</p>
+                    <div className="flex w-fit items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Live
+                      </span>
+                      <Suspense fallback={<span className="text-slate-400 text-sm">Checking...</span>}>
+                        <LiveStatusBadge />
+                      </Suspense>
+                    </div>
+                  </div>
+                </div>
+                <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
+                  <ReplayArea eventName={currentEvent} displayEventName={currentEvent} />
+                </Suspense>
+              </div>
+            </section>
+
+            {/* === Secondary Content: Session Fact Timeline === */}
+            <aside id="session-timeline" className="scroll-mt-8">
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60">
+                <div className="mb-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                    Session Timeline
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-950">
+                    セッション別の反応
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    イベントと時間帯の関係を横で見ながら、チャートの動きを確認できます。
+                  </p>
+                </div>
+                <Suspense
+                  fallback={
+                    <div className="animate-pulse space-y-4 pt-4">
+                      <div className="h-10 rounded bg-slate-100"></div>
+                      <div className="h-10 rounded bg-slate-100"></div>
+                    </div>
+                  }
+                >
+                  <SessionFactTimeline />
+                </Suspense>
+              </div>
+            </aside>
           </div>
         </section>
 
-        {/* Global Footer */}
-        <footer className="mt-40 pt-16 border-t border-slate-100 text-slate-400 text-xs flex flex-col xl:flex-row justify-between uppercase tracking-widest font-bold gap-12">
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-slate-900">&copy; 2026 Gold Volatility Analyzer</p>
-          </div>
-          <div className="flex flex-wrap gap-x-10 items-start">
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              Privacy & Security
-            </span>
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              Status
-            </span>
-            <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
-              API
-            </span>
-          </div>
-        </footer>
+        {/* === 共通フッター === */}
+        <SiteFooter />
       </main>
     </div>
   );

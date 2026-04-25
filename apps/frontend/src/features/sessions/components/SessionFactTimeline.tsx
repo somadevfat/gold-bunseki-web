@@ -9,6 +9,14 @@ export async function SessionFactTimeline() {
   const sessionsData = await getSessions();
   const sessions = (sessionsData?.sessions || []) as SessionVolatility[];
 
+  if (sessions.length === 0) {
+    return (
+      <div className="px-4 py-8 text-center border border-dashed border-slate-200 rounded-lg">
+        <p className="text-sm font-medium text-slate-400">データが見つかりませんでした。</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-1">
       {sessions.map((s, i) => {
