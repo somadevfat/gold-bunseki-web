@@ -41,6 +41,10 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * RootLayout はアプリケーション全体の共通レイアウトを定義するコンポーネントです。
+ * @responsibility HTML 構造の定義、SEO メタデータの管理、およびグローバルスタイルの適用を行う。
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

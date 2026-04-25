@@ -25,6 +25,10 @@ const insightPosts = [
   },
 ];
 
+/**
+ * InsightsPage は考察ブログのモックページを表示するコンポーネントです。
+ * @responsibility 経済指標やボラティリティに関する分析記事の閲覧環境（モック）を提供する。
+ */
 export default function InsightsPage() {
   return (
     <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
