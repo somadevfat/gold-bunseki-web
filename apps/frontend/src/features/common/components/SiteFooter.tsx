@@ -4,18 +4,21 @@
  */
 export function SiteFooter() {
   return (
-    <footer className="mt-40 pt-16 border-t border-slate-100 text-slate-400 text-xs flex flex-col xl:flex-row justify-between uppercase tracking-widest font-bold gap-12">
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-slate-900">&copy; 2026 Gold Volatility Analyzer</p>
+    <footer className="mt-32 flex flex-col justify-between gap-8 border-t border-slate-200/70 pt-10 text-xs text-slate-400 xl:flex-row">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-slate-800">&copy; 2026 Gold Volatility Analyzer</p>
+        <p className="max-w-md leading-6">
+          XAUUSDの経済指標反応を振り返るためのリサーチダッシュボード。
+        </p>
       </div>
-      <div className="flex flex-wrap gap-x-10 items-start">
-        <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-3 font-medium">
+        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           Privacy &amp; Security
         </span>
-        <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
+        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           Status
         </span>
-        <span className="hover:text-slate-900 cursor-pointer transition-colors border-b border-transparent hover:border-slate-900 pb-1">
+        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           API
         </span>
       </div>
