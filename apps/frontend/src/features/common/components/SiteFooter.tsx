@@ -6,9 +6,9 @@ export function SiteFooter() {
   return (
     <footer className="mt-32 flex flex-col justify-between gap-8 border-t border-slate-200/70 pt-10 text-xs text-slate-400 xl:flex-row">
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-slate-800">&copy; 2026 Gold Volatility Analyzer</p>
+        <p className="text-sm font-medium text-slate-800">&copy; 2026 fanda-dev</p>
         <p className="max-w-md leading-6">
-          XAUUSDの経済指標反応を振り返るためのリサーチダッシュボード。
+          XAUUSD分析・GOLD分析のためのリサーチダッシュボード。
         </p>
       </div>
       <div className="flex flex-wrap items-start gap-x-8 gap-y-3 font-medium">

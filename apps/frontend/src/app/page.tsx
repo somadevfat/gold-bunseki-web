@@ -9,17 +9,23 @@ import { SiteFooter } from '@/features/common/components/SiteFooter';
 
 const valueHighlights = [
   {
-    title: 'Event replay',
-    description: '米雇用統計やCPIなど、経済指標発表前後のXAUUSDの値動きをリプレイで確認。',
+    title: 'XAUUSD分析',
+    description: '経済指標前後のゴールドの値動きを、リプレイで振り返る。',
   },
   {
-    title: 'Session context',
-    description: '東京・ロンドン・NYなど、セッション別のボラティリティとイベント影響を整理。',
+    title: 'GOLD分析',
+    description: '東京・ロンドン・NYのセッション別に、荒れやすい時間帯を整理する。',
   },
   {
-    title: 'Trade prep',
-    description: '過去の反応を見ながら、指標前後の値動きの傾向を事前に確認。',
+    title: '指標リサーチ',
+    description: '雇用統計やCPIなど、過去イベントの反応を次の準備に使う。',
   },
+];
+
+const workflowSteps = [
+  '指標を選ぶ',
+  '発表前後の値動きを見る',
+  'セッションの荒れ方を確認する',
 ];
 
 /**
@@ -40,89 +46,135 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const currentEvent = resolvedParams.event || defaultEvent;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-[#fbfaf7] text-slate-900 selection:bg-amber-100">
-      <main className="w-full max-w-7xl px-4 py-8 text-slate-900 sm:px-8 md:py-14">
+    <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
+      <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
 
         {/* === 共通ヘッダー: タイトル・認証UI・ライブステータス === */}
         <SiteHeader />
 
-        <section id="overview" className="mb-16 scroll-mt-8 md:mb-24">
-          <div className="grid gap-10 border-b border-slate-200/70 pb-14 md:grid-cols-[1.25fr_0.75fr] md:pb-20">
-            <div className="space-y-9">
-              <div className="space-y-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">
-                  XAUUSD Volatility Research
+        <section id="overview" className="mb-8 scroll-mt-8">
+          <div className="grid overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
+            <div className="space-y-10 p-6 sm:p-8 lg:p-10">
+              <div className="max-w-4xl space-y-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
+                  XAUUSD analysis / GOLD analysis
                 </p>
-                <div className="space-y-4">
-                  <h2 className="max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.04em] text-slate-950 md:text-6xl">
-                    ゴールドの指標反応を、落ち着いて振り返るための分析ダッシュボード。
-                  </h2>
-                  <p className="max-w-2xl text-base leading-8 text-slate-600">
-                    XAUUSDの経済指標前後の値動き、セッション別の荒れ方、過去イベントの反応を一画面で確認できます。派手なシグナルではなく、次の判断材料を増やすためのリサーチツールです。
-                  </p>
-                </div>
+                <h2 className="text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-slate-950 md:text-6xl">
+                  fanda-devは、ゴールドの指標反応を整理する分析ダッシュボードです。
+                </h2>
+                <p className="max-w-2xl text-base leading-8 text-slate-600">
+                  XAUUSDの経済指標前後の値動き、セッション別ボラティリティ、過去イベントの反応を一画面に集約。GOLD分析の振り返りと次のトレード準備に使える情報を、迷わず確認できます。
+                </p>
               </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {workflowSteps.map((step, index) => (
+                  <div key={step} className="rounded-2xl border border-slate-200 bg-[#fbfaf7] p-4">
+                    <p className="mb-3 text-xs font-semibold text-amber-700">0{index + 1}</p>
+                    <p className="text-sm font-semibold text-slate-900">{step}</p>
+                  </div>
+                ))}
+              </div>
+
               <div className="flex flex-col gap-3 sm:flex-row">
                 <a
-                  href="#market-replay"
+                  href="#dashboard"
                   className="inline-flex items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
                 >
-                  分析チャートを見る
+                  ダッシュボードを見る
                 </a>
                 <a
                   href="#session-timeline"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-950"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-950"
                 >
                   セッション反応を見る
                 </a>
               </div>
             </div>
 
-            <div className="grid content-start gap-3">
-              {valueHighlights.map((item) => (
-                <article key={item.title} className="rounded-2xl border border-slate-200/80 bg-white/70 p-5">
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-950">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm leading-6 text-slate-600">{item.description}</p>
-                </article>
-              ))}
-            </div>
+            <aside className="border-t border-slate-200 bg-slate-950 p-6 text-white sm:p-8 lg:border-l lg:border-t-0 lg:p-8">
+              <div className="mb-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-300">
+                  Research Focus
+                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  検索流入では「XAUUSD分析」「GOLD分析」で見つけてもらい、画面上ではすぐ分析に入れる構成にしています。
+                </p>
+              </div>
+              <div className="grid gap-3">
+                {valueHighlights.map((item) => (
+                  <article key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.06] p-5">
+                    <h3 className="mb-2 text-sm font-semibold text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm leading-6 text-slate-300">{item.description}</p>
+                  </article>
+                ))}
+              </div>
+            </aside>
           </div>
         </section>
 
-        {/* === Primary Content: Market Event Context === */}
-        <section id="market-replay" className="mb-24 md:mb-32 scroll-mt-8">
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8 px-1">
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Market Event Context</h2>
+        <section id="dashboard" className="scroll-mt-8">
+          <div className="mb-5 flex flex-col gap-4 rounded-3xl border border-slate-200/80 bg-white/80 p-4 shadow-sm shadow-slate-200/50 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                Analysis Workspace
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                XAUUSD / GOLD 分析
+              </h2>
+            </div>
             <IndicatorSelector indicators={indicators} />
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-            <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
-              <ReplayArea eventName={currentEvent} displayEventName={currentEvent} />
-            </Suspense>
-          </div>
-        </section>
-
-        {/* === Secondary Content: Session Fact Timeline === */}
-        <section id="session-timeline" className="border-t border-slate-100 pt-20 max-w-4xl scroll-mt-8">
-          <div className="space-y-10">
-            <div className="px-1">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10">
-                Session Fact Timeline
-              </h3>
-              <Suspense
-                fallback={
-                  <div className="animate-pulse space-y-4 pt-4">
-                    <div className="h-10 bg-slate-100 rounded w-full"></div>
-                    <div className="h-10 bg-slate-100 rounded w-full"></div>
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            {/* === Primary Content: Market Event Context === */}
+            <section id="market-replay" className="scroll-mt-8">
+              <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60">
+                <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
+                      Market Replay
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-slate-950">
+                      指標発表前後の値動き
+                    </h3>
                   </div>
-                }
-              >
-                <SessionFactTimeline />
-              </Suspense>
-            </div>
+                  <p className="text-sm text-slate-500">{currentEvent}</p>
+                </div>
+                <Suspense key={currentEvent} fallback={<ReplaySkeleton />}>
+                  <ReplayArea eventName={currentEvent} displayEventName={currentEvent} />
+                </Suspense>
+              </div>
+            </section>
+
+            {/* === Secondary Content: Session Fact Timeline === */}
+            <aside id="session-timeline" className="scroll-mt-8">
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60">
+                <div className="mb-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                    Session Timeline
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-950">
+                    セッション別の反応
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    イベントと時間帯の関係を横で見ながら、チャートの動きを確認できます。
+                  </p>
+                </div>
+                <Suspense
+                  fallback={
+                    <div className="animate-pulse space-y-4 pt-4">
+                      <div className="h-10 rounded bg-slate-100"></div>
+                      <div className="h-10 rounded bg-slate-100"></div>
+                    </div>
+                  }
+                >
+                  <SessionFactTimeline />
+                </Suspense>
+              </div>
+            </aside>
           </div>
         </section>
 
