@@ -40,9 +40,32 @@ describe("errorResponse", () => {
 
     expect(res.status).toBe(401);
     expect(body).toMatchObject({
-      title: "Unauthorized",
+      title: "Application Error",
       status: 401,
       detail: "Unauthorized",
+      requestId: "test-request-id",
+    });
+  });
+
+  it("一般的なErrorを500レスポンスに変換すること", async () => {
+    const app = new Hono<{ Variables: { requestId: string } }>();
+    app.use("*", async (c, next) => {
+      c.set("requestId", "test-request-id");
+      await next();
+    });
+    app.get("/crash", () => {
+      throw new Error("unexpected boom");
+    });
+    app.onError(handleAppError);
+
+    const res = await app.request("/crash");
+    const body = await res.json();
+
+    expect(res.status).toBe(500);
+    expect(body).toMatchObject({
+      title: "Internal Server Error",
+      status: 500,
+      detail: "Internal Server Error",
       requestId: "test-request-id",
     });
   });

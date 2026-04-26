@@ -50,6 +50,7 @@ export function handleNotFound(c: Context) {
  */
 export function handleAppError(err: Error, c: Context) {
   const status = err instanceof HTTPException ? err.status : 500;
+  const title = status === 500 ? "Internal Server Error" : "Application Error";
   const detail = status === 500 ? "Internal Server Error" : err.message;
   const requestId = c.get("requestId");
 
@@ -64,5 +65,5 @@ export function handleAppError(err: Error, c: Context) {
     }),
   );
 
-  return c.json(createProblemDetails(status, detail, detail, c.req.path, requestId), status);
+  return c.json(createProblemDetails(status, title, detail, c.req.path, requestId), status);
 }
