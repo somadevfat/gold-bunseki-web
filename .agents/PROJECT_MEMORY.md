@@ -5,6 +5,28 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-26 - 残Issueの基盤実装とdevelop向けPR作成
+
+- **達成したタスク**:
+  - `develop` を `origin/develop` から最新化し、`feature/remaining-open-issues` ブランチを作成。
+  - Issue #24 は PR #25 が `develop` にマージ済みだったため completed としてクローズ。
+  - Issue #7/#8/#9/#11/#13/#14/#15 をまとめて解消する PR #27 を `develop` 向けに作成。
+  - バックエンドに RFC 7807 風の標準化エラーレスポンス、`requestId`、JSON構造化アクセスログ、同期API用 Bearer 認証ミドルウェアを追加。
+  - フロントエンドの root layout に `SiteHeader` / `SiteFooter` / `ToastProvider` を集約し、ページごとの重複レイアウトを削除。
+  - Toast 通知基盤、`useToast`、React Hook Form + zod の `ResearchNoteForm` サンプル基盤を追加。
+  - Playwright/E2E 廃止後の方針に合わせ、MSW の `x-test-scenario` 異常系をユニットテストで検証する形へ整理。
+  - `react-hook-form`, `@hookform/resolvers`, `zod` をフロントエンド依存に追加。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass（frontend 23件、backend 73件）
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+
+- **次回への申し送り事項**:
+  - バックエンドの構造化ログはテスト実行時にもJSONログを出力する。必要ならテスト環境だけ logger を差し替え可能にする。
+  - #15 は E2E 復活ではなく、現行方針の MSW ユニットテストとしてクローズする設計判断。
+
 ### 2026-04-25 - 認証・Honoセキュリティ強化PR
 
 - **達成したタスク**:
