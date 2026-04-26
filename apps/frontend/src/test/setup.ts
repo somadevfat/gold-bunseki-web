@@ -19,5 +19,8 @@ global.HTMLDivElement = window.HTMLDivElement as unknown as typeof HTMLDivElemen
 
 /* MSW: テストスイート開始前に起動し、各テスト後にハンドラーをリセット、終了時にクローズする */
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  document.body.replaceChildren();
+  server.resetHandlers();
+});
 afterAll(() => server.close());
