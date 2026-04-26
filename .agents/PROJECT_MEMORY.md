@@ -5,6 +5,26 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-26 - PR #27 セルフレビュー追加修正
+
+- **達成したタスク**:
+  - `feature/remaining-open-issues` の PR #27 をセルフレビューし、CI通過済みの差分を再確認。
+  - `apps/frontend/src/test/setup.ts` のテスト後処理を `document.body.replaceChildren()` から Testing Library `cleanup()` に変更。
+  - `@testing-library/react` は happy-dom の global document 初期化後に動的 import し、React effect の unmount cleanup が各テスト後に実行されるようにした。
+  - 修正コミット `729fd39 fix: run React cleanup after frontend tests` を push 済み。
+
+- **検証結果**:
+  - `bun test src/features/common/components/ToastProvider.test.tsx src/features/forms/components/ResearchNoteForm.test.tsx`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+  - `cd apps/frontend && bun run test --coverage`: All files 100.00 / 100.00
+  - `cd apps/backend && bun run test --coverage`: All files 100.00 / 100.00
+  - PR #27 GitHub Actions `lint-and-test`: pass
+
+- **次回への申し送り事項**:
+  - フロントエンド test setup で Testing Library を使う場合は、DOM global 初期化前の静的 import を避けること。
+
 ### 2026-04-26 - 残Issueの基盤実装とdevelop向けPR作成
 
 - **達成したタスク**:
