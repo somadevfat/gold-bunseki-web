@@ -2,13 +2,16 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 import * as routes from "./interface/routes/openapi";
 import { cors } from "hono/cors";
-import { bearerAuth } from "hono/bearer-auth";
 import { secureHeaders } from "hono/secure-headers";
 import { auth } from "./infrastructure/auth/auth";
 import { getAllowedOrigins } from "./infrastructure/security/origins";
 
 // Middleware / Config
 import { diMiddleware } from "./interface/middleware/diMiddleware";
+import { handleAppError, handleNotFound } from "./interface/http/errorResponse";
+import { requestIdMiddleware } from "./interface/middleware/requestIdMiddleware";
+import { structuredLogger } from "./interface/middleware/structuredLogger";
+import { syncBearerAuth } from "./interface/middleware/syncBearerAuth";
 import { Bindings, AppVariables } from "./interface/types";
 
 // Controllers
@@ -36,6 +39,8 @@ export function resolveCorsOrigin(origin: string | undefined): string | undefine
 }
 
 app.use("*", secureHeaders());
+app.use("*", requestIdMiddleware());
+app.use("*", structuredLogger());
 
 app.use(
   "*",
@@ -68,7 +73,7 @@ export function validateStartupEnv(): void {
 validateStartupEnv();
 const apiToken = process.env.API_TOKEN as string;
 
-app.use("/api/v1/sync/*", bearerAuth({ token: apiToken }));
+app.use("/api/v1/sync/*", syncBearerAuth(apiToken));
 
 // 2.8 Auth 関連 (better-auth)
 app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw));
@@ -104,6 +109,9 @@ app.openapi(routes.calculateZigZagRoute, MarketController.calculateZigZag);
 app.openapi(routes.marketSessionsRoute, MarketController.getRecentSessions);
 app.openapi(routes.eventReplayRoute, MarketController.getEventReplay);
 app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
+
+app.notFound(handleNotFound);
+app.onError(handleAppError);
 
 /* Bun.serve でHTTPサーバーを起動 (Docker/VPS環境用) */
 const port = parseInt(process.env.PORT ?? "3000", 10);

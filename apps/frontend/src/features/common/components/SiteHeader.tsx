@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AuthUI } from "@/features/auth/components/AuthUI";
 
 const navigationItems = [
@@ -12,6 +15,8 @@ const navigationItems = [
  * @responsibility アプリタイトル、ページナビゲーション、認証UIを統合して表示する。
  */
 export function SiteHeader() {
+  const pathname = usePathname();
+
   return (
     <header className="mb-10 rounded-3xl border border-slate-200/80 bg-white/75 px-5 py-4 shadow-sm shadow-slate-200/50 backdrop-blur md:mb-12 md:px-6">
       {/* タイトルと認証UIを横並び */}
@@ -32,7 +37,10 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="font-medium text-slate-500 transition-colors hover:text-slate-950"
+                aria-current={pathname === item.href ? "page" : undefined}
+                className={`font-medium transition-colors hover:text-slate-950 ${
+                  pathname === item.href ? "text-slate-950" : "text-slate-500"
+                }`}
               >
                 {item.label}
               </Link>

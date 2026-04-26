@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/features/common/components/SiteFooter";
-import { SiteHeader } from "@/features/common/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "掲示板",
@@ -31,10 +29,6 @@ const discussionTopics = [
  */
 export default function CommunityPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
-      <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-        <SiteHeader />
-
         <section className="grid gap-8 rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-200/60 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
           <div className="space-y-5">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
@@ -60,9 +54,5 @@ export default function CommunityPage() {
             ))}
           </div>
         </section>
-
-        <SiteFooter />
-      </main>
-    </div>
   );
 }
