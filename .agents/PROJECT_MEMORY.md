@@ -5,6 +5,48 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-26 - PR #27 セルフレビュー追加修正
+
+- **達成したタスク**:
+  - `feature/remaining-open-issues` の PR #27 をセルフレビューし、CI通過済みの差分を再確認。
+  - `apps/frontend/src/test/setup.ts` のテスト後処理を `document.body.replaceChildren()` から Testing Library `cleanup()` に変更。
+  - `@testing-library/react` は happy-dom の global document 初期化後に動的 import し、React effect の unmount cleanup が各テスト後に実行されるようにした。
+  - 修正コミット `729fd39 fix: run React cleanup after frontend tests` を push 済み。
+
+- **検証結果**:
+  - `bun test src/features/common/components/ToastProvider.test.tsx src/features/forms/components/ResearchNoteForm.test.tsx`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+  - `cd apps/frontend && bun run test --coverage`: All files 100.00 / 100.00
+  - `cd apps/backend && bun run test --coverage`: All files 100.00 / 100.00
+  - PR #27 GitHub Actions `lint-and-test`: pass
+
+- **次回への申し送り事項**:
+  - フロントエンド test setup で Testing Library を使う場合は、DOM global 初期化前の静的 import を避けること。
+
+### 2026-04-26 - 残Issueの基盤実装とdevelop向けPR作成
+
+- **達成したタスク**:
+  - `develop` を `origin/develop` から最新化し、`feature/remaining-open-issues` ブランチを作成。
+  - Issue #24 は PR #25 が `develop` にマージ済みだったため completed としてクローズ。
+  - Issue #7/#8/#9/#11/#13/#14/#15 をまとめて解消する PR #27 を `develop` 向けに作成。
+  - バックエンドに RFC 7807 風の標準化エラーレスポンス、`requestId`、JSON構造化アクセスログ、同期API用 Bearer 認証ミドルウェアを追加。
+  - フロントエンドの root layout に `SiteHeader` / `SiteFooter` / `ToastProvider` を集約し、ページごとの重複レイアウトを削除。
+  - Toast 通知基盤、`useToast`、React Hook Form + zod の `ResearchNoteForm` サンプル基盤を追加。
+  - Playwright/E2E 廃止後の方針に合わせ、MSW の `x-test-scenario` 異常系をユニットテストで検証する形へ整理。
+  - `react-hook-form`, `@hookform/resolvers`, `zod` をフロントエンド依存に追加。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass（frontend 23件、backend 73件）
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+
+- **次回への申し送り事項**:
+  - バックエンドの構造化ログはテスト実行時にもJSONログを出力する。必要ならテスト環境だけ logger を差し替え可能にする。
+  - #15 は E2E 復活ではなく、現行方針の MSW ユニットテストとしてクローズする設計判断。
+
 ### 2026-04-25 - 認証・Honoセキュリティ強化PR
 
 - **達成したタスク**:

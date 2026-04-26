@@ -1,5 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { SiteFooter } from "@/features/common/components/SiteFooter";
+import { SiteHeader } from "@/features/common/components/SiteHeader";
+import { ToastProvider } from "@/features/common/components/ToastProvider";
 
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanda-dev.com");
 const siteTitle = "fanda-dev | XAUUSD分析・GOLD分析ダッシュボード";
@@ -52,7 +55,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">
+        <ToastProvider>
+          <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
+            <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
+              <SiteHeader />
+              {children}
+              <SiteFooter />
+            </main>
+          </div>
+        </ToastProvider>
+      </body>
     </html>
   );
 }

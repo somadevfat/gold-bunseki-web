@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 /**
  * SiteFooter はアプリケーション共通のフッターコンポーネントです。
  * @responsibility コピーライト表示とフッターナビゲーションリンクを提供する。
@@ -12,15 +14,15 @@ export function SiteFooter() {
         </p>
       </div>
       <div className="flex flex-wrap items-start gap-x-8 gap-y-3 font-medium">
-        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
+        <Link href="/privacy" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           Privacy &amp; Security
-        </span>
-        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
+        </Link>
+        <Link href="/status" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           Status
-        </span>
-        <span className="cursor-pointer border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
+        </Link>
+        <Link href="/api" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           API
-        </span>
+        </Link>
       </div>
     </footer>
   );

@@ -1,2 +1,4 @@
 [test]
 preload = ["./src/test/setup.ts"]
+coverageThreshold = 1.0
+coveragePathIgnorePatterns = ["src/test/handlers.ts", "src/test/server.ts", "src/test/setup.ts"]

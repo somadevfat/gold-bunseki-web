@@ -17,6 +17,7 @@ export type Bindings = {
  * AppVariables は Hono Context に保存される依存オブジェクトの型定義です。
  */
 export type AppVariables = {
+  requestId: string;
   syncRepo: SyncRepositoryPort;
   priceRepo: PriceRepositoryPort;
   zigzagRepo: ZigZagRepositoryPort;
