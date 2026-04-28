@@ -5,6 +5,26 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-28 - Issue #29 掲示板一覧のAPI接続
+
+- **達成したタスク**:
+  - `feature/issue-29-community-api-list` ブランチを `develop` から作成。
+  - `/community` の固定モック配列を削除し、`getCommunityThreads()` 経由で掲示板投稿一覧APIを取得する構成へ変更。
+  - `CommunityThreadList` コンポーネントを追加し、投稿一覧表示と空状態を分離。
+  - `apps/frontend/src/app/community/loading.tsx` を追加し、掲示板ページの読み込み状態を表示。
+  - MSWハンドラーに `/api/v1/community/threads` の正常・空・500応答を追加。
+  - API取得・表示コンポーネント・MSWハンドラーのテストを追加。
+
+- **検証結果**:
+  - `cd apps/frontend && bun run lint`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+  - `cd apps/frontend && bun test src/`: 45 pass / 0 fail
+  - `cd apps/frontend && bun run build`: Node.js 20.18.2 のため失敗。Vite 8 / vinext が Node.js 20.19+ または 22.12+ を要求し、`node:fs/promises.glob` が利用できない。
+
+- **次回への申し送り事項**:
+  - Issue #29 はフロントエンド側のAPI接続実装。実運用で一覧表示するには依存Issue #28 のバックエンドAPI実装が必要。
+  - 期待エンドポイントは `/api/v1/community/threads`、レスポンスは `{ threads: CommunityThread[] }`。
+
 ### 2026-04-26 - PR #27 セルフレビュー追加修正
 
 - **達成したタスク**:

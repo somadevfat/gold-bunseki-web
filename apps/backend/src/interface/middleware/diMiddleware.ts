@@ -7,6 +7,7 @@ import { DrizzlePriceRepository } from '../../infrastructure/repository/drizzleP
 import { DrizzleZigZagRepository } from '../../infrastructure/repository/drizzleZigZagRepository';
 import { DrizzleSessionRepository } from '../../infrastructure/repository/drizzleSessionRepository';
 import { DrizzleBatchRepository } from '../../infrastructure/repository/drizzleBatchRepository';
+import { DrizzleCommunityThreadRepository } from '../../infrastructure/repository/drizzleCommunityThreadRepository';
 
 /**
  * diMiddleware は、リクエスト毎に必要な依存オブジェクトを Context に注入します。
@@ -23,6 +24,7 @@ export const diMiddleware = (): MiddlewareHandler => {
     c.set('sessionRepo', new DrizzleSessionRepository(db));
     c.set('syncRepo', new DrizzleSyncRepository(db));
     c.set('batchRepo', new DrizzleBatchRepository(db));
+    c.set('communityThreadRepo', new DrizzleCommunityThreadRepository(db));
 
     await next();
   };

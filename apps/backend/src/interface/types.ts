@@ -4,6 +4,7 @@ import { ZigZagRepositoryPort } from '../application/port/zigzagRepositoryPort';
 import { SessionRepositoryPort } from '../application/port/sessionRepositoryPort';
 import { DrizzleBatchRepository } from '../infrastructure/repository/drizzleBatchRepository';
 import { AnalyticsServicePort } from '../application/port/analyticsServicePort';
+import { CommunityThreadRepositoryPort } from '../application/port/communityThreadRepositoryPort';
 
 /**
  * Bindings は 環境変数などの定義です。
@@ -24,4 +25,5 @@ export type AppVariables = {
   sessionRepo: SessionRepositoryPort;
   batchRepo: DrizzleBatchRepository;
   analyticsService: AnalyticsServicePort;
+  communityThreadRepo: CommunityThreadRepositoryPort;
 };
