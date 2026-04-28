@@ -13,6 +13,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fail if unwanted HTML/test artifacts are tracked
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          forbidden="$(
+            {
+              git ls-files -- 'apps/frontend/playwright-report/**' 'apps/frontend/test-results/**' || true
+              git ls-files -- '*.html' | grep -v '^public/' || true
+            } | sort -u
+          )"
+
+          if [[ -n "${forbidden}" ]]; then
+            echo "Unwanted tracked files detected. Remove them from git history/tracking and ensure .gitignore is correct:"
+            echo "${forbidden}"
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
