@@ -15,6 +15,7 @@ dist/
 build/
 .next/
 out/
+.wrangler/
 .env
 .env*.local
 .npm
