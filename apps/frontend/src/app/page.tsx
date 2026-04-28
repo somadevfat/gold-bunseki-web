@@ -4,9 +4,8 @@ import { ReplayArea } from '@/features/market-replay/components/ReplayArea';
 import ReplaySkeleton from '@/features/market-replay/components/ReplaySkeleton';
 import { SessionFactTimeline } from '@/features/sessions/components/SessionFactTimeline';
 import { getIndicators } from '@/features/common/api/getIndicators';
-import { SiteHeader } from '@/features/common/components/SiteHeader';
-import { SiteFooter } from '@/features/common/components/SiteFooter';
 import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
+import { ResearchNoteForm } from '@/features/forms/components/ResearchNoteForm';
 
 const valueHighlights = [
   {
@@ -47,13 +46,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const currentEvent = resolvedParams.event || defaultEvent;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
-      <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-
-        {/* === 共通ヘッダー: タイトル・認証UI・ライブステータス === */}
-        <SiteHeader />
-
-        <section id="overview" className="mb-8 scroll-mt-8">
+    <>
+      <section id="overview" className="mb-8 scroll-mt-8">
           <div className="grid overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.55fr)]">
             <div className="space-y-10 p-6 sm:p-8 lg:p-10">
               <div className="max-w-4xl space-y-6">
@@ -154,36 +148,35 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
             {/* === Secondary Content: Session Fact Timeline === */}
             <aside id="session-timeline" className="scroll-mt-8">
-              <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60">
-                <div className="mb-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-                    Session Timeline
-                  </p>
-                  <h3 className="mt-2 text-lg font-semibold text-slate-950">
-                    セッション別の反応
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    イベントと時間帯の関係を横で見ながら、チャートの動きを確認できます。
-                  </p>
+              <div className="space-y-6">
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60">
+                  <div className="mb-5">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      Session Timeline
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-slate-950">
+                      セッション別の反応
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      イベントと時間帯の関係を横で見ながら、チャートの動きを確認できます。
+                    </p>
+                  </div>
+                  <Suspense
+                    fallback={
+                      <div className="animate-pulse space-y-4 pt-4">
+                        <div className="h-10 rounded bg-slate-100"></div>
+                        <div className="h-10 rounded bg-slate-100"></div>
+                      </div>
+                    }
+                  >
+                    <SessionFactTimeline />
+                  </Suspense>
                 </div>
-                <Suspense
-                  fallback={
-                    <div className="animate-pulse space-y-4 pt-4">
-                      <div className="h-10 rounded bg-slate-100"></div>
-                      <div className="h-10 rounded bg-slate-100"></div>
-                    </div>
-                  }
-                >
-                  <SessionFactTimeline />
-                </Suspense>
+                <ResearchNoteForm />
               </div>
             </aside>
           </div>
-        </section>
-
-        {/* === 共通フッター === */}
-        <SiteFooter />
-      </main>
-    </div>
+      </section>
+    </>
   );
 }

@@ -17,7 +17,12 @@ global.CustomEvent = window.CustomEvent as unknown as typeof CustomEvent;
 global.HTMLElement = window.HTMLElement as unknown as typeof HTMLElement;
 global.HTMLDivElement = window.HTMLDivElement as unknown as typeof HTMLDivElement;
 
+const { cleanup } = await import('@testing-library/react');
+
 /* MSW: テストスイート開始前に起動し、各テスト後にハンドラーをリセット、終了時にクローズする */
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  cleanup();
+  server.resetHandlers();
+});
 afterAll(() => server.close());

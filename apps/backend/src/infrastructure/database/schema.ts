@@ -1,4 +1,4 @@
-import { pgTable, text, real, integer, boolean, uniqueIndex, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, real, integer, boolean, uniqueIndex, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const prices = pgTable('prices', {
   timestamp: text('timestamp').primaryKey(),
@@ -62,6 +62,20 @@ export const syncStatus = pgTable('sync_status', {
   lastEventAt: text('last_event_at'),
   totalCandles: integer('total_candles').default(0).notNull(),
   syncHealth: text('sync_health').default('Healthy').notNull(),
+});
+
+// ==========================================
+// Community Board Tables
+// ==========================================
+
+export const communityThreads = pgTable('community_threads', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  category: text('category').notNull().default('General'),
+  replyCount: integer('reply_count').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 // ==========================================

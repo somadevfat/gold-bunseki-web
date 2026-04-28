@@ -14,7 +14,7 @@ describe("diMiddleware", () => {
     const middleware = diMiddleware();
     await middleware(c, next);
 
-    expect(set).toHaveBeenCalledTimes(5);
+    expect(set).toHaveBeenCalledTimes(6);
     expect(next).toHaveBeenCalled();
 
     // セットされたキーの確認
@@ -24,5 +24,6 @@ describe("diMiddleware", () => {
     expect(calledKeys).toContain("sessionRepo");
     expect(calledKeys).toContain("syncRepo");
     expect(calledKeys).toContain("batchRepo");
+    expect(calledKeys).toContain("communityThreadRepo");
   });
 });

@@ -5,6 +5,68 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-04-28 - Issue #29 掲示板一覧のAPI接続
+
+- **達成したタスク**:
+  - `feature/issue-29-community-api-list` ブランチを `develop` から作成。
+  - `/community` の固定モック配列を削除し、`getCommunityThreads()` 経由で掲示板投稿一覧APIを取得する構成へ変更。
+  - `CommunityThreadList` コンポーネントを追加し、投稿一覧表示と空状態を分離。
+  - `apps/frontend/src/app/community/loading.tsx` を追加し、掲示板ページの読み込み状態を表示。
+  - MSWハンドラーに `/api/v1/community/threads` の正常・空・500応答を追加。
+  - API取得・表示コンポーネント・MSWハンドラーのテストを追加。
+
+- **検証結果**:
+  - `cd apps/frontend && bun run lint`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+  - `cd apps/frontend && bun test src/`: 45 pass / 0 fail
+  - `cd apps/frontend && bun run build`: Node.js 20.18.2 のため失敗。Vite 8 / vinext が Node.js 20.19+ または 22.12+ を要求し、`node:fs/promises.glob` が利用できない。
+
+- **次回への申し送り事項**:
+  - Issue #29 はフロントエンド側のAPI接続実装。実運用で一覧表示するには依存Issue #28 のバックエンドAPI実装が必要。
+  - 期待エンドポイントは `/api/v1/community/threads`、レスポンスは `{ threads: CommunityThread[] }`。
+
+### 2026-04-26 - PR #27 セルフレビュー追加修正
+
+- **達成したタスク**:
+  - `feature/remaining-open-issues` の PR #27 をセルフレビューし、CI通過済みの差分を再確認。
+  - `apps/frontend/src/test/setup.ts` のテスト後処理を `document.body.replaceChildren()` から Testing Library `cleanup()` に変更。
+  - `@testing-library/react` は happy-dom の global document 初期化後に動的 import し、React effect の unmount cleanup が各テスト後に実行されるようにした。
+  - 修正コミット `729fd39 fix: run React cleanup after frontend tests` を push 済み。
+
+- **検証結果**:
+  - `bun test src/features/common/components/ToastProvider.test.tsx src/features/forms/components/ResearchNoteForm.test.tsx`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+  - `cd apps/frontend && bun run test --coverage`: All files 100.00 / 100.00
+  - `cd apps/backend && bun run test --coverage`: All files 100.00 / 100.00
+  - PR #27 GitHub Actions `lint-and-test`: pass
+
+- **次回への申し送り事項**:
+  - フロントエンド test setup で Testing Library を使う場合は、DOM global 初期化前の静的 import を避けること。
+
+### 2026-04-26 - 残Issueの基盤実装とdevelop向けPR作成
+
+- **達成したタスク**:
+  - `develop` を `origin/develop` から最新化し、`feature/remaining-open-issues` ブランチを作成。
+  - Issue #24 は PR #25 が `develop` にマージ済みだったため completed としてクローズ。
+  - Issue #7/#8/#9/#11/#13/#14/#15 をまとめて解消する PR #27 を `develop` 向けに作成。
+  - バックエンドに RFC 7807 風の標準化エラーレスポンス、`requestId`、JSON構造化アクセスログ、同期API用 Bearer 認証ミドルウェアを追加。
+  - フロントエンドの root layout に `SiteHeader` / `SiteFooter` / `ToastProvider` を集約し、ページごとの重複レイアウトを削除。
+  - Toast 通知基盤、`useToast`、React Hook Form + zod の `ResearchNoteForm` サンプル基盤を追加。
+  - Playwright/E2E 廃止後の方針に合わせ、MSW の `x-test-scenario` 異常系をユニットテストで検証する形へ整理。
+  - `react-hook-form`, `@hookform/resolvers`, `zod` をフロントエンド依存に追加。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass（frontend 23件、backend 73件）
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `cd apps/frontend && bunx tsc --noEmit`: pass
+
+- **次回への申し送り事項**:
+  - バックエンドの構造化ログはテスト実行時にもJSONログを出力する。必要ならテスト環境だけ logger を差し替え可能にする。
+  - #15 は E2E 復活ではなく、現行方針の MSW ユニットテストとしてクローズする設計判断。
+
 ### 2026-04-25 - 認証・Honoセキュリティ強化PR
 
 - **達成したタスク**:

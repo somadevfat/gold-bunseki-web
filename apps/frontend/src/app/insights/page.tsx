@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/features/common/components/SiteFooter";
-import { SiteHeader } from "@/features/common/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "考察ブログ",
@@ -31,10 +29,6 @@ const insightPosts = [
  */
 export default function InsightsPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center bg-[#f7f4ee] text-slate-900 selection:bg-amber-100">
-      <main className="w-full max-w-7xl px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
-        <SiteHeader />
-
         <section className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/60">
           <div className="border-b border-slate-100 p-6 lg:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-700">
@@ -62,9 +56,5 @@ export default function InsightsPage() {
             ))}
           </div>
         </section>
-
-        <SiteFooter />
-      </main>
-    </div>
   );
 }
