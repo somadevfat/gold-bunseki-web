@@ -4,6 +4,7 @@ import { ZigZagPointSchema } from "../../domain/entities/zigzag";
 import { SessionVolatilitySchema } from "../../domain/entities/session";
 import { SyncStatusSchema } from "../../domain/entities/syncStatus";
 import { ReplayDataResponseSchema } from "../../domain/entities/replay";
+import { CommunityThreadSchema, CreateCommunityThreadInputSchema } from "../../domain/entities/communityThread";
 
 /**
  * Health Check ルート
@@ -227,6 +228,62 @@ export const syncDataRoute = createRoute({
     500: {
       description: "同期失敗",
     }
+  },
+});
+
+/**
+ * 掲示板スレッド一覧ルート
+ */
+export const communityThreadsRoute = createRoute({
+  method: "get",
+  path: "/api/v1/community/threads",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            threads: z.array(CommunityThreadSchema),
+          }),
+        },
+      },
+      description: "掲示板スレッド一覧を新しい順で取得します",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * 掲示板スレッド作成ルート
+ */
+export const createCommunityThreadRoute = createRoute({
+  method: "post",
+  path: "/api/v1/community/threads",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: CreateCommunityThreadInputSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: CommunityThreadSchema,
+        },
+      },
+      description: "掲示板スレッドを作成して返します",
+    },
+    400: {
+      description: "バリデーションエラー",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
   },
 });
 

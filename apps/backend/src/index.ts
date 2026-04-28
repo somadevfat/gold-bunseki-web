@@ -17,6 +17,7 @@ import { Bindings, AppVariables } from "./interface/types";
 // Controllers
 import { MarketController } from "./interface/controller/marketController";
 import { SyncController } from "./interface/controller/syncController";
+import { CommunityController } from "./interface/controller/communityController";
 
 /**
  * Gold Volatility Bunseki API (Hono / Bun.serve)
@@ -109,6 +110,10 @@ app.openapi(routes.calculateZigZagRoute, MarketController.calculateZigZag);
 app.openapi(routes.marketSessionsRoute, MarketController.getRecentSessions);
 app.openapi(routes.eventReplayRoute, MarketController.getEventReplay);
 app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
+
+// Community Board
+app.openapi(routes.communityThreadsRoute, CommunityController.getThreads);
+app.openapi(routes.createCommunityThreadRoute, CommunityController.createThread);
 
 app.notFound(handleNotFound);
 app.onError(handleAppError);
