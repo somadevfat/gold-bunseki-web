@@ -28,7 +28,7 @@ export function CommunityThreadList({ threads }: CommunityThreadListProps) {
             {thread.category} / {thread.replyCount} replies
           </p>
           <h3 className="text-lg font-semibold text-slate-950">{thread.title}</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">{thread.excerpt}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{thread.body}</p>
           <time className="mt-4 block text-xs font-medium text-slate-400" dateTime={thread.createdAt}>
             {new Intl.DateTimeFormat("ja-JP", {
               dateStyle: "medium",

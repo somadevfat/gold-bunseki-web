@@ -101,7 +101,7 @@ export const handlers = [
           id: 'thread-1',
           title: 'CPI発表前後のXAUUSDの値幅をどう見ていますか？',
           category: 'Market Discussion',
-          excerpt: '前回CPIでは発表直後の初動より、NY後半の戻りが大きかったです。',
+          body: '前回CPIでは発表直後の初動より、NY後半の戻りが大きかったです。',
           replyCount: 12,
           createdAt: '2026-04-01T12:00:00Z',
         },

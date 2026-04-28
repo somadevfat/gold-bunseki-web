@@ -67,7 +67,7 @@ export type CommunityThread = {
   id: string;
   title: string;
   category: string;
-  excerpt: string;
+  body: string;
   replyCount: number;
   createdAt: string;
 };

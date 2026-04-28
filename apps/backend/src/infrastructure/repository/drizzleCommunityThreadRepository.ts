@@ -40,7 +40,7 @@ export class DrizzleCommunityThreadRepository implements CommunityThreadReposito
       .values({
         title: input.title,
         body: input.body,
-        category: input.category ?? 'General',
+        category: input.category,
       })
       .returning();
 
