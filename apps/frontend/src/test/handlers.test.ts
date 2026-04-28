@@ -65,6 +65,36 @@ describe("MSW abnormal scenarios", () => {
     expect(body.previousEvent.eventsLinked).toBe("CPI");
   });
 
+  it("掲示板投稿一覧APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads");
+    const body = await res.json() as { threads: Array<{ title: string }> };
+
+    expect(res.status).toBe(200);
+    expect(body.threads[0].title).toBe("CPI発表前後のXAUUSDの値幅をどう見ていますか？");
+  });
+
+  it("x-test-scenario=empty で空の掲示板投稿一覧を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads", {
+      headers: {
+        "x-test-scenario": "empty",
+      },
+    });
+    const body = await res.json() as { threads: unknown[] };
+
+    expect(res.status).toBe(200);
+    expect(body.threads).toEqual([]);
+  });
+
+  it("x-test-scenario=error で掲示板投稿一覧APIの500応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads", {
+      headers: {
+        "x-test-scenario": "error",
+      },
+    });
+
+    expect(res.status).toBe(500);
+  });
+
   it("未ログイン時の認証セッションAPIは null を返すこと", async () => {
     const res = await fetch("http://localhost:3000/api/auth/get-session");
     const body = await res.json();

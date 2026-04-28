@@ -84,6 +84,31 @@ export const handlers = [
     });
   }),
 
+  /* 掲示板投稿一覧 */
+  http.get(`${baseUrl}/api/v1/community/threads`, ({ request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+
+    if (scenario === 'error') {
+      return new HttpResponse(null, { status: 500 });
+    }
+    if (scenario === 'empty') {
+      return HttpResponse.json({ threads: [] });
+    }
+
+    return HttpResponse.json({
+      threads: [
+        {
+          id: 'thread-1',
+          title: 'CPI発表前後のXAUUSDの値幅をどう見ていますか？',
+          category: 'Market Discussion',
+          excerpt: '前回CPIでは発表直後の初動より、NY後半の戻りが大きかったです。',
+          replyCount: 12,
+          createdAt: '2026-04-01T12:00:00Z',
+        },
+      ],
+    });
+  }),
+
   /* 認証 (better-auth) - セッション取得 */
   http.get(`${baseUrl}/api/auth/get-session`, ({ request }) => {
     const cookie = request.headers.get('cookie');

@@ -11,6 +11,9 @@ export type AppClient = {
         replay: { $get: (args: { query: { event: string } }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<ReplayDataResponse> }> };
         sessions: { $get: (args: { query: { limit: string } }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<SessionsResponse> }> };
       }
+      community: {
+        threads: { $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThreadsResponse> }> };
+      }
     }
   }
 };
@@ -58,6 +61,19 @@ export type SessionsResponse = {
 
 export type IndicatorsResponse = {
   indicators: string[];
+};
+
+export type CommunityThread = {
+  id: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  replyCount: number;
+  createdAt: string;
+};
+
+export type CommunityThreadsResponse = {
+  threads: CommunityThread[];
 };
 
 export type Candle = {
