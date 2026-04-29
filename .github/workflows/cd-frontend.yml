@@ -32,6 +32,8 @@ jobs:
 
       - name: Build
         run: cd apps/frontend && bun run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
