@@ -60,7 +60,8 @@ jobs:
               git reset --hard ${{ github.sha }} &&
               test \"\$(git rev-parse HEAD)\" = \"${{ github.sha }}\" &&
               git rev-parse HEAD &&
-              gcloud auth configure-docker --quiet &&
+              gcloud auth configure-docker gcr.io --quiet &&
+              gcloud auth print-access-token | sudo docker login -u oauth2accesstoken --password-stdin https://gcr.io &&
               export BACKEND_IMAGE=${{ env.GCR_IMAGE }}:${{ github.sha }} &&
               export BACKEND_BASE_URL=${{ env.BACKEND_BASE_URL }} &&
               sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose config | sed -n '/backend:/,/^[^ ]/p' &&
