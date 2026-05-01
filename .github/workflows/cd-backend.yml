@@ -10,6 +10,7 @@ on:
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCR_IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/gold-vola-backend
+  BACKEND_BASE_URL: https://api.fanda-dev.com
 
 jobs:
   deploy-backend:
@@ -57,6 +58,15 @@ jobs:
               cd ~/gold-bunseki-web &&
               gcloud auth configure-docker --quiet &&
               export BACKEND_IMAGE=${{ env.GCR_IMAGE }}:${{ github.sha }} &&
+              export BACKEND_BASE_URL=${{ env.BACKEND_BASE_URL }} &&
               sudo -E docker-compose pull backend &&
-              sudo -E docker-compose up -d backend
+              sudo -E docker-compose run --rm backend bun run db:migrate &&
+              sudo -E docker-compose up -d --force-recreate backend &&
+              for url in \"\$BACKEND_BASE_URL/health\" \"\$BACKEND_BASE_URL/api/auth/get-session\"; do
+                for attempt in 1 2 3 4 5; do
+                  curl -fsS \"\$url\" && break
+                  if [ \"\$attempt\" = \"5\" ]; then exit 1; fi
+                  sleep 2
+                done
+              done
             "
