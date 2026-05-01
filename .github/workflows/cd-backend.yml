@@ -67,11 +67,15 @@ jobs:
               sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose config | sed -n '/backend:/,/^[^ ]/p' &&
               sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose pull backend &&
               sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose run --rm backend bun run src/infrastructure/database/migrate.ts &&
-              sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose up -d --force-recreate backend &&
+              sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose up -d --no-deps --force-recreate backend &&
               for url in \"\$BACKEND_BASE_URL/health\" \"\$BACKEND_BASE_URL/api/auth/get-session\"; do
-                for attempt in 1 2 3 4 5; do
+                for attempt in \$(seq 1 30); do
                   curl -fsS \"\$url\" && break
-                  if [ \"\$attempt\" = \"5\" ]; then exit 1; fi
+                  if [ \"\$attempt\" = \"30\" ]; then
+                    sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose ps
+                    sudo env BACKEND_IMAGE=\"\$BACKEND_IMAGE\" docker-compose logs --tail=80 backend
+                    exit 1
+                  fi
                   sleep 2
                 done
               done
