@@ -5,6 +5,23 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-02 - CORS Origin マージ修正 Issue #79 / PR #80
+
+- **達成したタスク**:
+  - Issue #79 `[BE] fix: CORS許可Origin設定をenv上書きに依存しない実装に修正する` を作成。
+  - `fix/issue-79-cors-origin-merge` ブランチを `develop` から作成し、PR #80 を `develop` 向けに作成。
+  - `getAllowedOrigins` をデフォルト + env 追加のマージ方式へ変更。
+  - テストコードからドメインのハードコードを除去し、`defaultAllowedOrigins` を参照する形に変更（どの環境でも通るテストへ）。
+  - `OPTIONS /api/auth/sign-in/social` の preflight テストを追加。
+  - `.env.example` に `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` を追加。
+
+- **検証結果**:
+  - `bun test src/infrastructure/security/origins.test.ts src/securityMiddleware.test.ts`: 9 pass / 0 fail
+  - `bun run test:all`: 89 pass / 0 fail
+
+- **次回への申し送り事項**:
+  - PR #80 マージ後、Backend CD を再実行し、本番で CORS 再発しないことを確認する。
+
 ### 2026-05-02 - Issueクローズ時の記録ルールをスキルへ追加
 
 - **達成したタスク**:
