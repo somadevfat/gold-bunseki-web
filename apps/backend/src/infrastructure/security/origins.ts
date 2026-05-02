@@ -14,10 +14,10 @@ export function getAllowedOrigins(envValue = process.env.ALLOWED_ORIGINS): strin
     return defaultAllowedOrigins;
   }
 
-  const origins = envValue
+  const additionalOrigins = envValue
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  return origins.length > 0 ? origins : defaultAllowedOrigins;
+  return Array.from(new Set([...defaultAllowedOrigins, ...additionalOrigins]));
 }
