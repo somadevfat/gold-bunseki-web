@@ -11,7 +11,7 @@ export const defaultAllowedOrigins = [
  */
 export function getAllowedOrigins(envValue = process.env.ALLOWED_ORIGINS): string[] {
   if (!envValue) {
-    return defaultAllowedOrigins;
+    return [...defaultAllowedOrigins];
   }
 
   const additionalOrigins = envValue
