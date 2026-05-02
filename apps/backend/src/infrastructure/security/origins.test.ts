@@ -6,11 +6,35 @@ describe("getAllowedOrigins", () => {
     expect(getAllowedOrigins(undefined)).toEqual(defaultAllowedOrigins);
   });
 
+  it("返却された配列を変更してもデフォルト Origin が汚染されないこと", () => {
+    const result = getAllowedOrigins(undefined);
+    result.push("https://evil.example.com");
+
+    expect(defaultAllowedOrigins).not.toContain("https://evil.example.com");
+  });
+
   it("カンマ区切りの環境変数をトリムして返すこと", () => {
     expect(getAllowedOrigins(" https://example.com,https://app.example.com , ")).toEqual([
+      ...defaultAllowedOrigins,
       "https://example.com",
       "https://app.example.com",
     ]);
+  });
+
+  it("環境変数が指定されても本番デフォルト Origin を維持すること", () => {
+    const result = getAllowedOrigins("https://custom.example.com");
+
+    defaultAllowedOrigins.forEach((origin) => {
+      expect(result).toContain(origin);
+    });
+    expect(result).toContain("https://custom.example.com");
+  });
+
+  it("重複した Origin を除去すること", () => {
+    const [firstDefault] = defaultAllowedOrigins;
+    const origins = getAllowedOrigins(`${firstDefault},https://custom.example.com`);
+
+    expect(origins.filter((origin) => origin === firstDefault)).toHaveLength(1);
   });
 
   it("未使用の Vite 5173 Origin をデフォルトで許可しないこと", () => {
