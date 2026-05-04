@@ -1,5 +1,6 @@
 import { GetCommunityThreadsUseCase } from "../application/use_case/getCommunityThreadsUseCase";
 import { CreateCommunityThreadUseCase } from "../application/use_case/createCommunityThreadUseCase";
+import { GetSyncStatusUseCase } from "../application/use_case/getSyncStatusUseCase";
 import { db, DbType } from "../infrastructure/database/db";
 import { DrizzleBatchRepository } from "../infrastructure/repository/drizzleBatchRepository";
 import { DrizzleCommunityThreadRepository } from "../infrastructure/repository/drizzleCommunityThreadRepository";
@@ -14,13 +15,14 @@ import { DrizzleZigZagRepository } from "../infrastructure/repository/drizzleZig
  */
 export function createAppContainer(database: DbType = db) {
   const communityThreadRepo = new DrizzleCommunityThreadRepository(database);
+  const syncRepo = new DrizzleSyncRepository(database);
 
   return {
     repositories: {
       priceRepo: new DrizzlePriceRepository(database),
       zigzagRepo: new DrizzleZigZagRepository(database),
       sessionRepo: new DrizzleSessionRepository(database),
-      syncRepo: new DrizzleSyncRepository(database),
+      syncRepo,
       batchRepo: new DrizzleBatchRepository(database),
       communityThreadRepo,
     },
@@ -28,6 +30,9 @@ export function createAppContainer(database: DbType = db) {
       community: {
         getThreads: new GetCommunityThreadsUseCase(communityThreadRepo),
         createThread: new CreateCommunityThreadUseCase(communityThreadRepo),
+      },
+      sync: {
+        getStatus: new GetSyncStatusUseCase(syncRepo),
       },
     },
   };
@@ -42,6 +47,7 @@ export type AppContainer = ReturnType<typeof createAppContainer>;
 export function freezeAppContainer(container: AppContainer): AppContainer {
   Object.freeze(container.repositories);
   Object.freeze(container.useCases.community);
+  Object.freeze(container.useCases.sync);
   Object.freeze(container.useCases);
 
   return Object.freeze(container);

@@ -13,7 +13,6 @@ export const diMiddleware = (container: AppContainer = appContainer): Middleware
     c.set('priceRepo', repositories.priceRepo);
     c.set('zigzagRepo', repositories.zigzagRepo);
     c.set('sessionRepo', repositories.sessionRepo);
-    c.set('syncRepo', repositories.syncRepo);
     c.set('batchRepo', repositories.batchRepo);
 
     await next();

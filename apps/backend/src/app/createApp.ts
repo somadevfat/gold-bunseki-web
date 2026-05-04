@@ -15,10 +15,10 @@ import { structuredLogger } from "../interface/middleware/structuredLogger";
 import { syncBearerAuth } from "../interface/middleware/syncBearerAuth";
 import { Bindings, AppVariables } from "../interface/types";
 import { registerCommunityRoutes } from "../interface/routes/communityRoutes";
+import { registerSyncRoutes } from "../interface/routes/syncRoutes";
 
 // Controllers
 import { MarketController } from "../interface/controller/marketController";
-import { SyncController } from "../interface/controller/syncController";
 
 const defaultAllowedOrigins = getAllowedOrigins();
 
@@ -83,9 +83,7 @@ export function createApp(
     c.json({ status: "ok", server: "Hono/Bun" }),
   );
 
-  app.openapi(routes.syncStatusRoute, SyncController.getSyncStatus);
-  app.openapi(routes.syncDataRoute, SyncController.receiveSyncData);
-  app.openapi(routes.syncSeedRoute, SyncController.receiveSeedData);
+  registerSyncRoutes(app, container);
 
   app.openapi(routes.latestPriceRoute, MarketController.getLatestPrice);
   app.openapi(routes.calculateZigZagRoute, MarketController.calculateZigZag);

@@ -1,4 +1,3 @@
-import { SyncRepositoryPort } from '../application/port/syncRepositoryPort';
 import { PriceRepositoryPort } from '../application/port/priceRepositoryPort';
 import { ZigZagRepositoryPort } from '../application/port/zigzagRepositoryPort';
 import { SessionRepositoryPort } from '../application/port/sessionRepositoryPort';
@@ -18,7 +17,6 @@ export type Bindings = {
  */
 export type AppVariables = {
   requestId: string;
-  syncRepo: SyncRepositoryPort;
   priceRepo: PriceRepositoryPort;
   zigzagRepo: ZigZagRepositoryPort;
   sessionRepo: SessionRepositoryPort;
