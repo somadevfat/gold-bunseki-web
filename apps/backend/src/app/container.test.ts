@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { CreateCommunityThreadUseCase } from '../application/use_case/createCommunityThreadUseCase';
 import { GetCommunityThreadsUseCase } from '../application/use_case/getCommunityThreadsUseCase';
+import { GetSyncStatusUseCase } from '../application/use_case/getSyncStatusUseCase';
 import { createAppContainer, freezeAppContainer } from './container';
 import { createMockDrizzle } from '../interface/test/testHelpers';
 
@@ -13,6 +14,7 @@ describe('createAppContainer', () => {
     expect(container.repositories.syncRepo).toBeDefined();
     expect(container.useCases.community.getThreads).toBeInstanceOf(GetCommunityThreadsUseCase);
     expect(container.useCases.community.createThread).toBeInstanceOf(CreateCommunityThreadUseCase);
+    expect(container.useCases.sync.getStatus).toBeInstanceOf(GetSyncStatusUseCase);
   });
 
   it('グローバル利用するContainerの依存配線をfreezeできること', () => {
@@ -22,5 +24,6 @@ describe('createAppContainer', () => {
     expect(Object.isFrozen(container.repositories)).toBe(true);
     expect(Object.isFrozen(container.useCases)).toBe(true);
     expect(Object.isFrozen(container.useCases.community)).toBe(true);
+    expect(Object.isFrozen(container.useCases.sync)).toBe(true);
   });
 });
