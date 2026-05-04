@@ -7,7 +7,6 @@ import { AppContainer } from '../../../app/container';
 interface MockResponse {
   body: Record<string, unknown> & {
     threads?: CommunityThread[];
-    error?: string;
     id?: string;
     title?: string;
   };
@@ -79,19 +78,15 @@ describe('CommunityController', () => {
       expect(res.body.threads).toHaveLength(0);
     });
 
-    it('リポジトリがエラーをスローした場合、500 を返すこと', async () => {
+    it('ユースケースがエラーをスローした場合、グローバルエラーハンドラーへ委譲すること', async () => {
       // ## Arrange ##
       getThreadsExecute = mock(() => Promise.reject(new Error('DB接続エラー')));
       container.useCases.community.getThreads.execute = getThreadsExecute;
       const controller = createCommunityController(container);
       const c = createMockContext({});
 
-      // ## Act ##
-      const res = (await controller.getThreads(c)) as unknown as MockResponse;
-
-      // ## Assert ##
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('スレッド一覧の取得に失敗しました');
+      // ## Act & Assert ##
+      await expect(controller.getThreads(c)).rejects.toThrow('DB接続エラー');
     });
   });
 
@@ -119,7 +114,7 @@ describe('CommunityController', () => {
       expect(createThreadExecute).toHaveBeenCalledWith(body);
     });
 
-    it('リポジトリがエラーをスローした場合、500 を返すこと', async () => {
+    it('ユースケースがエラーをスローした場合、グローバルエラーハンドラーへ委譲すること', async () => {
       // ## Arrange ##
       createThreadExecute = mock(() => Promise.reject(new Error('INSERT失敗')));
       container.useCases.community.createThread.execute = createThreadExecute;
@@ -131,12 +126,8 @@ describe('CommunityController', () => {
       const controller = createCommunityController(container);
       const c = createMockContext({}, {}, body as Record<string, string>);
 
-      // ## Act ##
-      const res = (await controller.createThread(c)) as unknown as MockResponse;
-
-      // ## Assert ##
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('スレッドの作成に失敗しました');
+      // ## Act & Assert ##
+      await expect(controller.createThread(c)).rejects.toThrow('INSERT失敗');
     });
   });
 });

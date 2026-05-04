@@ -35,4 +35,16 @@ export function createAppContainer(database: DbType = db) {
 
 export type AppContainer = ReturnType<typeof createAppContainer>;
 
-export const appContainer = createAppContainer();
+/**
+ * freezeAppContainer はグローバルContainerの依存差し替えを防ぎます。
+ * @responsibility アプリ実行中に依存配線が誤って変更されないようにする。
+ */
+export function freezeAppContainer(container: AppContainer): AppContainer {
+  Object.freeze(container.repositories);
+  Object.freeze(container.useCases.community);
+  Object.freeze(container.useCases);
+
+  return Object.freeze(container);
+}
+
+export const appContainer = freezeAppContainer(createAppContainer());

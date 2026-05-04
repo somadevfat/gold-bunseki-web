@@ -14,14 +14,8 @@ export function createCommunityController(container: AppContainer) {
      * @responsibility ユースケースを実行し、スレッド一覧を JSON 形式で返す。
      */
     getThreads: async (c: Context<{ Bindings: Bindings; Variables: AppVariables }>) => {
-      try {
-        const threads = await container.useCases.community.getThreads.execute();
-        return c.json({ threads }, 200);
-      } catch (err: unknown) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        console.error('[Community Threads Error]', error.message);
-        return c.json({ error: 'スレッド一覧の取得に失敗しました' }, 500);
-      }
+      const threads = await container.useCases.community.getThreads.execute();
+      return c.json({ threads }, 200);
     },
 
     /**
@@ -29,15 +23,9 @@ export function createCommunityController(container: AppContainer) {
      * @responsibility リクエストボディをバリデーションし、ユースケースを実行して新規スレッドを返す。
      */
     createThread: async (c: Context<{ Bindings: Bindings; Variables: AppVariables }>) => {
-      try {
-        const input = c.req.valid('json' as never) as CreateCommunityThreadInput;
-        const thread = await container.useCases.community.createThread.execute(input);
-        return c.json(thread, 201);
-      } catch (err: unknown) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        console.error('[Community Thread Create Error]', error.message);
-        return c.json({ error: 'スレッドの作成に失敗しました' }, 500);
-      }
+      const input = c.req.valid('json' as never) as CreateCommunityThreadInput;
+      const thread = await container.useCases.community.createThread.execute(input);
+      return c.json(thread, 201);
     },
   };
 }

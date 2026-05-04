@@ -15,7 +15,6 @@ export const diMiddleware = (container: AppContainer = appContainer): Middleware
     c.set('sessionRepo', repositories.sessionRepo);
     c.set('syncRepo', repositories.syncRepo);
     c.set('batchRepo', repositories.batchRepo);
-    c.set('communityThreadRepo', repositories.communityThreadRepo);
 
     await next();
   };
