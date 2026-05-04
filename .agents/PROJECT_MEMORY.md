@@ -5,6 +5,28 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-04 - Issue #83 Sync APIのAppContainer/routes移行PR
+
+- **達成したタスク**:
+  - Issue #83 `[BE] Sync APIをAppContainer注入と専用routesへ移行する` を作成。
+  - `refactor/issue-83-sync-container-routes` ブランチを `develop` から作成。
+  - AppContainer に Sync 用 `GetSyncStatusUseCase` の配線を追加。
+  - `SyncController` を static class から `createSyncController(container)` の handler factory に変更。
+  - `apps/backend/src/interface/routes/syncRoutes.ts` を追加し、Sync API の route 登録を `createApp.ts` から分離。
+  - `syncRepo` の Hono Context 注入と `AppVariables` 型定義を削除。
+  - セルフレビューで、Sync POST 異常系の既存API契約 `{ success: false, message }` を維持するよう調整。
+  - PR #84 `https://github.com/somadevfat/gold-bunseki-web/pull/84` を `develop` 向けに作成。
+
+- **検証結果**:
+  - targeted backend tests: 18 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 90 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #84 マージ後、MarketController / marketRoutes を同じパターンで移行すると、`diMiddleware` から `priceRepo`, `zigzagRepo`, `sessionRepo`, `batchRepo` の Context 注入も段階的に削除できる。
+  - 未追跡の `.agents/skills/self-implement/` と `docs/archives/auth_strategy_zenn.md` は今回PRに含めていない。
+
 ### 2026-05-04 - PR #82 Geminiレビュー対応
 
 - **達成したタスク**:
