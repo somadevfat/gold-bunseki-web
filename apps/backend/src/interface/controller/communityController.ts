@@ -23,7 +23,7 @@ export function createCommunityController(container: AppContainer) {
      * @responsibility リクエストボディをバリデーションし、ユースケースを実行して新規スレッドを返す。
      */
     createThread: async (c: Context<{ Bindings: Bindings; Variables: AppVariables }>) => {
-      const input = c.req.valid('json' as never) as CreateCommunityThreadInput;
+      const input = (await c.req.valid('json' as never)) as CreateCommunityThreadInput;
       const thread = await container.useCases.community.createThread.execute(input);
       return c.json(thread, 201);
     },

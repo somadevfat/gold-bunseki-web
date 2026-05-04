@@ -1,7 +1,9 @@
 import { expect, describe, it, mock, beforeEach } from "bun:test";
-import { MarketController } from "../marketController";
+import type { SessionVolatility } from "../../../domain/entities/session";
+import { AppContainer } from "../../../app/container";
+import { createMarketController } from "../marketController";
 import { createMockContext } from "../../test/testHelpers";
-import { AppVariables, Bindings } from "../../types";
+import { Bindings } from "../../types";
 
 interface MockResponse {
   body: Record<string, unknown> & {
@@ -18,45 +20,54 @@ interface MockResponse {
   status: number;
 }
 
-describe("MarketController", () => {
-  it("クラスをインスタンス化できること", () => {
-    expect(new MarketController()).toBeInstanceOf(MarketController);
-  });
-  let mockRepos: Partial<AppVariables>;
+describe("createMarketController", () => {
+  const noopNext = async (): Promise<void> => {};
+
+  let container: AppContainer;
+  let indicatorsExecute: ReturnType<typeof mock>;
+  let getLatestExecute: ReturnType<typeof mock>;
+  let calculateZigZagExecute: ReturnType<typeof mock>;
+  let getRecentSessionsExecute: ReturnType<typeof mock>;
+  let getReplayExecute: ReturnType<typeof mock>;
+  let batchRepoSaveAll: ReturnType<typeof mock>;
   let mockEnv: Partial<Bindings>;
 
   beforeEach(() => {
-    mockRepos = {
-      sessionRepo: {
-        getRecentEventNames: mock(() => Promise.resolve(["CPI", "雇用統計"])),
-        findRecentSessions: mock(() => Promise.resolve([])),
-        findPreviousEvent: mock(() => Promise.resolve(null)),
-        getCandles: mock(() => Promise.resolve([])),
-        getThresholds: mock(() => Promise.resolve({})),
-        getEventStats: mock(() => Promise.resolve([])),
-      } as unknown as AppVariables["sessionRepo"],
-      priceRepo: {
-        getLatestPrice: mock(() =>
-          Promise.resolve({
-            timestamp: "now",
-            open: 1,
-            high: 2,
-            low: 0,
-            close: 1.5,
-          }),
-        ),
-        getRecentPrices: mock(() => Promise.resolve([])),
-      } as unknown as AppVariables["priceRepo"],
-      zigzagRepo: {
-        savePoints: mock(() => Promise.resolve()),
-      } as unknown as AppVariables["zigzagRepo"],
-      batchRepo: {
-        saveAll: mock(() => Promise.resolve(true)),
-      } as unknown as AppVariables["batchRepo"],
-      analyticsService: {
-        calculateZigZag: mock(() => Promise.resolve([])),
-      } as unknown as AppVariables["analyticsService"],
-    };
+    indicatorsExecute = mock(() => Promise.resolve(["CPI", "雇用統計"]));
+    getLatestExecute = mock(() =>
+      Promise.resolve({
+        timestamp: "now",
+        open: 1,
+        high: 2,
+        low: 0,
+        close: 1.5,
+      }),
+    );
+    calculateZigZagExecute = mock(() => Promise.resolve([]));
+    getRecentSessionsExecute = mock(() => Promise.resolve([]));
+    getReplayExecute = mock(() =>
+      Promise.resolve({
+        previousEvent: null,
+        candles: [],
+        historicalStats: [],
+      }),
+    );
+    batchRepoSaveAll = mock(() => Promise.resolve(true));
+
+    container = {
+      repositories: {
+        batchRepo: { saveAll: batchRepoSaveAll },
+      },
+      useCases: {
+        market: {
+          getIndicators: { execute: indicatorsExecute },
+          getLatestPrice: { execute: getLatestExecute },
+          calculateZigZag: { execute: calculateZigZagExecute },
+          getRecentSessions: { execute: getRecentSessionsExecute },
+          getReplayData: { execute: getReplayExecute },
+        },
+      },
+    } as unknown as AppContainer;
 
     mockEnv = {
       ANALYTICS_SERVICE_URL: "http://mock-service",
@@ -65,23 +76,24 @@ describe("MarketController", () => {
 
   describe("getIndicators", () => {
     it("指標リストを取得して 200 を返すこと", async () => {
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.getIndicators(
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.getIndicators(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body.indicators).toEqual(["CPI", "雇用統計"]);
     });
 
     it("例外発生時に 500 と空リストを返すこと", async () => {
-      if (mockRepos.sessionRepo) {
-        mockRepos.sessionRepo.getRecentEventNames = mock(() =>
-          Promise.reject(new Error("DB Error")),
-        );
-      }
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.getIndicators(
+      indicatorsExecute = mock(() => Promise.reject(new Error("DB Error")));
+      container.useCases.market.getIndicators.execute = indicatorsExecute;
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.getIndicators(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(500);
       expect(res.body.indicators).toEqual([]);
@@ -90,8 +102,12 @@ describe("MarketController", () => {
 
   describe("getLatestPrice", () => {
     it("最新価格を 200 で返すこと", async () => {
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.getLatestPrice(c)) as unknown as {
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.getLatestPrice(
+        c,
+        noopNext,
+      )) as unknown as {
         body: { timestamp: string };
         status: number;
       };
@@ -102,23 +118,27 @@ describe("MarketController", () => {
 
   describe("calculateZigZag", () => {
     it("計算に成功した場合 200 を返すこと", async () => {
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.calculateZigZag(
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.calculateZigZag(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("ZigZag calculate success");
     });
 
     it("例外発生時に 500 を返すこと", async () => {
-      if (mockRepos.priceRepo) {
-        mockRepos.priceRepo.getRecentPrices = mock(() =>
-          Promise.reject(new Error("Calculate Error")),
-        );
-      }
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.calculateZigZag(
+      calculateZigZagExecute = mock(() =>
+        Promise.reject(new Error("Calculate Error")),
+      );
+      container.useCases.market.calculateZigZag.execute =
+        calculateZigZagExecute;
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.calculateZigZag(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(500);
       expect(res.body.points).toEqual([]);
@@ -127,40 +147,32 @@ describe("MarketController", () => {
 
   describe("getRecentSessions", () => {
     it("データがある場合、セッション一覧を 200 で返すこと", async () => {
-      if (mockRepos.sessionRepo) {
-        mockRepos.sessionRepo.getThresholds = mock(() =>
-          Promise.resolve({
-            NY: { sessionName: "NY", smallThreshold: 50, largeThreshold: 100 },
-          }),
-        );
-        mockRepos.sessionRepo.findRecentSessions = mock(() =>
-          Promise.resolve([
-            {
-              id: 1,
-              date: "2026-03-27",
-              sessionName: "NY",
-              startTimeJst: "09:00",
-              endTimeJst: "15:00",
-              volatilityPoints: 150,
-              hasEvent: false,
-              hasHighImpactEvent: false,
-              eventsLinked: "",
-              condition: "Small" as const,
-            },
-          ]),
-        );
-      }
+      const session: SessionVolatility = {
+        id: 1,
+        date: "2026-03-27",
+        sessionName: "NY",
+        startTimeJst: "09:00",
+        endTimeJst: "15:00",
+        volatilityPoints: 150,
+        hasEvent: false,
+        hasHighImpactEvent: false,
+        eventsLinked: "",
+        condition: "Large",
+      };
+      getRecentSessionsExecute = mock(() => Promise.resolve([session]));
+      container.useCases.market.getRecentSessions.execute =
+        getRecentSessionsExecute;
 
-      const c = createMockContext(mockRepos, mockEnv, { limit: "5" });
-      const res = (await MarketController.getRecentSessions(
+      const c = createMockContext({}, mockEnv, { limit: "5" });
+      const controller = createMarketController(container);
+      const res = (await controller.getRecentSessions(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body.sessions).toHaveLength(1);
-      const session = res.body.sessions
-        ? (res.body.sessions[0] as { condition: string })
-        : { condition: "" };
-      expect(session.condition).toBe("Large");
+      const row = res.body.sessions?.[0] as SessionVolatility;
+      expect(row.condition).toBe("Large");
       expect(res.body.currentCondition).toBe("Large");
     });
 
@@ -173,11 +185,12 @@ describe("MarketController", () => {
         }),
       ) as unknown as typeof globalThis.fetch;
 
-      const c = createMockContext(mockRepos, mockEnv);
-      await MarketController.getRecentSessions(c);
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      await controller.getRecentSessions(c, noopNext);
 
       expect(globalThis.fetch).toHaveBeenCalled();
-      expect(mockRepos.batchRepo?.saveAll).toHaveBeenCalled();
+      expect(batchRepoSaveAll).toHaveBeenCalled();
 
       globalThis.fetch = originalFetch;
     });
@@ -188,9 +201,11 @@ describe("MarketController", () => {
         Promise.reject(new Error("Fetch Error")),
       ) as unknown as typeof globalThis.fetch;
 
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.getRecentSessions(
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.getRecentSessions(
         c,
+        noopNext,
       )) as unknown as MockResponse;
 
       expect(res.status).toBe(200);
@@ -200,14 +215,16 @@ describe("MarketController", () => {
     });
 
     it("例外発生時に 200 で空の結果を返すこと (要件に基づいた挙動)", async () => {
-      if (mockRepos.sessionRepo) {
-        mockRepos.sessionRepo.findRecentSessions = mock(() => {
-          throw new Error("Error");
-        });
-      }
-      const c = createMockContext(mockRepos, mockEnv);
-      const res = (await MarketController.getRecentSessions(
+      getRecentSessionsExecute = mock(() => {
+        throw new Error("Error");
+      });
+      container.useCases.market.getRecentSessions.execute =
+        getRecentSessionsExecute;
+      const c = createMockContext({}, mockEnv);
+      const controller = createMarketController(container);
+      const res = (await controller.getRecentSessions(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body.sessions).toEqual([]);
@@ -216,17 +233,29 @@ describe("MarketController", () => {
 
   describe("getEventReplay", () => {
     it("eventが指定されていない場合 400 を返すこと", async () => {
-      const c = createMockContext(mockRepos, mockEnv, { event: "" });
-      const res = (await MarketController.getEventReplay(
+      const c = createMockContext({}, mockEnv, { event: "" });
+      const controller = createMarketController(container);
+      const res = (await controller.getEventReplay(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(400);
     });
 
     it("正常な指標データ取得で 200 を返すこと", async () => {
-      const c = createMockContext(mockRepos, mockEnv, { event: "CPI" });
-      const res = (await MarketController.getEventReplay(
+      getReplayExecute = mock(() =>
+        Promise.resolve({
+          previousEvent: null,
+          candles: [],
+          historicalStats: [],
+        }),
+      );
+      container.useCases.market.getReplayData.execute = getReplayExecute;
+      const c = createMockContext({}, mockEnv, { event: "CPI" });
+      const controller = createMarketController(container);
+      const res = (await controller.getEventReplay(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty("candles");
@@ -234,14 +263,15 @@ describe("MarketController", () => {
     });
 
     it("例外発生時に 200 で空の構造を返すこと", async () => {
-      if (mockRepos.sessionRepo) {
-        mockRepos.sessionRepo.findPreviousEvent = mock(() =>
-          Promise.reject(new Error("Replay Error")),
-        );
-      }
-      const c = createMockContext(mockRepos, mockEnv, { event: "CPI" });
-      const res = (await MarketController.getEventReplay(
+      getReplayExecute = mock(() =>
+        Promise.reject(new Error("Replay Error")),
+      );
+      container.useCases.market.getReplayData.execute = getReplayExecute;
+      const c = createMockContext({}, mockEnv, { event: "CPI" });
+      const controller = createMarketController(container);
+      const res = (await controller.getEventReplay(
         c,
+        noopNext,
       )) as unknown as MockResponse;
       expect(res.status).toBe(200);
       expect(res.body.previousEvent).toBeNull();

@@ -46,16 +46,20 @@ export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
  * @responsibility: コントローラーのテストで Hono のリクエスト・レスポンスをシミュレートする。
  */
 export const createMockContext = (
-  repos: Partial<AppVariables>,
+  variables: Partial<AppVariables>,
   env: Partial<Bindings> = {},
   queryData: Record<string, string> = {},
+  jsonBody: Record<string, unknown> = {},
 ) => {
   return {
-    get: (key: keyof AppVariables) => repos[key],
+    get: (key: keyof AppVariables) => variables[key],
     json: mock((body: unknown, status: number) => ({ body, status })),
     req: {
-      valid: () => queryData,
+      valid: mock(async (target?: string) => {
+        if (target === "json") return jsonBody;
+        return queryData;
+      }),
     },
-    env: env,
+    env,
   } as unknown as Context<{ Bindings: Bindings; Variables: AppVariables }>;
 };
