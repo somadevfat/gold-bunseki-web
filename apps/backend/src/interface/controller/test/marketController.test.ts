@@ -29,7 +29,6 @@ describe("createMarketController", () => {
   let calculateZigZagExecute: ReturnType<typeof mock>;
   let getRecentSessionsExecute: ReturnType<typeof mock>;
   let getReplayExecute: ReturnType<typeof mock>;
-  let batchRepoSaveAll: ReturnType<typeof mock>;
   let mockEnv: Partial<Bindings>;
 
   beforeEach(() => {
@@ -52,12 +51,7 @@ describe("createMarketController", () => {
         historicalStats: [],
       }),
     );
-    batchRepoSaveAll = mock(() => Promise.resolve(true));
-
     container = {
-      repositories: {
-        batchRepo: { saveAll: batchRepoSaveAll },
-      },
       useCases: {
         market: {
           getIndicators: { execute: indicatorsExecute },
@@ -176,30 +170,25 @@ describe("createMarketController", () => {
       expect(res.body.currentCondition).toBe("Large");
     });
 
-    it("データが空の場合、自動同期を試行すること", async () => {
-      const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ sessions: [{ condition: "Mid" }] }),
-        }),
-      ) as unknown as typeof globalThis.fetch;
+    it("一覧取得ユースケースへ limit と analytics URL を渡すこと", async () => {
+      getRecentSessionsExecute = mock(() => Promise.resolve([]));
+      container.useCases.market.getRecentSessions.execute =
+        getRecentSessionsExecute;
 
-      const c = createMockContext({}, mockEnv);
+      const c = createMockContext({}, mockEnv, { limit: "7" });
       const controller = createMarketController(container);
       await controller.getRecentSessions(c, noopNext);
 
-      expect(globalThis.fetch).toHaveBeenCalled();
-      expect(batchRepoSaveAll).toHaveBeenCalled();
-
-      globalThis.fetch = originalFetch;
+      expect(getRecentSessionsExecute).toHaveBeenCalledWith(
+        7,
+        mockEnv.ANALYTICS_SERVICE_URL,
+      );
     });
 
-    it("自動同期中に fetch が失敗しても安全に続行すること", async () => {
-      const originalFetch = globalThis.fetch;
-      globalThis.fetch = mock(() =>
-        Promise.reject(new Error("Fetch Error")),
-      ) as unknown as typeof globalThis.fetch;
+    it("ユースケースが空配列を返すと 200 で currentCondition が Small のままになること", async () => {
+      getRecentSessionsExecute = mock(() => Promise.resolve([]));
+      container.useCases.market.getRecentSessions.execute =
+        getRecentSessionsExecute;
 
       const c = createMockContext({}, mockEnv);
       const controller = createMarketController(container);
@@ -210,8 +199,7 @@ describe("createMarketController", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.sessions).toEqual([]);
-
-      globalThis.fetch = originalFetch;
+      expect(res.body.currentCondition).toBe("Small");
     });
 
     it("例外発生時に 200 で空の結果を返すこと (要件に基づいた挙動)", async () => {

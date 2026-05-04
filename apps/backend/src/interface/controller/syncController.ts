@@ -1,6 +1,6 @@
 import { Context } from "hono";
 import { Bindings, AppVariables } from "../types";
-import { SyncPayload } from "../../infrastructure/repository/drizzleBatchRepository";
+import type { SyncPayload } from "../../domain/entities/syncPayload";
 import { AppContainer } from "../../app/container";
 
 /**

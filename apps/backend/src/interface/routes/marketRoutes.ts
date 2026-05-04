@@ -8,6 +8,7 @@ type BackendApp = OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>;
 
 /**
  * registerMarketRoutes は Market API のルートを登録します。
+ * @responsibility Market 関連のエンドポイントを Hono インスタンスに登録する。
  */
 export function registerMarketRoutes(
   app: BackendApp,

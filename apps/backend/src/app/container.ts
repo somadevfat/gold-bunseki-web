@@ -4,10 +4,12 @@ import { GetCommunityThreadsUseCase } from "../application/use_case/getCommunity
 import { GetLatestPriceUseCase } from "../application/use_case/getLatestPriceUseCase";
 import { GetRecentEventNamesUseCase } from "../application/use_case/getRecentEventNamesUseCase";
 import { GetRecentSessionsUseCase } from "../application/use_case/getRecentSessionsUseCase";
+import { GetRecentSessionsWithAutoSyncUseCase } from "../application/use_case/getRecentSessionsWithAutoSyncUseCase";
 import { GetReplayDataUseCase } from "../application/use_case/getReplayDataUseCase";
 import { GetSyncStatusUseCase } from "../application/use_case/getSyncStatusUseCase";
 import { db, DbType } from "../infrastructure/database/db";
 import { HttpAnalyticsService } from "../infrastructure/external/analyticsServiceImpl";
+import { HttpAnalyticsSyncPull } from "../infrastructure/external/analyticsSyncPullImpl";
 import { DrizzleBatchRepository } from "../infrastructure/repository/drizzleBatchRepository";
 import { DrizzleCommunityThreadRepository } from "../infrastructure/repository/drizzleCommunityThreadRepository";
 import { DrizzlePriceRepository } from "../infrastructure/repository/drizzlePriceRepository";
@@ -41,6 +43,9 @@ export function createAppContainer(
     "http://127.0.0.1:8000";
   const analyticsService = new HttpAnalyticsService(analyticsBaseUrl);
 
+  const getRecentSessionsInner = new GetRecentSessionsUseCase(sessionRepo);
+  const analyticsSyncPull = new HttpAnalyticsSyncPull();
+
   return {
     repositories: {
       priceRepo,
@@ -65,7 +70,11 @@ export function createAppContainer(
           analyticsService,
           zigzagRepo,
         ),
-        getRecentSessions: new GetRecentSessionsUseCase(sessionRepo),
+        getRecentSessions: new GetRecentSessionsWithAutoSyncUseCase(
+          getRecentSessionsInner,
+          batchRepo,
+          analyticsSyncPull,
+        ),
         getReplayData: new GetReplayDataUseCase(sessionRepo),
         getIndicators: new GetRecentEventNamesUseCase(sessionRepo),
       },

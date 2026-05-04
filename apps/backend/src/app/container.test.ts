@@ -4,7 +4,7 @@ import { CreateCommunityThreadUseCase } from '../application/use_case/createComm
 import { GetCommunityThreadsUseCase } from '../application/use_case/getCommunityThreadsUseCase';
 import { GetLatestPriceUseCase } from '../application/use_case/getLatestPriceUseCase';
 import { GetRecentEventNamesUseCase } from '../application/use_case/getRecentEventNamesUseCase';
-import { GetRecentSessionsUseCase } from '../application/use_case/getRecentSessionsUseCase';
+import { GetRecentSessionsWithAutoSyncUseCase } from '../application/use_case/getRecentSessionsWithAutoSyncUseCase';
 import { GetReplayDataUseCase } from '../application/use_case/getReplayDataUseCase';
 import { GetSyncStatusUseCase } from '../application/use_case/getSyncStatusUseCase';
 import { createAppContainer, freezeAppContainer } from './container';
@@ -22,7 +22,7 @@ describe('createAppContainer', () => {
     expect(container.useCases.sync.getStatus).toBeInstanceOf(GetSyncStatusUseCase);
     expect(container.useCases.market.getLatestPrice).toBeInstanceOf(GetLatestPriceUseCase);
     expect(container.useCases.market.calculateZigZag).toBeInstanceOf(CalculateZigZagUseCase);
-    expect(container.useCases.market.getRecentSessions).toBeInstanceOf(GetRecentSessionsUseCase);
+    expect(container.useCases.market.getRecentSessions).toBeInstanceOf(GetRecentSessionsWithAutoSyncUseCase);
     expect(container.useCases.market.getReplayData).toBeInstanceOf(GetReplayDataUseCase);
     expect(container.useCases.market.getIndicators).toBeInstanceOf(GetRecentEventNamesUseCase);
   });

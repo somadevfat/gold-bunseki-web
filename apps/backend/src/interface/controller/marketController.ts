@@ -1,5 +1,4 @@
 import type { RouteHandler } from "@hono/zod-openapi";
-import type { SyncPayload } from "../../infrastructure/repository/drizzleBatchRepository";
 import { AppContainer } from "../../app/container";
 import {
   calculateZigZagRoute,
@@ -63,31 +62,13 @@ export function createMarketController(container: AppContainer) {
       const { limit } = await c.req.valid("query");
       const count = parseInt(limit || "10", 10);
 
-      let sessions =
-        await container.useCases.market.getRecentSessions.execute(count);
-
-      if (sessions.length === 0) {
-        const analyticsUrl =
-          c.env.ANALYTICS_SERVICE_URL || "http://127.0.0.1:8000";
-        console.log(
-          "[Auto-Sync] Database is empty. Triggering automatic sync...",
+      const analyticsUrl =
+        c.env.ANALYTICS_SERVICE_URL || "http://127.0.0.1:8000";
+      const sessions =
+        await container.useCases.market.getRecentSessions.execute(
+          count,
+          analyticsUrl,
         );
-        try {
-          const response = await fetch(`${analyticsUrl}/analyze/sync`, {
-            method: "POST",
-          });
-          if (response.ok) {
-            const payload = (await response.json()) as SyncPayload;
-            await container.repositories.batchRepo.saveAll(payload);
-            sessions =
-              await container.useCases.market.getRecentSessions.execute(count);
-          }
-        } catch (syncErr: unknown) {
-          const error =
-            syncErr instanceof Error ? syncErr : new Error(String(syncErr));
-          console.warn("[Auto-Sync Failed]", error.message);
-        }
-      }
 
       return c.json(
         {
