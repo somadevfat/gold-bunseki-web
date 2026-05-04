@@ -25,3 +25,4 @@
 ### コミット
 
 - Conventional Commits に従う（`feat:`, `fix:`, `test:`, `refactor:` など）
+- **件名・本文・フッタは英語のみ**（`commitlint.config.js` の `english-only` が非 ASCII を拒否。日本語は不可）

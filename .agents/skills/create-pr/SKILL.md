@@ -28,7 +28,7 @@ bun run lint:all
 # 可能であればテストも実行
 bun run test:all
 ```
-すでにコミット＆Pushが済んでいるかを確認し、未実施の場合はコミット（Conventional Commitsに基づく英語メッセージ）とPushを行うこと。
+すでにコミット＆Pushが済んでいるかを確認し、未実施の場合はコミット（Conventional Commits・**英語のみ**；`commitlint` が日本語・非 ASCII を拒否）とPushを行うこと。
 
 ### ステップ 2: PRドラフトの設計と提示
 AIは以下の手順でPRのドラフトを作成し、ユーザーに提示する。

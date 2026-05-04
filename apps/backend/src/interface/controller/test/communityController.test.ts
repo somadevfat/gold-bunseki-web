@@ -102,7 +102,7 @@ describe('CommunityController', () => {
         category: 'Market Discussion',
       };
       const controller = createCommunityController(container);
-      const c = createMockContext({}, {}, body as Record<string, string>);
+      const c = createMockContext({}, {}, {}, body);
 
       // ## Act ##
       const res = (await controller.createThread(c)) as unknown as MockResponse;
@@ -124,7 +124,7 @@ describe('CommunityController', () => {
         category: 'General',
       };
       const controller = createCommunityController(container);
-      const c = createMockContext({}, {}, body as Record<string, string>);
+      const c = createMockContext({}, {}, {}, body);
 
       // ## Act & Assert ##
       await expect(controller.createThread(c)).rejects.toThrow('INSERT失敗');

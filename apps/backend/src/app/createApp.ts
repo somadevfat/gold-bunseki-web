@@ -8,17 +8,14 @@ import { getAllowedOrigins } from "../infrastructure/security/origins";
 import { AppContainer } from "./container";
 
 // Middleware / Config
-import { diMiddleware } from "../interface/middleware/diMiddleware";
 import { handleAppError, handleNotFound } from "../interface/http/errorResponse";
 import { requestIdMiddleware } from "../interface/middleware/requestIdMiddleware";
 import { structuredLogger } from "../interface/middleware/structuredLogger";
 import { syncBearerAuth } from "../interface/middleware/syncBearerAuth";
 import { Bindings, AppVariables } from "../interface/types";
 import { registerCommunityRoutes } from "../interface/routes/communityRoutes";
+import { registerMarketRoutes } from "../interface/routes/marketRoutes";
 import { registerSyncRoutes } from "../interface/routes/syncRoutes";
-
-// Controllers
-import { MarketController } from "../interface/controller/marketController";
 
 const defaultAllowedOrigins = getAllowedOrigins();
 
@@ -63,7 +60,6 @@ export function createApp(
     }),
   );
 
-  app.use("*", diMiddleware(container));
   app.use("/api/v1/sync/*", syncBearerAuth(options.apiToken));
 
   // Auth 関連 (better-auth)
@@ -84,13 +80,7 @@ export function createApp(
   );
 
   registerSyncRoutes(app, container);
-
-  app.openapi(routes.latestPriceRoute, MarketController.getLatestPrice);
-  app.openapi(routes.calculateZigZagRoute, MarketController.calculateZigZag);
-  app.openapi(routes.marketSessionsRoute, MarketController.getRecentSessions);
-  app.openapi(routes.eventReplayRoute, MarketController.getEventReplay);
-  app.openapi(routes.marketIndicatorsRoute, MarketController.getIndicators);
-
+  registerMarketRoutes(app, container);
   registerCommunityRoutes(app, container);
 
   app.notFound(handleNotFound);
