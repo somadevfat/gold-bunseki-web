@@ -1,30 +1,20 @@
 import { MiddlewareHandler } from 'hono';
-
-// Infrastructure
-import { db } from '../../infrastructure/database/db';
-import { DrizzleSyncRepository } from '../../infrastructure/repository/drizzleSyncRepository';
-import { DrizzlePriceRepository } from '../../infrastructure/repository/drizzlePriceRepository';
-import { DrizzleZigZagRepository } from '../../infrastructure/repository/drizzleZigZagRepository';
-import { DrizzleSessionRepository } from '../../infrastructure/repository/drizzleSessionRepository';
-import { DrizzleBatchRepository } from '../../infrastructure/repository/drizzleBatchRepository';
-import { DrizzleCommunityThreadRepository } from '../../infrastructure/repository/drizzleCommunityThreadRepository';
+import { AppContainer, appContainer } from '../../app/container';
 
 /**
  * diMiddleware は、リクエスト毎に必要な依存オブジェクトを Context に注入します。
  * @responsibility: インフラ層の具体的実装をインスタンス化し、インターフェースを通じてアプリケーション層に提供する。
  */
-export const diMiddleware = (): MiddlewareHandler => {
+export const diMiddleware = (container: AppContainer = appContainer): MiddlewareHandler => {
   return async (c, next) => {
+    const { repositories } = container;
 
-    // 依存オブジェクトの注入
-    // Note: パフォーマンス向上のため、必要に応じてシングルトン化を検討可能ですが、
-    // 現時点ではクリーンなステート管理のためリクエスト毎にセットします。
-    c.set('priceRepo', new DrizzlePriceRepository(db));
-    c.set('zigzagRepo', new DrizzleZigZagRepository(db));
-    c.set('sessionRepo', new DrizzleSessionRepository(db));
-    c.set('syncRepo', new DrizzleSyncRepository(db));
-    c.set('batchRepo', new DrizzleBatchRepository(db));
-    c.set('communityThreadRepo', new DrizzleCommunityThreadRepository(db));
+    // 依存オブジェクトの注入。インスタンス生成は AppContainer に集約する。
+    c.set('priceRepo', repositories.priceRepo);
+    c.set('zigzagRepo', repositories.zigzagRepo);
+    c.set('sessionRepo', repositories.sessionRepo);
+    c.set('syncRepo', repositories.syncRepo);
+    c.set('batchRepo', repositories.batchRepo);
 
     await next();
   };

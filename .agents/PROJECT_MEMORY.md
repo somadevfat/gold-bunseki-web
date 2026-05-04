@@ -5,6 +5,46 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-04 - PR #82 Geminiレビュー対応
+
+- **達成したタスク**:
+  - PR #82 の Gemini Code Assist コメント3件を確認し、全て対応。
+  - `freezeAppContainer` を追加し、グローバル `appContainer` の top-level / repositories / useCases / useCases.community を `Object.freeze` で保護。
+  - CommunityController の独自 `console.error` / catch を削除し、例外を `handleAppError` に委譲する設計へ変更。
+  - `diMiddleware` から不要になった `communityThreadRepo` の Context 注入を削除し、`AppVariables` 型定義からも削除。
+  - PR本文のエビデンスを最新結果（2026-05-04 10:15 JST）へ更新し、各レビューコメントへ対応済み返信を追加。
+
+- **検証結果**:
+  - targeted backend tests: 18 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 91 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #82 はレビュー対応済み。追加コメントがなければマージ可能。
+
+### 2026-05-03 - Issue #81 AppContainer導入と掲示板ルート分離PR
+
+- **達成したタスク**:
+  - Issue #81 `[BE] AppContainerで掲示板APIの依存生成とルート登録を整理する` を作成。
+  - `refactor/issue-81-app-container-community` ブランチを `develop` から作成。
+  - `apps/backend/src/app/container.ts` を追加し、Repository / 掲示板 UseCase の生成を AppContainer に集約。
+  - `apps/backend/src/app/createApp.ts` を追加し、Hono アプリの組み立てを `createApp(container, options)` として切り出し、テストで mock container を注入可能にした。
+  - `CommunityController` を static class から `createCommunityController(container)` の handler factory へ変更。
+  - 掲示板ルート登録を `apps/backend/src/interface/routes/communityRoutes.ts` に分離。
+  - `index.ts` を startup env validation / app生成 / Bun.serve export の起動責務へ縮小。
+  - PR #82 `https://github.com/somadevfat/gold-bunseki-web/pull/82` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun test src/app/container.test.ts src/interface/routes/test/apiIntegration.test.ts src/interface/controller/test/communityController.test.ts src/securityMiddleware.test.ts`: 16 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 90 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #82 マージ後、同じパターンで Market / Sync routes/controller の依存生成と route 登録を段階的に移行できる。
+  - 未追跡の `.agents/skills/self-implement/` と `docs/archives/auth_strategy_zenn.md` は今回PRに含めていない。
+
 ### 2026-05-02 - CORS Origin マージ修正 Issue #79 / PR #80
 
 - **達成したタスク**:
