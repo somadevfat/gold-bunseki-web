@@ -12,7 +12,10 @@ export type AppClient = {
         sessions: { $get: (args: { query: { limit: string } }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<SessionsResponse> }> };
       }
       community: {
-        threads: { $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThreadsResponse> }> };
+        threads: {
+          $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThreadsResponse> }>;
+          $post: (args: { json: CreateCommunityThreadInput }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThread> }>;
+        };
       }
     }
   }
@@ -74,6 +77,12 @@ export type CommunityThread = {
 
 export type CommunityThreadsResponse = {
   threads: CommunityThread[];
+};
+
+export type CreateCommunityThreadInput = {
+  title: string;
+  body: string;
+  category?: string;
 };
 
 export type Candle = {

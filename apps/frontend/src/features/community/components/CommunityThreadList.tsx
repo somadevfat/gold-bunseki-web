@@ -5,8 +5,8 @@ type CommunityThreadListProps = {
 };
 
 /**
- * CommunityThreadList は掲示板スレッド一覧を表示するコンポーネントです。
- * @responsibility APIから取得した投稿一覧・空状態をユーザーに分かりやすく表示する。
+ * CommunityThreadList displays community threads.
+ * @responsibility Render fetched posts and a clear empty state for the community page.
  */
 export function CommunityThreadList({ threads }: CommunityThreadListProps) {
   if (threads.length === 0) {

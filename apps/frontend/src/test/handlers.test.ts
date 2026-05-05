@@ -125,4 +125,38 @@ describe("MSW abnormal scenarios", () => {
     expect(body.success).toBe(true);
     expect(res.headers.get("set-cookie")).toContain("Max-Age=0");
   });
+
+  it("掲示板投稿作成APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "CPI reaction plan",
+        body: "Watch the first impulse and NY continuation.",
+        category: "Event Watch",
+      }),
+    });
+    const body = await res.json() as { title: string; replyCount: number };
+
+    expect(res.status).toBe(201);
+    expect(body.title).toBe("CPI reaction plan");
+    expect(body.replyCount).toBe(0);
+  });
+
+  it("掲示板投稿作成APIのバリデーションエラーを再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "",
+        body: "",
+      }),
+    });
+
+    expect(res.status).toBe(400);
+  });
 });
