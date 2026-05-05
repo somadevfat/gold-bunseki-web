@@ -1,13 +1,12 @@
 import { expect, describe, it, mock, beforeEach } from 'bun:test';
-import { CommunityController } from '../communityController';
+import { createCommunityController } from '../communityController';
 import { createMockContext } from '../../test/testHelpers';
-import { AppVariables } from '../../types';
 import { CommunityThread } from '../../../domain/entities/communityThread';
+import { AppContainer } from '../../../app/container';
 
 interface MockResponse {
   body: Record<string, unknown> & {
     threads?: CommunityThread[];
-    error?: string;
     id?: string;
     title?: string;
   };
@@ -28,19 +27,21 @@ const mockThread: CommunityThread = {
  * @responsibility: 掲示板スレッドの一覧取得・作成APIの正常系・異常系を検証する。
  */
 describe('CommunityController', () => {
-  it('クラスをインスタンス化できること', () => {
-    expect(new CommunityController()).toBeInstanceOf(CommunityController);
-  });
-
-  let mockRepos: Partial<AppVariables>;
+  let container: AppContainer;
+  let getThreadsExecute: ReturnType<typeof mock>;
+  let createThreadExecute: ReturnType<typeof mock>;
 
   beforeEach(() => {
-    mockRepos = {
-      communityThreadRepo: {
-        findAll: mock(() => Promise.resolve([mockThread])),
-        create: mock(() => Promise.resolve(mockThread)),
-      } as unknown as AppVariables['communityThreadRepo'],
-    };
+    getThreadsExecute = mock(() => Promise.resolve([mockThread]));
+    createThreadExecute = mock(() => Promise.resolve(mockThread));
+    container = {
+      useCases: {
+        community: {
+          getThreads: { execute: getThreadsExecute },
+          createThread: { execute: createThreadExecute },
+        },
+      },
+    } as unknown as AppContainer;
   });
 
   // ==========================================
@@ -49,47 +50,43 @@ describe('CommunityController', () => {
   describe('getThreads', () => {
     it('スレッド一覧を取得して 200 を返すこと', async () => {
       // ## Arrange ##
-      const c = createMockContext(mockRepos);
+      const controller = createCommunityController(container);
+      const c = createMockContext({});
 
       // ## Act ##
-      const res = (await CommunityController.getThreads(c)) as unknown as MockResponse;
+      const res = (await controller.getThreads(c)) as unknown as MockResponse;
 
       // ## Assert ##
       expect(res.status).toBe(200);
       expect(res.body.threads).toHaveLength(1);
       expect(res.body.threads?.[0].id).toBe(mockThread.id);
+      expect(getThreadsExecute).toHaveBeenCalledTimes(1);
     });
 
     it('リポジトリが空配列を返した場合、空の threads 配列と 200 を返すこと', async () => {
       // ## Arrange ##
-      if (mockRepos.communityThreadRepo) {
-        mockRepos.communityThreadRepo.findAll = mock(() => Promise.resolve([]));
-      }
-      const c = createMockContext(mockRepos);
+      getThreadsExecute = mock(() => Promise.resolve([]));
+      container.useCases.community.getThreads.execute = getThreadsExecute;
+      const controller = createCommunityController(container);
+      const c = createMockContext({});
 
       // ## Act ##
-      const res = (await CommunityController.getThreads(c)) as unknown as MockResponse;
+      const res = (await controller.getThreads(c)) as unknown as MockResponse;
 
       // ## Assert ##
       expect(res.status).toBe(200);
       expect(res.body.threads).toHaveLength(0);
     });
 
-    it('リポジトリがエラーをスローした場合、500 を返すこと', async () => {
+    it('ユースケースがエラーをスローした場合、グローバルエラーハンドラーへ委譲すること', async () => {
       // ## Arrange ##
-      if (mockRepos.communityThreadRepo) {
-        mockRepos.communityThreadRepo.findAll = mock(() =>
-          Promise.reject(new Error('DB接続エラー')),
-        );
-      }
-      const c = createMockContext(mockRepos);
+      getThreadsExecute = mock(() => Promise.reject(new Error('DB接続エラー')));
+      container.useCases.community.getThreads.execute = getThreadsExecute;
+      const controller = createCommunityController(container);
+      const c = createMockContext({});
 
-      // ## Act ##
-      const res = (await CommunityController.getThreads(c)) as unknown as MockResponse;
-
-      // ## Assert ##
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('スレッド一覧の取得に失敗しました');
+      // ## Act & Assert ##
+      await expect(controller.getThreads(c)).rejects.toThrow('DB接続エラー');
     });
   });
 
@@ -104,37 +101,33 @@ describe('CommunityController', () => {
         body: '前回CPIでは発表直後の初動より、NY後半の戻りが大きかったです。',
         category: 'Market Discussion',
       };
-      const c = createMockContext(mockRepos, {}, body as Record<string, string>);
+      const controller = createCommunityController(container);
+      const c = createMockContext({}, {}, {}, body);
 
       // ## Act ##
-      const res = (await CommunityController.createThread(c)) as unknown as MockResponse;
+      const res = (await controller.createThread(c)) as unknown as MockResponse;
 
       // ## Assert ##
       expect(res.status).toBe(201);
       expect(res.body.id).toBe(mockThread.id);
       expect(res.body.title).toBe(mockThread.title);
+      expect(createThreadExecute).toHaveBeenCalledWith(body);
     });
 
-    it('リポジトリがエラーをスローした場合、500 を返すこと', async () => {
+    it('ユースケースがエラーをスローした場合、グローバルエラーハンドラーへ委譲すること', async () => {
       // ## Arrange ##
-      if (mockRepos.communityThreadRepo) {
-        mockRepos.communityThreadRepo.create = mock(() =>
-          Promise.reject(new Error('INSERT失敗')),
-        );
-      }
+      createThreadExecute = mock(() => Promise.reject(new Error('INSERT失敗')));
+      container.useCases.community.createThread.execute = createThreadExecute;
       const body = {
         title: 'NFP後の戻りについて',
         body: '本文です。',
         category: 'General',
       };
-      const c = createMockContext(mockRepos, {}, body as Record<string, string>);
+      const controller = createCommunityController(container);
+      const c = createMockContext({}, {}, {}, body);
 
-      // ## Act ##
-      const res = (await CommunityController.createThread(c)) as unknown as MockResponse;
-
-      // ## Assert ##
-      expect(res.status).toBe(500);
-      expect(res.body.error).toBe('スレッドの作成に失敗しました');
+      // ## Act & Assert ##
+      await expect(controller.createThread(c)).rejects.toThrow('INSERT失敗');
     });
   });
 });

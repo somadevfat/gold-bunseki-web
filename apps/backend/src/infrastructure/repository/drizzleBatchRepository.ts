@@ -8,52 +8,9 @@ import {
   zigzagPoints 
 } from '../database/schema';
 import { sql } from 'drizzle-orm';
+import type { SyncPayload } from '../../domain/entities/syncPayload';
 
-export interface SyncPayload {
-  events?: Array<{
-    datetimeJst: string;
-    eventName: string;
-    importance: string;
-    actual: number | null;
-    forecast: number | null;
-    previous: number | null;
-  }>;
-  sessions?: Array<{
-    date: string;
-    sessionName: string;
-    startTimeJst: string;
-    endTimeJst: string;
-    volatilityPoints: number;
-    hasEvent: boolean;
-    hasHighImpactEvent: boolean;
-    eventsLinked: string;
-  }>;
-  candles?: Array<{
-    datetimeJst: string;
-    sessionName: string;
-    openPrice: number;
-    highPrice: number;
-    lowPrice: number;
-    closePrice: number;
-  }>;
-  thresholds?: Array<{
-    sessionName: string;
-    smallThreshold: number;
-    largeThreshold: number;
-  }>;
-  prices?: Array<{
-    timestamp: string;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-  }>;
-  zigzagPoints?: Array<{
-    timestamp: string;
-    price: number;
-    type: string;
-  }>;
-}
+export type { SyncPayload };
 
 /**
  * DrizzleBatchRepository は、Python側からPushされた解析データを PostgreSQL に一括保存するリポジトリの実装です。

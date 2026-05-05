@@ -30,11 +30,20 @@ bun run test:all
 # Evidences (Screenshots, Test Results, etc)
 
 <!-- 正常に機能していることが分かるテスト結果のログ、ブラウザのスクリーンショットやその他のエビデンスを添付・記載してください -->
+<!-- 以下の情報を必ず記載してください:                                         -->
+<!--   - 実行日時: YYYY-MM-DD HH:MM (JST)                                    -->
+<!--   - ブランチ名: git branch --show-current                                -->
+<!--   - テスト結果ログ / スクリーンショット                                        -->
 
 <details>
 <summary>エビデンスを展開する</summary>
 
-![alt text](image url)
+- 実行日時: 
+- ブランチ: 
+
+```
+# テスト結果ログをここに貼る
+```
 
 </details>
 

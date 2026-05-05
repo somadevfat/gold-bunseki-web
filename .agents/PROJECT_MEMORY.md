@@ -5,6 +5,300 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-04 - Issue #83 Sync APIのAppContainer/routes移行PR
+
+- **達成したタスク**:
+  - Issue #83 `[BE] Sync APIをAppContainer注入と専用routesへ移行する` を作成。
+  - `refactor/issue-83-sync-container-routes` ブランチを `develop` から作成。
+  - AppContainer に Sync 用 `GetSyncStatusUseCase` の配線を追加。
+  - `SyncController` を static class から `createSyncController(container)` の handler factory に変更。
+  - `apps/backend/src/interface/routes/syncRoutes.ts` を追加し、Sync API の route 登録を `createApp.ts` から分離。
+  - `syncRepo` の Hono Context 注入と `AppVariables` 型定義を削除。
+  - セルフレビューで、Sync POST 異常系の既存API契約 `{ success: false, message }` を維持するよう調整。
+  - PR #84 `https://github.com/somadevfat/gold-bunseki-web/pull/84` を `develop` 向けに作成。
+
+- **検証結果**:
+  - targeted backend tests: 18 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 90 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #84 マージ後、MarketController / marketRoutes を同じパターンで移行すると、`diMiddleware` から `priceRepo`, `zigzagRepo`, `sessionRepo`, `batchRepo` の Context 注入も段階的に削除できる。
+  - 未追跡の `.agents/skills/self-implement/` と `docs/archives/auth_strategy_zenn.md` は今回PRに含めていない。
+
+### 2026-05-04 - PR #82 Geminiレビュー対応
+
+- **達成したタスク**:
+  - PR #82 の Gemini Code Assist コメント3件を確認し、全て対応。
+  - `freezeAppContainer` を追加し、グローバル `appContainer` の top-level / repositories / useCases / useCases.community を `Object.freeze` で保護。
+  - CommunityController の独自 `console.error` / catch を削除し、例外を `handleAppError` に委譲する設計へ変更。
+  - `diMiddleware` から不要になった `communityThreadRepo` の Context 注入を削除し、`AppVariables` 型定義からも削除。
+  - PR本文のエビデンスを最新結果（2026-05-04 10:15 JST）へ更新し、各レビューコメントへ対応済み返信を追加。
+
+- **検証結果**:
+  - targeted backend tests: 18 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 91 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #82 はレビュー対応済み。追加コメントがなければマージ可能。
+
+### 2026-05-03 - Issue #81 AppContainer導入と掲示板ルート分離PR
+
+- **達成したタスク**:
+  - Issue #81 `[BE] AppContainerで掲示板APIの依存生成とルート登録を整理する` を作成。
+  - `refactor/issue-81-app-container-community` ブランチを `develop` から作成。
+  - `apps/backend/src/app/container.ts` を追加し、Repository / 掲示板 UseCase の生成を AppContainer に集約。
+  - `apps/backend/src/app/createApp.ts` を追加し、Hono アプリの組み立てを `createApp(container, options)` として切り出し、テストで mock container を注入可能にした。
+  - `CommunityController` を static class から `createCommunityController(container)` の handler factory へ変更。
+  - 掲示板ルート登録を `apps/backend/src/interface/routes/communityRoutes.ts` に分離。
+  - `index.ts` を startup env validation / app生成 / Bun.serve export の起動責務へ縮小。
+  - PR #82 `https://github.com/somadevfat/gold-bunseki-web/pull/82` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun test src/app/container.test.ts src/interface/routes/test/apiIntegration.test.ts src/interface/controller/test/communityController.test.ts src/securityMiddleware.test.ts`: 16 pass / 0 fail
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run test:all`: frontend 45 pass / backend 90 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #82 マージ後、同じパターンで Market / Sync routes/controller の依存生成と route 登録を段階的に移行できる。
+  - 未追跡の `.agents/skills/self-implement/` と `docs/archives/auth_strategy_zenn.md` は今回PRに含めていない。
+
+### 2026-05-02 - CORS Origin マージ修正 Issue #79 / PR #80
+
+- **達成したタスク**:
+  - Issue #79 `[BE] fix: CORS許可Origin設定をenv上書きに依存しない実装に修正する` を作成。
+  - `fix/issue-79-cors-origin-merge` ブランチを `develop` から作成し、PR #80 を `develop` 向けに作成。
+  - `getAllowedOrigins` をデフォルト + env 追加のマージ方式へ変更。
+  - テストコードからドメインのハードコードを除去し、`defaultAllowedOrigins` を参照する形に変更（どの環境でも通るテストへ）。
+  - `OPTIONS /api/auth/sign-in/social` の preflight テストを追加。
+  - `.env.example` に `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` を追加。
+
+- **検証結果**:
+  - `bun test src/infrastructure/security/origins.test.ts src/securityMiddleware.test.ts`: 9 pass / 0 fail
+  - `bun run test:all`: 89 pass / 0 fail
+
+- **次回への申し送り事項**:
+  - PR #80 マージ後、Backend CD を再実行し、本番で CORS 再発しないことを確認する。
+
+### 2026-05-02 - Issueクローズ時の記録ルールをスキルへ追加
+
+- **達成したタスク**:
+  - `.agents/skills/agile-issue/SKILL.md` を更新。
+  - Issue を閉じるときは無言で close せず、対応内容・検証・残課題をコメントに残すルールを追加。
+  - 複数Issueをまとめて閉じる場合も、各Issueに固有の対応内容を書くルールを明記。
+  - `gh issue close --comment` のHEREDOC例を追加。
+
+- **検証結果**:
+  - `ReadLints` で `.agents/skills/agile-issue/SKILL.md` に診断エラーなし。
+
+- **次回への申し送り事項**:
+  - 今後Issueを閉じる際は、必ず対応内容・検証・残課題をGitHubコメントとして残す。
+
+### 2026-05-02 - 本番ログイン完了とCD関連Issueクローズ
+
+- **達成したタスク**:
+  - ユーザー側で Google OAuth の Web クライアント設定、本番 `.env` の認証/CORS設定を反映し、本番フロントからGoogleログインできることを確認。
+  - Cloudflare Web Analytics の `ERR_BLOCKED_BY_CLIENT` は広告ブロッカー由来でアプリ/認証とは無関係と確認。
+  - Googleログイン専用の既存Issueは存在しないことを確認。
+  - CDが無事に動いたことを受け、完了済みのCD修正Issue #60, #63, #66, #69, #72 を completed としてクローズ。
+
+- **次回への申し送り事項**:
+  - 認証CORS再発防止のローカル差分（`getAllowedOrigins` のデフォルト+追加Origin化、preflightテスト追加、`.env.example` 更新）は未PR。必要なら次にPR化する。
+  - OAuth client secret はチャットに貼られたため、ポートフォリオ公開前にGoogle Cloud Consoleで再生成し、本番 `.env` を更新すること。
+
+### 2026-05-02 - 本番GoogleログインCORS原因調査と修正
+
+- **達成したタスク**:
+  - 本番フロント `https://fanda-dev.com` から `https://api.fanda-dev.com/api/auth/get-session` / `sign-in/social` へのリクエストが CORS で失敗しているログを確認。
+  - 本番APIへ preflight / get-session を `curl` で確認し、`Access-Control-Allow-Credentials` は返るが `Access-Control-Allow-Origin` が返らないことを確認。
+  - 原因は `ALLOWED_ORIGINS` が設定されている場合、コード側の本番デフォルト Origin (`https://fanda-dev.com`, `https://www.fanda-dev.com`) を上書きして消してしまう実装。
+  - `getAllowedOrigins` を「デフォルト Origin + env 追加 Origin」のマージ方式へ変更し、env の古い/不足設定で本番Originが消えないように修正。
+  - `OPTIONS /api/auth/sign-in/social` の preflight が `https://fanda-dev.com` から許可されるテストを追加。
+  - `.env.example` に `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` を追加。
+
+- **検証結果**:
+  - `cd apps/backend && bun test src/infrastructure/security/origins.test.ts src/securityMiddleware.test.ts`: pass
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `cd apps/backend && bun run lint`: pass
+  - `ReadLints`: 関連ファイルに診断エラーなし。
+
+- **次回への申し送り事項**:
+  - 即時復旧する場合は本番GCEの `.env` の `ALLOWED_ORIGINS` に `https://fanda-dev.com,https://www.fanda-dev.com` が含まれるよう更新し、backend を再起動する。
+  - コード修正を反映する場合はPR/マージ後に Backend CD を再実行し、preflightで `Access-Control-Allow-Origin: https://fanda-dev.com` が返ることを確認する。
+  - CORS解消後にGoogle OAuth側で失敗する場合は、Google Cloud Console の Authorized redirect URI に `https://api.fanda-dev.com/api/auth/callback/google` が登録されているか確認する。
+
+### 2026-05-02 - ノートPC MT5定時同期運用のIssue追加
+
+- **達成したタスク**:
+  - MT5同期はノートPCを同期サーバーとして使い、決まった時刻に本番BackendへPOSTする方針に決定。
+  - GitHub Issue を確認し、MT5/同期/ノートPC/ポートフォリオ系の重複Issueがないことを確認。
+  - フロントのStatusページは既存Issue #42 があるため新規作成せず、同期運用に直接必要な4件のみ追加。
+  - 追加Issue:
+    - #75 `[Analytics] MT5から定時POSTするノートPC同期スクリプトを実装する`
+    - #76 `[Ops] ノートPC同期サーバーの自動起動と復旧を設定する`
+    - #77 `[BE] 定時同期POSTの受信結果と最終同期状態を確認できるようにする`
+    - #78 `[Docs] ノートPCからのMT5定時同期運用手順を整備する`
+
+- **次回への申し送り事項**:
+  - まず #75 で定時POSTの正常系を通し、次に #76 でノートPC再起動後の復旧、#77 で同期状態確認、#78 で運用手順化を進める。
+  - #42 のStatusページ実装時には #77 の同期ステータス取得結果を表示対象にするとよい。
+
+### 2026-05-02 - 転職用ポートフォリオ完成ロードマップ作成
+
+- **達成したタスク**:
+  - 自社開発転職用ポートフォリオとして Gold Volatility Analyzer を仕上げるための作業一覧を整理。
+  - `docs/portfolio-roadmap.md` を追加し、機能完成、データ同期、本番運用、セキュリティ、テスト、UI/UX、ドキュメント、面接対策、アプリ理解チェックリストをMarkdownで作成。
+  - AI主導で実装された箇所を自分の言葉で説明できるようにするため、Backend / Frontend / Auth / Analytics / CI/CD の理解項目をチェックリスト化。
+
+- **検証結果**:
+  - `ReadLints` で `docs/portfolio-roadmap.md` に診断エラーなし。
+
+- **次回への申し送り事項**:
+  - 次は `docs/portfolio-roadmap.md` の優先順位に沿って、本番安定化、データ同期環境の決定、README整備、面接回答作成を進める。
+  - 特に「Googleログイン本番動作」「掲示板API本番表示」「MT5同期環境」はポートフォリオ完成の最優先項目。
+
+### 2026-05-01 - Backend deploy後の一時的502対策
+
+- **達成したタスク**:
+  - Backend CD が GCR pull と migration 成功後、`docker-compose up -d --force-recreate backend` で `db` まで再作成し、その直後の nginx 経由 health check が 502 で失敗していることを確認。
+  - Issue #72 `[CI/CD] fix: avoid DB recreate and wait for backend health` を作成。
+  - `.github/workflows/cd-backend.yml` の backend 再作成に `--no-deps` を追加し、PostgreSQL コンテナを再作成しないように修正。
+  - post-deploy health check のリトライを 5回/10秒から 30回/60秒へ延長。
+  - health check 失敗時に `docker-compose ps` と `docker-compose logs --tail=80 backend` を出力するようにし、次回障害時の診断情報を増やした。
+  - PR #73 `https://github.com/somadevfat/gold-bunseki-web/pull/73` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #73 マージ後、Backend CD ログで `Recreating ...-db` が出ないことを確認する。
+  - もしまだ 502 が出る場合は、追加出力される backend logs と compose ps を確認してアプリ起動失敗かnginx upstream問題か切り分ける。
+
+### 2026-05-01 - sudo docker のGCR認証不足修正
+
+- **達成したタスク**:
+  - Backend CD が `artifactregistry.repositories.downloadArtifacts` の unauthenticated error で `docker-compose pull backend` に失敗していることを確認。
+  - 原因は `gcloud auth configure-docker` がSSHユーザー側のDocker configだけを更新し、実際の `docker-compose` は `sudo` 経由でroot Dockerとして動いていたため、root側にGCR認証が無いこと。
+  - Issue #69 `[CI/CD] fix: authenticate sudo docker to GCR before backend pull` を作成。
+  - `.github/workflows/cd-backend.yml` で `gcloud auth configure-docker gcr.io --quiet` に絞り、`gcloud auth print-access-token | sudo docker login -u oauth2accesstoken --password-stdin https://gcr.io` を追加。
+  - PR #70 `https://github.com/somadevfat/gold-bunseki-web/pull/70` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #70 マージ後、Backend CD ログで `Login Succeeded` 相当の docker login 成功と `docker-compose pull backend` 成功を確認する。
+
+### 2026-05-01 - GCE deploy directory 同期漏れの修正PR
+
+- **達成したタスク**:
+  - Backend CD ログの `docker-compose config` に `backend.build.context` が出ていることから、GCE上の `~/gold-bunseki-web` が古い `docker-compose.yml` / 古いコードのまま使われていることを根本原因として特定。
+  - Issue #66 `[CI/CD] fix: sync GCE deploy repo before docker-compose` を作成。
+  - `.github/workflows/cd-backend.yml` のSSH内で `git fetch origin main` → `git reset --hard ${{ github.sha }}` → `git rev-parse HEAD` の一致確認を追加し、デプロイ対象SHAへGCE作業ディレクトリを同期するよう修正。
+  - PR #67 `https://github.com/somadevfat/gold-bunseki-web/pull/67` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #67 マージ後、Backend CDログで `git rev-parse HEAD` が workflow の `github.sha` と一致することを確認する。
+  - その後 `docker-compose config` の backend が `build.context` ではなく `image: gcr.io/...:<sha>` を使うことを確認する。
+
+### 2026-05-01 - Backend CD が古い image を掴む問題の追加修正
+
+- **達成したタスク**:
+  - PR #61 マージ後の CD でも `$ drizzle-kit migrate` が実行されていることを確認。`origin/main` の `db:migrate` は runtime migrator に更新済みだったため、GCE 側の `sudo docker-compose` が期待した `BACKEND_IMAGE` を使っていない疑いを特定。
+  - Issue #63 `[CI/CD] fix: pass backend image explicitly to docker-compose` を作成。
+  - `.github/workflows/cd-backend.yml` の全 `docker-compose` 呼び出しを `sudo env BACKEND_IMAGE="$BACKEND_IMAGE" docker-compose ...` に変更し、sudo 経由でも SHA タグ付き image を確実に compose に渡すよう修正。
+  - `docker-compose config` の backend セクションをデプロイログへ出力し、実際に使われる image を確認できるようにした。
+  - migration 実行を `bun run db:migrate` ではなく `bun run src/infrastructure/database/migrate.ts` へ変更し、古い package script を掴んだ場合でも検出しやすくした。
+  - PR #64 `https://github.com/somadevfat/gold-bunseki-web/pull/64` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #64 マージ後の Backend CD ログで `docker-compose config` に `gcr.io/.../gold-vola-backend:<main SHA>` が表示されることを確認する。
+  - migration ログが `$ drizzle-kit migrate` ではなく `bun run src/infrastructure/database/migrate.ts` になっていることを確認する。
+
+### 2026-05-01 - Backend CD migration 失敗の追加修正
+
+- **達成したタスク**:
+  - PR #58 マージ後の Backend CD で `drizzle-kit migrate` が `/bin/sh: drizzle-kit: not found` により失敗したことを受け、追加 Issue #60 を作成。
+  - `drizzle-kit` CLI に依存せず本番コンテナ内で migration を実行できるよう、`apps/backend/src/infrastructure/database/migrate.ts` を追加。
+  - `drizzle-orm/postgres-js/migrator` を使って `./migrations` の SQL migration を適用し、完了後に postgres client を close する runtime migration script にした。
+  - `apps/backend/package.json` の `db:migrate` を `bun run src/infrastructure/database/migrate.ts` に差し替え、`drizzle-kit` は devDependencies に戻した。
+  - PR #61 `https://github.com/somadevfat/gold-bunseki-web/pull/61` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `cd apps/backend && bunx tsc --noEmit`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+  - ローカル Docker build は `bun install --production` の dependency resolution で数分停止したため中断。CI/CD上の再実行で最終確認する。
+
+- **次回への申し送り事項**:
+  - PR #61 マージ後、Backend CD が `bun run db:migrate` を runtime script として実行し、`drizzle-kit` not found が解消することを確認する。
+  - その後 `/health` と `/api/auth/get-session` の post-deploy check、さらに `/doc` に community/auth 追加後の内容が反映されることを確認する。
+
+### 2026-05-01 - Backend CD migration 実行対応とPR作成
+
+- **達成したタスク**:
+  - GitHub Issue #57 `[CI/CD] fix: run backend migrations during deployment` を作成。
+  - `fix/backend-cd-migrations` ブランチで、掲示板 `community_threads` と Better Auth の `user/session/account/verification` テーブルを作成する Drizzle migration を追加。
+  - 本番 backend イメージ内で `bun run db:migrate` が実行できるよう、`drizzle-kit` を backend の production dependency へ移動。
+  - `.github/workflows/cd-backend.yml` で、GCE デプロイ時に `docker-compose run --rm backend bun run db:migrate` を実行し、その後 `docker-compose up -d --force-recreate backend` で最新コンテナを確実に再作成するよう修正。
+  - デプロイ後に `/health` と `/api/auth/get-session` をリトライ付きで確認する疎通チェックを追加。
+  - PR #58 `https://github.com/somadevfat/gold-bunseki-web/pull/58` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: pass
+
+- **次回への申し送り事項**:
+  - PR #58 マージ後、Backend CD が実際に migration → force recreate → health/auth checks を通過することを Actions ログで確認する。
+  - 本番 `/doc` に `/api/v1/community/threads` が表示され、`/api/auth/get-session` が 404 ではなくなることを確認する。
+
+### 2026-05-01 - 本番ログイン不可・掲示板APIエラー調査
+
+- **達成したタスク**:
+  - 本番 `https://api.fanda-dev.com` の `/api/v1/community/threads`、`/api/auth/get-session`、`/api/auth/sign-in/social` を確認し、いずれも 404 を返すことを確認。
+  - 本番 `/doc` の OpenAPI に `/api/v1/community/threads` が含まれていない一方、最新 `origin/main` には `CommunityController` と Better Auth の `/api/auth/**` マウントが含まれることを確認。
+  - GitHub Actions の CD Backend は成功しているが、ログ上 `docker-compose up -d backend` が `backend is up-to-date` と表示され、稼働コンテナが最新イメージへ再作成されていない疑いを記録。
+  - `apps/backend/migrations/` に `community_threads` および Better Auth の `user/session/account/verification` テーブルを作成する migration が存在しないことを確認。
+
+- **根本原因候補**:
+  - 本番バックエンドが最新コード（community/auth 追加後）で稼働していない。
+  - 最新コードへ切り替わっても、DB migration が不足しているため掲示板/ログインが DB テーブル不足で 500 になる可能性が高い。
+  - 本番 API は `Origin: https://fanda-dev.com` に `Access-Control-Allow-Origin` を返しておらず、ログインのブラウザ通信では CORS 設定/デプロイ反映も要確認。
+
+- **次回への申し送り事項**:
+  - CD Backend の `docker-compose up` に `--force-recreate` などを追加し、デプロイ後に `/doc` や `/api/auth/get-session` の疎通確認を入れる。
+  - Drizzle migration を生成し、`community_threads` と Better Auth テーブルを本番DBへ適用する手順を追加する。
+
+### 2026-04-29 - 本番フロントのAPI URL誤設定修正
+
+- **達成したタスク**:
+  - 本番ログの `localhost:3000/api/auth/get-session` への接続失敗を調査し、`NEXT_PUBLIC_API_URL` 未設定時の `http://localhost:3000` フォールバックが本番ビルドに焼き込まれていることを特定。
+  - GitHub Repository Variable `NEXT_PUBLIC_API_URL=https://api.fanda-dev.com` を追加。
+  - `.github/workflows/cd-frontend.yml` の Build step に `NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}` を渡す修正を追加。
+  - `fix/develop-frontend-api-url-variable` ブランチから `develop` 向け PR #55 を作成。
+  - 誤って作成した `main` 向け PR #54 は close 済み。
+
+- **検証結果**:
+  - commit hook 経由で `bun run lint:frontend && bun run lint:backend`: pass
+
+- **次回への申し送り事項**:
+  - PR #55 マージ後、Cloudflare frontend deploy を再実行し、本番 JS から `localhost:3000` 参照が消えていることをブラウザ Network で確認する。
+  - `/status`, `/privacy`, `/api` は現在ページ未作成のため、リンクを残す場合は各ページを追加する。
+
 ### 2026-04-28 - Issue #29 掲示板一覧のAPI接続
 
 - **達成したタスク**:

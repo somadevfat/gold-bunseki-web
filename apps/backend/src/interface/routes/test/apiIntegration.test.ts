@@ -1,12 +1,7 @@
 import { expect, describe, it, mock, beforeAll, afterAll } from "bun:test";
+import { createApp } from "../../../app/createApp";
+import { createAppContainer } from "../../../app/container";
 import { createMockDrizzle } from "../../test/testHelpers";
-
-// DB をモックしてテスト時に実際のDB接続を発生させない
-mock.module("../../../infrastructure/database/db", () => ({
-  db: createMockDrizzle([]),
-}));
-
-import { app } from "../../../index";
 
 /**
  * API Response Integrity Tests (Integration)
@@ -15,6 +10,9 @@ import { app } from "../../../index";
  */
 describe("API Response Integrity Tests (Integration)", () => {
   let originalFetch: typeof globalThis.fetch;
+  const app = createApp(createAppContainer(createMockDrizzle([])), {
+    apiToken: "ci-test-token",
+  });
 
   beforeAll(() => {
     originalFetch = globalThis.fetch;
@@ -27,10 +25,7 @@ describe("API Response Integrity Tests (Integration)", () => {
     globalThis.fetch = originalFetch;
   });
 
-  // 注: index.ts の DI ミドルウェアで db シングルトンが直接使われているため、
-  // 完全に分離したインテグレーションテストにするには、本来は DI を差し替え可能にする必要がある。
-  // 現状はコントローラーのテストで十分カバーされているが、
-  // ここでは最低限の不整合を解消するためにダミーの環境変数を渡す。
+  // createApp に mock container を渡すことで、実DB接続を発生させずに統合テストを行う。
   const mockEnv = {
     DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock",
     ANALYTICS_SERVICE_URL: "http://mock-service",
