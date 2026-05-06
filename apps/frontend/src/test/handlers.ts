@@ -124,7 +124,7 @@ export const handlers = [
     return HttpResponse.json({
       id: 'thread-new',
       title: body.title,
-      category: body.category || 'General',
+      category: body.category || 'その他',
       body: body.body,
       replyCount: 0,
       createdAt: '2026-05-05T10:00:00Z',

@@ -9,12 +9,12 @@ mock.module("@/features/community/api/createCommunityThread", () => ({
 }));
 
 describe("CommunityBoard", () => {
-  it("prepends a created thread to the visible list", async () => {
+  it("投稿作成後、作成済みスレッドを一覧へ先頭追加すること", async () => {
     createCommunityThreadMock.mockResolvedValue({
       id: "thread-new",
-      title: "New CPI reaction plan",
-      body: "Watch the first impulse and NY continuation.",
-      category: "Event Watch",
+      title: "CPI発表後の反応確認",
+      body: "初動とNY後半の戻りを比較したいです。",
+      category: "経済指標",
       replyCount: 0,
       createdAt: "2026-05-05T10:00:00Z",
     });
@@ -26,18 +26,18 @@ describe("CommunityBoard", () => {
     );
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
-      target: { value: "New CPI reaction plan" },
+      target: { value: "CPI発表後の反応確認" },
     });
     fireEvent.change(screen.getByLabelText("カテゴリ"), {
-      target: { value: "Event Watch" },
+      target: { value: "経済指標" },
     });
     fireEvent.change(screen.getByLabelText("本文"), {
-      target: { value: "Watch the first impulse and NY continuation." },
+      target: { value: "初動とNY後半の戻りを比較したいです。" },
     });
     fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
 
     await waitFor(() => {
-      expect(screen.getByText("New CPI reaction plan")).toBeDefined();
+      expect(screen.getByText("CPI発表後の反応確認")).toBeDefined();
     });
     expect(screen.queryByText("まだ投稿がありません")).toBeNull();
   });

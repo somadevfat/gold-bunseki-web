@@ -5,8 +5,8 @@ type CommunityThreadListProps = {
 };
 
 /**
- * CommunityThreadList displays community threads.
- * @responsibility Render fetched posts and a clear empty state for the community page.
+ * CommunityThreadList は掲示板スレッド一覧を表示します。
+ * @responsibility 取得済み投稿と空状態をユーザーに分かりやすく表示する。
  */
 export function CommunityThreadList({ threads }: CommunityThreadListProps) {
   if (threads.length === 0) {
@@ -24,8 +24,8 @@ export function CommunityThreadList({ threads }: CommunityThreadListProps) {
     <div className="space-y-3">
       {threads.map((thread) => (
         <article key={thread.id} className="rounded-2xl border border-slate-200 bg-[#fbfaf7] p-5">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {thread.category} / {thread.replyCount} replies
+          <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-slate-400">
+            {thread.category} / {thread.replyCount}件の返信
           </p>
           <h3 className="text-lg font-semibold text-slate-950">{thread.title}</h3>
           <p className="mt-3 text-sm leading-6 text-slate-600">{thread.body}</p>

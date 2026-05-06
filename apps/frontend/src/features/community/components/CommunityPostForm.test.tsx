@@ -13,7 +13,7 @@ describe("CommunityPostForm", () => {
     createCommunityThreadMock.mockClear();
   });
 
-  it("shows validation errors when required fields are empty", async () => {
+  it("必須項目が空の場合、入力エラーを表示すること", async () => {
     render(
       <ToastProvider>
         <CommunityPostForm onCreated={mock()} />
@@ -27,13 +27,13 @@ describe("CommunityPostForm", () => {
     expect(createCommunityThreadMock).not.toHaveBeenCalled();
   });
 
-  it("submits valid input and passes created thread to the parent", async () => {
+  it("入力が正しい場合、投稿APIを呼び出して作成済みスレッドを親へ渡すこと", async () => {
     const onCreated = mock();
     const createdThread = {
       id: "thread-new",
-      title: "CPI reaction plan",
-      body: "Watch the first impulse and NY continuation.",
-      category: "Event Watch",
+      title: "CPI発表後の反応確認",
+      body: "初動とNY後半の戻りを比較したいです。",
+      category: "経済指標",
       replyCount: 0,
       createdAt: "2026-05-05T10:00:00Z",
     };
@@ -46,28 +46,28 @@ describe("CommunityPostForm", () => {
     );
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
-      target: { value: "CPI reaction plan" },
+      target: { value: "CPI発表後の反応確認" },
     });
     fireEvent.change(screen.getByLabelText("カテゴリ"), {
-      target: { value: "Event Watch" },
+      target: { value: "経済指標" },
     });
     fireEvent.change(screen.getByLabelText("本文"), {
-      target: { value: "Watch the first impulse and NY continuation." },
+      target: { value: "初動とNY後半の戻りを比較したいです。" },
     });
     fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
 
     await waitFor(() => {
       expect(createCommunityThreadMock).toHaveBeenCalledWith({
-        title: "CPI reaction plan",
-        body: "Watch the first impulse and NY continuation.",
-        category: "Event Watch",
+        title: "CPI発表後の反応確認",
+        body: "初動とNY後半の戻りを比較したいです。",
+        category: "経済指標",
       });
       expect(onCreated).toHaveBeenCalledWith(createdThread);
     });
     expect(await screen.findByText("投稿しました")).toBeDefined();
   });
 
-  it("shows an error toast when creation fails", async () => {
+  it("投稿APIが失敗した場合、エラー通知を表示すること", async () => {
     createCommunityThreadMock.mockRejectedValue(new Error("failed"));
 
     render(
@@ -77,10 +77,10 @@ describe("CommunityPostForm", () => {
     );
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
-      target: { value: "CPI reaction plan" },
+      target: { value: "CPI発表後の反応確認" },
     });
     fireEvent.change(screen.getByLabelText("本文"), {
-      target: { value: "Watch the first impulse and NY continuation." },
+      target: { value: "初動とNY後半の戻りを比較したいです。" },
     });
     fireEvent.click(screen.getByRole("button", { name: "投稿する" }));
 

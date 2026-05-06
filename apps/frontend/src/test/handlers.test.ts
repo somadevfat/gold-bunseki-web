@@ -133,15 +133,15 @@ describe("MSW abnormal scenarios", () => {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        title: "CPI reaction plan",
-        body: "Watch the first impulse and NY continuation.",
-        category: "Event Watch",
+        title: "CPI発表後の反応確認",
+        body: "初動とNY後半の戻りを比較したいです。",
+        category: "経済指標",
       }),
     });
     const body = await res.json() as { title: string; replyCount: number };
 
     expect(res.status).toBe(201);
-    expect(body.title).toBe("CPI reaction plan");
+    expect(body.title).toBe("CPI発表後の反応確認");
     expect(body.replyCount).toBe(0);
   });
 

@@ -7,7 +7,7 @@ import { createCommunityThread } from "@/features/community/api/createCommunityT
 import { useToast } from "@/features/common/components/ToastProvider";
 import type { CommunityThread } from "@/lib/api/client";
 
-const categoryOptions = ["Market Discussion", "Event Watch", "Trade Review", "General"] as const;
+const categoryOptions = ["相場分析", "経済指標", "トレード振り返り", "その他"] as const;
 
 const communityPostSchema = z.object({
   title: z.string().trim().min(1, "タイトルを入力してください").max(200, "タイトルは200文字以内で入力してください"),
@@ -22,8 +22,8 @@ type CommunityPostFormProps = {
 };
 
 /**
- * CommunityPostForm renders the new community thread form.
- * @responsibility Validate user input, submit it to the community API, and surface success or failure feedback.
+ * CommunityPostForm は掲示板の新規投稿フォームです。
+ * @responsibility 入力検証、投稿API呼び出し、成功・失敗の通知を担当する。
  */
 export function CommunityPostForm({ onCreated }: CommunityPostFormProps) {
   const { showToast } = useToast();
@@ -37,7 +37,7 @@ export function CommunityPostForm({ onCreated }: CommunityPostFormProps) {
     defaultValues: {
       title: "",
       body: "",
-      category: "Market Discussion",
+      category: "相場分析",
     },
   });
 
@@ -63,7 +63,7 @@ export function CommunityPostForm({ onCreated }: CommunityPostFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/60">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">New Thread</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">新規投稿</p>
         <h3 className="mt-2 text-xl font-semibold text-slate-950">新しい投稿を作成</h3>
       </div>
 

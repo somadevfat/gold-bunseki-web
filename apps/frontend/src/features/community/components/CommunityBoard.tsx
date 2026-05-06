@@ -10,8 +10,8 @@ type CommunityBoardProps = {
 };
 
 /**
- * CommunityBoard owns client-side community interactions.
- * @responsibility Keep the fetched thread list in sync with newly created posts.
+ * CommunityBoard は掲示板のクライアント操作をまとめます。
+ * @responsibility 初期表示済みの投稿一覧へ、新規作成された投稿を反映する。
  */
 export function CommunityBoard({ initialThreads }: CommunityBoardProps) {
   const [threads, setThreads] = useState(initialThreads);
