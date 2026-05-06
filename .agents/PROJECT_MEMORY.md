@@ -5,6 +5,28 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-06 - Issue #75 MT5定時POSTスケジューラ実装
+
+- **達成したタスク**:
+  - Issue #75 `[Analytics] MT5から定時POSTするノートPC同期スクリプトを実装する` に対応。
+  - `feature/issue-75-scheduled-sync` ブランチを `develop` から作成。
+  - `apps/analytics/api/scheduled_sync.py` を追加し、`SCHEDULED_SYNC_TIMES` で指定した時刻に `gold_calendar_cache.json` のSHA-256ハッシュを確認する常駐スケジューラを実装。
+  - 前回POST済みハッシュと同一の場合はスキップし、差分がある場合のみ既存 `run_analysis_and_push()` を呼び出して Hono の `/api/v1/sync/data` へPOSTする構成にした。
+  - `HONO_SYNC_URL`, `API_TOKEN`, `SCHEDULED_SYNC_*`, `CALENDAR_CACHE_PATH` の設定を `.env.example`, `apps/analytics/README.md`, `docs/SYNC_AND_SEED.md` に追記。
+  - `apps/analytics/api/test_scheduled_sync.py` を追加し、時刻パース、指定時刻判定、差分ありPOST、差分なしスキップ、同一スロット二重実行防止を検証。
+
+- **検証結果**:
+  - `python3 -m unittest test_scheduled_sync`: 5 pass / 0 fail
+  - `python3 -m py_compile apps/analytics/api/scheduled_sync.py apps/analytics/api/server.py apps/analytics/api/test_scheduled_sync.py`: pass
+  - `.venv/bin/ruff check apps/analytics/api/server.py apps/analytics/api/scheduled_sync.py apps/analytics/api/test_scheduled_sync.py`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 53 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - #76 で Windows タスクスケジューラ/自動起動/ログ保存/スリープ抑止の運用設定を詰める。
+  - #77 で Backend 側の同期状態更新・確認手順を強化する。
+  - 実機ノートPCでは MT5 と `GoldCalendarPush.mq5` を常時起動し、`SCHEDULED_SYNC_TIMES` と本番 `HONO_SYNC_URL` / `API_TOKEN` を設定して疎通確認する。
+
 ### 2026-05-06 - PR #92 掲示板投稿作成APIテストのCI失敗修正確認
 
 - **達成したタスク**:

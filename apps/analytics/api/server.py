@@ -1,18 +1,19 @@
 import os
 import sys
 import threading
-import time
-import requests
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+
+import pandas as pd
+import requests
 import uvicorn
+from fastapi import FastAPI
 
 # 親ディレクトリ(apps/analytics)のcoreモジュールを参照できるようにする
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from core.market_analyzer import MarketAnalyzer
-
 import MetaTrader5 as mt5
-import pandas as pd
+from scheduled_sync import JsonDiffSyncScheduler, ScheduledSyncConfig
+
+from core.market_analyzer import MarketAnalyzer
 
 app = FastAPI(
     title="Gold Volatility API",
@@ -22,13 +23,19 @@ app = FastAPI(
 # =============================================================================
 # 設定
 # =============================================================================
-HONO_SYNC_URL = "http://localhost:3000/api/v1/sync/data"
+HONO_SYNC_URL = os.environ.get(
+    "HONO_SYNC_URL",
+    "http://localhost:3000/api/v1/sync/data",
+)
+SCHEDULED_SYNC_SYMBOL = os.environ.get("SCHEDULED_SYNC_SYMBOL", "GOLD")
+SCHEDULED_SYNC_FETCH_COUNT = int(os.environ.get("SCHEDULED_SYNC_FETCH_COUNT", "500"))
+scheduled_sync_scheduler: JsonDiffSyncScheduler | None = None
 
 def run_analysis_and_push(symbol: str = "GOLD", fetch_count: int = 500):
     """MT5から直近の価格を取得し、カレンダーと合わせて分析、HonoへPOSTする"""
     print("=====================================================")
     print(f"[Sync] {symbol} の差分同期を開始します...")
-    
+
     if not mt5.initialize():
         print("[Sync] ❌ MT5の初期化に失敗しました。MT5が起動中か確認してください。")
         return
@@ -39,12 +46,14 @@ def run_analysis_and_push(symbol: str = "GOLD", fetch_count: int = 500):
         if rates is None or len(rates) == 0:
             print(f"[Sync] ❌ {symbol} の価格データが取得できませんでした。")
             return
-            
+
         price_df = pd.DataFrame(rates)
         price_df['Datetime_JST'] = pd.to_datetime(price_df['time'], unit='s')
-        price_df = price_df.rename(columns={'open': 'OPEN', 'high': 'HIGH', 'low': 'LOW', 'close': 'CLOSE'})
+        price_df = price_df.rename(
+            columns={"open": "OPEN", "high": "HIGH", "low": "LOW", "close": "CLOSE"}
+        )
         price_df.set_index('Datetime_JST', inplace=True)
-        
+
         # 2. カレンダーデータの読み込み
         analyzer = MarketAnalyzer(xm_to_jst_offset_hours=7)
         calendar_df = analyzer.load_calendar_data('auto')
@@ -54,22 +63,25 @@ def run_analysis_and_push(symbol: str = "GOLD", fetch_count: int = 500):
 
         # 4. JSONペイロード構築
         payload = analyzer.prepare_api_payload(result_df, calendar_df, price_df)
-        
+
         # 5. Hono DBへPOST送信
         print(f"[Sync] Honoバックエンド ({HONO_SYNC_URL}) へ POST 送信中...")
         headers = {"Content-Type": "application/json"}
-        
+
         api_token = os.environ.get("API_TOKEN")
         if not api_token:
-            print("[Sync] 💣 致命的エラー: API_TOKEN 環境変数が設定されていません。終了します。")
+            print(
+                "[Sync] 💣 致命的エラー: API_TOKEN 環境変数が設定されていません。"
+                "終了します。"
+            )
             return
-            
+
         headers["Authorization"] = f"Bearer {api_token}"
-        
+
         res = requests.post(HONO_SYNC_URL, json=payload, headers=headers, timeout=30)
-        
+
         if res.status_code == 200:
-            print(f"[Sync] ✅ HonoへのPush同期が完了しました！ (HTTP 200)")
+            print("[Sync] ✅ HonoへのPush同期が完了しました！ (HTTP 200)")
         else:
             print(f"[Sync] ❌ HonoへのPush失敗: HTTP {res.status_code}")
             print(res.text)
@@ -89,6 +101,33 @@ def trigger_sync():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+def start_scheduled_sync():
+    """環境変数が設定されている場合のみ、JSON差分同期スケジューラを開始する"""
+    global scheduled_sync_scheduler
+
+    config = ScheduledSyncConfig.from_env()
+    if config is None:
+        print("[ScheduledSync] Disabled. Set SCHEDULED_SYNC_TIMES to enable it.")
+        return
+
+    scheduled_sync_scheduler = JsonDiffSyncScheduler(
+        config=config,
+        sync_callback=lambda: run_analysis_and_push(
+            symbol=SCHEDULED_SYNC_SYMBOL,
+            fetch_count=SCHEDULED_SYNC_FETCH_COUNT,
+        ),
+    )
+    scheduled_sync_scheduler.start()
+
+
+@app.on_event("shutdown")
+def stop_scheduled_sync():
+    """FastAPI終了時にスケジューラを停止する"""
+    if scheduled_sync_scheduler is not None:
+        scheduled_sync_scheduler.stop()
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
