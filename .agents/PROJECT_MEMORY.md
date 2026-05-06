@@ -5,6 +5,35 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-06 - PRテンプレート運用と日本語ルールの明文化
+
+- **達成したタスク**:
+  - PR #88 の本文を `.github/pull_request_template.md` の固定部分（見出し・HTMLコメント・details構造）を保持する形へ修正。
+  - Gemini Code Assist のレビューコメント対応後、PRコメント・レビュー回答は日本語で行う方針を再確認。
+  - `.agents/rules/rules.md` に、回答・PR本文・PRコメント・レビュー回答は基本日本語で行うことを明記。
+  - `.agents/rules/rules.md` と `.agents/skills/create-pr/SKILL.md` に、PRテンプレートの固定部分を勝手に変更・削除せず、記入欄だけを埋めるルールを追加。
+  - `.github/copilot-instructions.md` と `AGENTS.md` にも同じ要点を追記。
+- **検証結果**:
+  - PR #88 の本文は GitHub MCP でテンプレート固定コメントを含む日本語本文として確認済み。
+- **次回への申し送り**:
+  - 今後 PR 作成・更新では `.github/pull_request_template.md` を壊さず、固定部分を保持したまま Evidence と Todo の記入欄のみ編集する。
+  - コミットメッセージは引き続き英語 / ASCII のみ。
+
+### 2026-05-05 - Codex向けルール・スキル整備
+
+- **達成したタスク**:
+  - 既存の Cursor / Copilot 前提のルールを Codex が参照しやすい形に整理。
+  - ルートに `AGENTS.md` を追加し、Codex の入口として `.agents/rules/rules.md` と主要スキルへの導線を明記。
+  - `.agents/rules/rules.md` を文字化けのない日本語で再構成し、Codex の作業開始、スキル使用、Git安全、検証、PR、作業ログ更新ルールを明文化。
+  - `.github/copilot-instructions.md` をツール横断の短い参照ファイルに変更し、一次ルールを `.agents/rules/rules.md` に統一。
+  - `.agents/skills/create-pr/SKILL.md` を Codex の実運用に合わせ、MCP write 権限不足、HTTPS push、`bun` 不在時の代替検証、Evidence 記録を追記。
+  - `.agents/skills/execute-task/SKILL.md` を Codex 向けに整理し、実装開始時の状態確認、調査、実装、テスト、セルフレビュー、PR 連携を明確化。
+- **検証結果**:
+  - `git diff --check -- AGENTS.md .agents/rules/rules.md .github/copilot-instructions.md .agents/skills/create-pr/SKILL.md .agents/skills/execute-task/SKILL.md`: pass
+- **次回への申し送り**:
+  - 今後 Codex は `AGENTS.md` と `.agents/rules/rules.md` を一次ルールとして扱う。
+  - Issue 実装では `execute-task`、PR 作成では `create-pr`、作業終了時は `project_memory` を必ず使う運用に統一。
+
 ### 2026-05-04 - Issue #83 Sync APIのAppContainer/routes移行PR
 
 - **達成したタスク**:

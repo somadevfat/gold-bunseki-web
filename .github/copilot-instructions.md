@@ -1,28 +1,18 @@
-# Copilot Instructions
+# Copilot / Cursor / Codex Instructions
 
-開発ルール・アーキテクチャ・テスト方針はすべて `.agents/rules/rules.md` を正として参照すること。
+このリポジトリの一次ルールは `.agents/rules/rules.md` です。
 
-以下はそのサマリー（詳細は rules.md 優先）:
+Copilot、Cursor、Codex のどれを使う場合でも、古いツール固有の慣習ではなく `.agents/rules/rules.md` を優先してください。
 
-### テスト駆動開発 (TDD)
+## 要約
 
-- **必ずテストファースト**: 新機能・バグ修正は実装前にテストを書く（Red → Green → Refactor）
-- テストファイルは `*.test.ts` / `*.test.tsx` として実装ファイルと同ディレクトリの `test/` サブディレクトリに配置する
-- 正常系・異常系・境界値を必ずカバーする
-
-### カバレッジ 100%
-
-- バックエンド: `bun run test:coverage` で **Funcs 100% / Lines 100%** を維持すること
-- フロントエンド: `bun run test:coverage` で **100%** を維持すること
-- カバレッジが下がるコードは追加しない
-
-### モック
-
-- テスト時に外部リソース（DB・HTTP）へ実際に接続しない
-- Bun の `mock.module` を使ってモジュールレベルでモックする
-- `testHelpers.ts` の `createMockDrizzle` / `createMockContext` を再利用する
-
-### コミット
-
-- Conventional Commits に従う（`feat:`, `fix:`, `test:`, `refactor:` など）
-- **件名・本文・フッタは英語のみ**（`commitlint.config.js` の `english-only` が非 ASCII を拒否。日本語は不可）
+- 回答、PR本文、PRコメント、レビュー回答は基本日本語。
+- コミットメッセージは Conventional Commits かつ英語 / ASCII のみ。
+- TypeScript の `any` は禁止。
+- 作業前に `git status --short --branch` を確認する。
+- 既存の未コミット差分を勝手に revert しない。
+- Issue 実装は `.agents/skills/execute-task/SKILL.md`。
+- PR 作成は `.agents/skills/create-pr/SKILL.md`。
+- PR本文は `.github/pull_request_template.md` の固定部分（見出し・コメント・順序・details構造）を変更せず、記入欄だけを埋める。
+- テスト作成は `.agents/skills/test_coding/SKILL.md`。
+- 作業終了時は `.agents/skills/project_memory/SKILL.md` に従って記憶を更新する。

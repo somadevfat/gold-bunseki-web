@@ -2,69 +2,105 @@
 name: create-pr
 description: |
   PR（プルリクエスト）を作成・提出するためのスキル。
-  変更内容から適切なPRタイトルを付け、`.github/pull_request_template.md` に沿った本文を自動生成し、gh CLI（またはGitHub MCP）を用いてPRを発行する。
-  Use when: 作業ブランチの実装が完了し、mainブランチへの取り込みに向けたPRを作成するとき。
+  変更内容から適切なPRタイトルを付け、`.github/pull_request_template.md` に沿った本文を作成し、利用可能な GitHub 認証手段でPRを発行する。
+  Use when: 実装完了後にPRを作成するとき。
 ---
 
 # create-pr スキル
 
-このスキルは、作業ブランチの実装が完了した後に、レビュー可能な品質でPRを作成・起票するための標準ワークフローです。
+このスキルは、Codex がレビュー可能なPRを安全に作成するための標準ワークフローです。
 
-## 🎯 責務
+## 責務
 
-- 現在の差分に基づくコミット・Pushの完了確認
-- `.github/pull_request_template.md` を用いたPR本文（ドラフト）の生成
-- 対象Issue番号との紐付け（`Closes #XXX`）
-- `gh` CLI（またはGitHub MCPツール）からのPR発行
+- 現在の差分、ブランチ、未コミット変更を確認する。
+- 今回の依頼に関係するファイルだけを stage / commit / push する。
+- `.github/pull_request_template.md` に沿ってPR本文を作る。
+- 検証結果、未実行チェック、代替手段を Evidence に残す。
+- PR URL をユーザーへ共有する。
 
----
+## ワークフロー
 
-## 🛠️ 実行ワークフロー
+### 1. 状態確認
 
-### ステップ 1: 実装と品質の最終確認
-AIはPR作成前に、プロジェクトの品質基準を満たしているかテストを実行して確認すること。
+必ず以下を確認する。
+
+```bash
+git status --short --branch
+git diff --stat
+git diff --cached --stat
+git branch --show-current
+```
+
+未コミット差分に今回の作業と無関係なファイルがある場合、それらを stage しない。
+
+### 2. 品質確認
+
+原則として以下を実行する。
+
 ```bash
 bun run lint:all
-# 可能であればテストも実行
 bun run test:all
 ```
-すでにコミット＆Pushが済んでいるかを確認し、未実施の場合はコミット（Conventional Commits・**英語のみ**；`commitlint` が日本語・非 ASCII を拒否）とPushを行うこと。
 
-### ステップ 2: PRドラフトの設計と提示
-AIは以下の手順でPRのドラフトを作成し、ユーザーに提示する。
+環境に `bun` がない場合は、実行できる代替を使う。
 
-1. `.github/pull_request_template.md` の内容を読み取る。
-2. 作業中の Issue 番号を確認し、`Closes #XXX` を埋める。
-3. 今回の実装内容に基づき、`Todo` リストのチェックボックス埋めと、補足事項の記載を行う。
-4. Markdown形式で最終的なPR本文のドラフトと、「PRタイトル（機能追加なら `feat: ...` など）」を提案する。
-
-*※ユーザーからOKが出るまで勝手に起票してはならない。*
-
-### ステップ 3: PRの自動作成
-
-ユーザーからOKが出たら、以下の方法でPRを発行する。
-
-**▼ gh CLI を使用する場合（推奨）**
-ターミナル上で `gh` コマンドを使用して作成。環境変数などでエディタが立ち上がるのを防ぐため、標準入力やファイル経由で body を渡すか `--fill` の活用を検討する。
+例:
 
 ```bash
-# 例: 標準入力からbodyを渡してPR作成
-cat << 'EOF' | gh pr create --title "feat: エラーレスポンス基盤の構築" --body-file - --base main
-<ここに構成したドラフトのMarkdown内容>
-EOF
+apps/frontend/node_modules/.bin/tsc --noEmit --project apps/frontend/tsconfig.json
+apps/frontend/node_modules/.bin/eslint <changed-files-or-dirs>
 ```
 
-**▼ GitHub MCP を使用する場合（代替手段）**
-`mcp_github-mcp-server_create_pull_request` ツールを用いて、`owner`, `repo`, `title`, `body`, `base`, `head` パラメータを送りPRを作成する。
+未実行のチェックと理由は PR Evidence に必ず書く。
 
-### ステップ 4: 完了報告
-起票が成功したら、ターミナルやMCPから返ってきた **Pull Request の URL** をユーザーに共有し、「レビュー（およびエビデンス画像の追加）をお願いします」と案内する。
+### 3. コミット
 
----
+- commit message は英語 / ASCII のみ。
+- Conventional Commits に従う。
+- 例: `feat: add community thread creation form`
+- pre-commit が `bun` 不在など環境理由で失敗した場合、代替検証を通したうえで `--no-verify` を使ってよい。ただし Evidence に必ず書く。
 
-## ⚠️ 注意事項
+### 4. Push
 
-- タイトルには必ずプレフィックス（`feat:`, `fix:`, `refactor:` など）をつけること。
-- チケット名で使用した領域プレフィックス（`[BE]`, `[FE]` など）もタイトルの先頭へ付与することが望ましい。例: `[BE] feat: 標準エラーレスポンスの実装`
-- AI自身はスクリーンショットの撮影や画面操作ができないため、エビデンス画像が必要な部分はプレースホルダーのまま残し、ユーザーに事後追加を依頼すること。
-- Evidences セクションには必ず **実行日時（JST）** と **ブランチ名**（`git branch --show-current` の結果）を記載すること。
+優先順:
+
+1. `git push -u origin <branch>`
+2. SSH が失敗する場合は HTTPS remote へ push
+3. `gh` が利用可能なら `gh auth status` を確認して push / PR 作成
+4. GitHub MCP が write 可能なら MCP で branch / PR 作成
+5. GitHub MCP が 403 の場合は、権限不足として別認証手段へ切り替える
+
+どの手段を使ったかを最終報告に書く。
+
+### 5. PR本文
+
+`.github/pull_request_template.md` を読み、テンプレートの固定部分を保持したまま、最低限以下を埋める。
+
+固定部分の扱い:
+
+- 見出し、HTMLコメント、順序、`details` / `summary` 構造、コードフェンスのセクション構造を勝手に変更・削除しない。
+- 編集してよいのは、`Closes #`、Todo のチェック項目、How to check のコマンド、Evidences の実行日時・ブランチ名・ログ、Related Links の追記など、テンプレート上の記入欄だけ。
+- PR 本文・PRコメント・レビュー回答は、ユーザーから別指定がない限り日本語で書く。
+
+- Issue: `Closes #...`。Issue が不明なら `Closes #` のままにし、不明であることを書く。
+- Todo: 実装内容をチェック済みにする。
+- How to check: 実行した検証コマンドを書く。
+- Evidences: 実行日時 JST、ブランチ名、コミット、検証結果、未実行チェックと理由を書く。
+
+### 6. PR作成
+
+- デフォルトは draft PR。
+- base branch は作業元ブランチを確認して決める。現在ブランチの upstream や `git merge-base`、ユーザー指定を優先する。
+- title は領域プレフィックスを必要に応じて付ける。例: `[FE] feat: add community thread creation form`
+
+### 7. 完了報告
+
+ユーザーへ以下を報告する。
+
+- PR URL
+- branch
+- commit
+- base branch
+- 実行した検証
+- 未実行チェックと理由
+- 未コミットで残っている unrelated 差分があればその事実

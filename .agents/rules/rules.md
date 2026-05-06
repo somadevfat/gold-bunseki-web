@@ -2,70 +2,91 @@
 trigger: always_on
 ---
 
-あなたはアーキテクトフルスタックエンジニアのメンターであり、ペアプログラミングの強力な相棒です。
-時間効率を優先し、ユーザーの指示で「AI主導・実装代行モード」へ切り替わりました。
-AIから積極的にコードを書いて提示し、後からユーザーが解説を読んで理解するスタイルで進めます。コミットは **@commitlint/config-conventional に従い、本文・件名とも英語のみ**（`commitlint.config.js` の `english-only` ルールで非 ASCII を拒否）。
+# Codex 共通ルール
 
-## 1. 言語使用原則
+このファイルは、このリポジトリにおける AI 作業の一次ルールです。Cursor / Copilot 由来の古い運用よりも、ここに書かれた Codex 用ルールを優先してください。
 
-- **完全日本語化**: 回答、コードコメント、テスト用コメントに至るまで、すべて**日本語**で統一すること。
-  **コミットメッセージ（件名・本文・フッタを含む）は英語のみ**。日本語や絵文字は pre-commit の commitlint で弾かれる。
-- **絶対的 any 禁止**: TypeScript において `any` 型の使用を**いかなる理由（テストコード、外部ライブラリのモック等を含む）があっても厳禁**とする。発見した場合は、たとえ一時的な実装であっても即座に `unknown` への置換や適切な型定義、型ガード、または型アサーション（`as Type`）を用いて修正すること。
-- **型の再利用と共通化**: 型定義は極力既存のエンティティやポートの型を使用し、重複を避けること。テストコードで頻出するモック（D1Database, Hono Context等）の共通型は、プロジェクトの `types/` ディレクトリ等に定義して一貫性を保つこと。
-- **コード変更後の検証義務**: コードに変更を加えた後は、必ず対象プロジェクトのリンター（`bun run lint:all` 等）およびTypeScriptコンパイラ（`npx tsc --noEmit` 等）を実行し、型エラーや静的解析エラーがゼロであることを確認してから完了（コミット等）すること。
-- **徹底した既存実装調査**: 重要なロジック（同期、外部通信、データ変換等）を修正・新設する際は、必ずプロジェクト全体を `grep_search` 等でスキャンし、既存の類似実装や関連コードを漏れなく把握すること。「ない」と断定する前に、複数のキーワードで検索を尽くすこと。
-- **ADR 優先の原則**: アーキテクチャ上の設計判断については、まず `docs/adr/` の記録を確認し、既存の決定事項を尊重すること。ADR に記されていない重要な決定を行った場合は、即座に ADR を更新し、知識の揮発を防ぐこと。
-- コードの要素（ログ、エラーメッセージ、コミットメッセージ）は英語とすること。コミットは上記のとおり **強制的に英語のみ**。
+## 1. 基本姿勢
 
-## 2. アーキテクチャとディレクトリ構造
+- 回答・説明・レビューコメント・PRコメントは、ユーザーから別指定がない限り日本語で行う。
+- コード内コメント、テスト名、ユーザー向けエラーメッセージは原則日本語でよい。
+- コミットメッセージだけは Conventional Commits に従い、件名・本文・フッタを英語のみ、ASCII のみで書く。
+- ユーザーが「実装」「修正」「PR作成」などを依頼した場合は、提案だけで止めず、実装・検証・PR準備まで進める。
+- ただし、Issue 実装フローや PR フローで明示的な合意が必要な場面では、該当スキルの手順を優先する。
 
-### 2.1 バックエンド (Hono / Clean Architecture)
+## 2. Codex で必ず守ること
 
-本プロジェクトのバックエンドでは、以下のレイヤー分離に従う。
+- 作業開始時に `git status --short --branch` を確認し、既存の未コミット差分を把握する。
+- 既存の未コミット差分はユーザーまたは他エージェントの作業とみなし、勝手に revert / reset / checkout しない。
+- 変更を stage / commit するときは、今回の依頼に含まれるファイルだけを明示的に指定する。
+- ファイル編集は原則 `apply_patch` を使う。生成物やフォーマッタ実行を除き、シェルのリダイレクトで雑に上書きしない。
+- 検索は可能な限り `rg` / `rg --files` を使う。使えない環境では PowerShell / `find` / `grep` へ切り替え、理由を簡潔に記録する。
+- `bun`, `gh`, `rg` などが環境にない場合は、代替コマンドや GitHub HTTPS / MCP を検討する。代替した事実は最終報告や PR Evidence に必ず書く。
+- Codex から見える GitHub MCP は read 権限だけの場合がある。write 操作が 403 の場合は、`gh`、HTTPS push、Git Credential Manager、またはユーザー確認へ切り替える。
 
-- **Domain 層 (`domain/`)**: コアエンティティと型定義。
-- **Application 層 (`application/`)**: ユースケース、ポート（インターフェース）。
-- **Interface 層 (`interface/`)**: ルーター、コントローラー。
-- **Infrastructure 層 (`infrastructure/`)**: DB、外部サービス実装。
+## 3. スキルの使用ルール
 
-### 2.2 フロントエンド (Next.js / Feature-Sliced Design)
+- ユーザーが Issue 実装を依頼したら、`.agents/skills/execute-task/SKILL.md` を読む。
+- ユーザーが PR 作成を依頼したら、`.agents/skills/create-pr/SKILL.md` を読む。
+- テストを追加・修正する場合は、`.agents/skills/test_coding/SKILL.md` を読む。
+- Hono のルート、middleware、controller、OpenAPI を触る場合は、`.agents/skills/hono/SKILL.md` を読む。
+- ADR が必要な設計判断、技術選定、アーキテクチャ変更では、`.agents/skills/adr-manager/SKILL.md` を読む。
+- 作業終了時には、`.agents/skills/project_memory/SKILL.md` に従い `.agents/PROJECT_MEMORY.md` の最近の作業ログへ追記する。
+- スキルに書かれた手順とユーザーの最新指示が衝突する場合は、ユーザーの最新指示を優先し、何を変更したかを報告する。
 
-テスタビリティと拡張性を最大化するため、以下のディレクトリ構造と原則を徹底する。
+## 4. アーキテクチャ
 
-- **Features 層 (`src/features/`)**: ドメインごとの機能単位で分割（例: `market-replay`, `sessions`）。
-  - `components/`: その機能専用のUI。
-  - `hooks/`: その機能のロジックを抽出したカスタムフック（**単体テストの対象**）。
-  - `api/`: その機能で使用する API 取得ロジック（Hono RPC `apiClient` を使用）。
-- **Common 層 (`src/components/ui/`, `src/hooks/`)**: プロジェクト全体で共有する汎用パーツ。
-- **RSC原則**: データフェッチは可能な限り **Server Components (RSC)** で行い、Client Components には Props としてデータを渡す。
-- **ロジックの分離**: コンポーネント内に `useEffect` や複雑な状態管理をベタ書きせず、必ずカスタムフックに抽出してテスタブルな状態に保つこと。
-- **E2E型安全**: `src/lib/api/client.ts` の `apiClient` を使用し、バックエンドの型を直接参照すること。
+### Backend
 
-### 2.3 データ分析・同期エンジン (Python / Analytics)
+- Hono / Clean Architecture を前提にする。
+- `domain/`: エンティティ、ドメイン型、ドメインルール。
+- `application/`: use case、port。
+- `interface/`: routes、controller、middleware、HTTP 表現。
+- `infrastructure/`: DB、外部サービス、設定、認証。
+- controller は use case へ処理を委譲し、ビジネスロジックを抱え込まない。
+- route 登録や OpenAPI 定義を変更する場合は、関連 controller / use case / test を合わせて確認する。
 
-MT5からのデータ取得およびバックエンド（PostgreSQL）への同期を担う `apps/analytics/` は、シード処理と定期更新の責任を明確に分離する。
+### Frontend
 
-- **`core/`**: `market_analyzer.py` など、価格と指標を突合し解析・成型する共通ロジック。
-- **`scripts/`**: `generate_seed_csv.py` のような手動実行・DB初期投入用（CSV出力など）のCLIスクリプト。
-- **`api/`**: FastAPI等で常駐し、直近データの差分更新・バックエンドへのPush送信を担うWebサーバー。
+- Next.js / vinext / Feature-Sliced Design を前提にする。
+- `src/features/<feature>/api`: API 呼び出し。
+- `src/features/<feature>/components`: その機能専用 UI。
+- `src/features/<feature>/hooks`: 状態・副作用・ロジック。
+- データ取得はできる限り Server Component 側に寄せ、操作やフォームなどクライアント状態が必要な箇所だけ Client Component にする。
+- API 型は `src/lib/api/client.ts` の既存方針を尊重し、重複型を増やしすぎない。
 
-## 3. テスト構成の原則
+## 5. TypeScript / 実装品質
 
-- **E2Eテストのモック**: E2Eテスト（Playwright）実行時のバックエンドのモックには、HonoやExpressの代用品ではなく、`MSW (Mock Service Worker)` を `Bun.serve` 上でネイティブに稼働させるスタンドアロンサーバー (`apps/frontend/tests/mocks/http-server.ts`) を使用すること。
-- **ロンドン学派 (Mockist) の採用**:
-  - テスト対象のユニットを完全に隔離するため、依存関係（APIクライアント、他のフック、外部ライブラリ）はすべてモックすること。
-  - 「状態」の検証だけでなく、依存先との「インタラクション（どのような引数で、何回呼ばれたか）」の検証を重視する。
-- **ロジック層のカバレッジ100%義務**:
-  - `features/*/hooks/`、`features/*/api/`、および共通の `utils/` 等のロジックを専念するファイルについては、**C0（命令網羅）および C1（分岐網羅）で100%**を維持すること。
-  - ただし、`pages/` や単純な表示のみの `components/` については、Playwright による結合テストでカバーするものとし、100%の対象外とする。
-- **テストは仕様書 (Living Documentation)**: 正常系・異常系・境界値を網羅し、ドキュメント価値を持たせる。無意味な（単にパスするだけの）テストを避け、ビジネスルールを記述すること。
-- **カバレッジの自動計測**: `bun test --coverage` を活用し、常に指標を確認すること。
+- `any` は禁止。テストやモックでも `unknown`、型ガード、明示的な型定義を使う。
+- 既存の設計・命名・ディレクトリ構造を優先し、不要な抽象化や大きなリファクタを混ぜない。
+- ログ、内部エラー、技術的な識別子は英語でよい。ただし UI とユーザー向け文言は日本語を優先する。
+- 文字化けしている既存ファイルを触る場合は、該当箇所を読める UTF-8 の日本語へ直してよい。ただし unrelated な大規模修正は避ける。
 
-## 5. プロジェクト記憶の維持
+## 6. テスト / 検証
 
-- **project_memoryスキルの実行**: 一連のタスクや会話が終了したタイミングで、必ず `.agents/skills/project_memory/SKILL.md` の指示に従い作業内容を要約・記録すること。
-- **文脈の連続性**: 新しいセッションが始まった際は、まず `.agents/PROJECT_MEMORY.md` を読み込み、これまでの経緯を把握した上で作業を開始すること。
+- 変更後は、影響範囲に応じて lint、type check、unit test、build を実行する。
+- 標準の優先順は次の通り。
+  - `bun run lint:all`
+  - `bun run test:all`
+  - frontend: `cd apps/frontend && bun run lint && bun run test`
+  - backend: `cd apps/backend && bun run lint && bun run test`
+  - TypeScript: `tsc --noEmit` または対象 package の `node_modules/.bin/tsc`
+- `bun` が使えない環境では、実行可能な `tsc` / `eslint` / targeted test で代替し、未実行コマンドと理由を必ず記録する。
+- ロジック層、API wrapper、hooks はユニットテストを追加・更新する。UI はユーザー操作、空状態、エラー状態を優先して検証する。
 
-## 6. チャットルール
+## 7. Git / PR
 
-- 比喩禁止。明確な用語を使う。例: オレンジの雲
+- ブランチ名は、ユーザー指定がなければ `codex/<short-description>` を使う。
+- 既存ブランチ上で依頼された場合は、そのブランチを尊重する。base branch は作業元を確認して決める。
+- コミットメッセージは英語のみ。例: `feat: add community thread creation form`
+- pre-commit が環境依存で失敗した場合、代替検証を行ったうえで `--no-verify` は許容する。ただし PR Evidence と最終報告に必ず書く。
+- PR は `.github/pull_request_template.md` に沿って作成する。
+- PR テンプレートの固定部分（見出し、HTMLコメント、順序、`details` / `summary` 構造、コードフェンスのセクション構造）は勝手に変更・削除しない。
+- PR body で編集してよいのは、`Closes #`、Todo のチェック項目、How to check のコマンド、Evidences の実行日時・ブランチ名・ログ、Related Links の追記など、テンプレート上の記入欄だけとする。
+- PR body には最低限、実装内容、検証コマンド、実行日時 JST、ブランチ名、未実行チェックと理由を書く。
+- review comment や discussion に返信するときは、相手の `@username` メンションを含める。
+
+## 8. 作業ログ
+
+- 作業の最後に `.agents/PROJECT_MEMORY.md` へ、日時、内容、主要ファイル、検証結果、次回への申し送りを追記する。
+- 記憶更新に失敗した場合は、理由と追記予定の内容を最終報告に含める。
