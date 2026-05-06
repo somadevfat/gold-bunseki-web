@@ -4,9 +4,6 @@ import { ToastProvider } from "@/features/common/components/ToastProvider";
 import { CommunityPostForm } from "./CommunityPostForm";
 
 const createCommunityThreadMock = mock();
-mock.module("@/features/community/api/createCommunityThread", () => ({
-  createCommunityThread: createCommunityThreadMock,
-}));
 
 describe("CommunityPostForm", () => {
   beforeEach(() => {
@@ -16,7 +13,7 @@ describe("CommunityPostForm", () => {
   it("必須項目が空の場合、入力エラーを表示すること", async () => {
     render(
       <ToastProvider>
-        <CommunityPostForm onCreated={mock()} />
+        <CommunityPostForm createThread={createCommunityThreadMock} onCreated={mock()} />
       </ToastProvider>,
     );
 
@@ -41,7 +38,7 @@ describe("CommunityPostForm", () => {
 
     render(
       <ToastProvider>
-        <CommunityPostForm onCreated={onCreated} />
+        <CommunityPostForm createThread={createCommunityThreadMock} onCreated={onCreated} />
       </ToastProvider>,
     );
 
@@ -72,7 +69,7 @@ describe("CommunityPostForm", () => {
 
     render(
       <ToastProvider>
-        <CommunityPostForm onCreated={mock()} />
+        <CommunityPostForm createThread={createCommunityThreadMock} onCreated={mock()} />
       </ToastProvider>,
     );
 

@@ -5,6 +5,26 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-06 - PR #92 掲示板投稿作成APIテストのCI失敗修正確認
+
+- **達成したタスク**:
+  - PR #92 `[CI] developの掲示板投稿作成APIテスト失敗を修正する` のCIログを確認。
+  - 失敗していたRunは `pull/90/merge` の修正前CIで、Bun 1.3.13上のテスト順序により `mock.module("@/lib/api/client")` が期待通り効かず、`postMock` が呼ばれないことが根本原因と確認。
+  - PR #92 の既存修正で `createCommunityThread` に任意 `AppClient` 注入を追加し、テストをmodule mock依存から明示的なmock client注入へ変更済みであることを確認。
+  - Gemini Code Assistのレビューに対応し、`createMockClient` からテスト対象外の `market` API mockを削除し、community APIのみを持つ最小mockへ整理。
+
+- **変更ファイル**:
+  - `apps/frontend/src/features/community/api/createCommunityThread.test.ts`
+
+- **検証結果**:
+  - `/tmp/bun-1.3.13/bun-linux-x64/bun test apps/frontend/src/features/community/api/createCommunityThread.test.ts`: 2 pass / 0 fail
+  - `bun run test:all`: frontend 53 pass / backend 92 pass
+  - `bun run lint:all`: pass
+
+- **次回への申し送り事項**:
+  - ローカルの `gh auth status` はトークン無効のため、Actionsの再実行やPRチェック確認をCLIで行うには `gh auth login -h github.com` が必要。
+  - 作業ツリーには今回のAPIテスト修正以外に、CommunityBoard / CommunityPostForm 周辺の未コミット差分が残っている。
+
 ### 2026-05-04 - Issue #83 Sync APIのAppContainer/routes移行PR
 
 - **達成したタスク**:

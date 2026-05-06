@@ -4,9 +4,6 @@ import { ToastProvider } from "@/features/common/components/ToastProvider";
 import { CommunityBoard } from "./CommunityBoard";
 
 const createCommunityThreadMock = mock();
-mock.module("@/features/community/api/createCommunityThread", () => ({
-  createCommunityThread: createCommunityThreadMock,
-}));
 
 describe("CommunityBoard", () => {
   it("投稿作成後、作成済みスレッドを一覧へ先頭追加すること", async () => {
@@ -21,7 +18,7 @@ describe("CommunityBoard", () => {
 
     render(
       <ToastProvider>
-        <CommunityBoard initialThreads={[]} />
+        <CommunityBoard createThread={createCommunityThreadMock} initialThreads={[]} />
       </ToastProvider>,
     );
 

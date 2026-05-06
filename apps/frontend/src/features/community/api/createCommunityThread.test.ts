@@ -7,11 +7,6 @@ const postMock = mock();
 const createMockClient = (): AppClient => ({
   api: {
     v1: {
-      market: {
-        indicators: { $get: mock() },
-        replay: { $get: mock() },
-        sessions: { $get: mock() },
-      },
       community: {
         threads: {
           $get: mock(),
@@ -20,7 +15,7 @@ const createMockClient = (): AppClient => ({
       },
     },
   },
-});
+} as unknown as AppClient);
 
 describe("createCommunityThread", () => {
   beforeEach(() => {
