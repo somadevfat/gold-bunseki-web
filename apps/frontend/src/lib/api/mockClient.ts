@@ -43,6 +43,9 @@ const mockCandles: Candle[] = [
   { datetimeJst: '2026-04-10T21:32:00.000Z', open: 2332.9, high: 2334.2, low: 2324.3, close: 2326.4 },
 ];
 
+/**
+ * @responsibility モック API の戻り値を Hono RPC クライアント互換の最小レスポンスへ整形する。
+ */
 function createResponse<T>(body: T, ok = true): ApiResponse<T> {
   return {
     ok,
@@ -50,11 +53,17 @@ function createResponse<T>(body: T, ok = true): ApiResponse<T> {
   };
 }
 
+/**
+ * @responsibility リクエストヘッダーまたは環境変数からモックシナリオを決定する。
+ */
 function getScenario(options?: ApiOptions): string | undefined {
   const headerScenario = getHeaderValue(options?.init?.headers, 'x-test-scenario');
   return headerScenario ?? process.env.NEXT_PUBLIC_MOCK_API_SCENARIO;
 }
 
+/**
+ * @responsibility HeadersInit の形式差を吸収し、指定ヘッダー値を大文字小文字を区別せずに取得する。
+ */
 function getHeaderValue(headers: HeadersInit | undefined, name: string): string | undefined {
   if (!headers) {
     return undefined;
@@ -64,23 +73,29 @@ function getHeaderValue(headers: HeadersInit | undefined, name: string): string 
     return headers.get(name) ?? undefined;
   }
 
-  if (Array.isArray(headers)) {
-    const entry = headers.find(([key]) => key.toLowerCase() === name.toLowerCase());
-    return entry?.[1];
-  }
-
-  const value = headers[name] ?? headers[name.toLowerCase()];
+  const entries = Array.isArray(headers) ? headers : Object.entries(headers);
+  const entry = entries.find(([key]) => key.toLowerCase() === name.toLowerCase());
+  const value = entry?.[1];
   return Array.isArray(value) ? value.join(',') : value;
 }
 
+/**
+ * @responsibility 現在のモックシナリオが失敗レスポンスを要求しているか判定する。
+ */
 function shouldFail(options?: ApiOptions): boolean {
   return getScenario(options) === 'error';
 }
 
+/**
+ * @responsibility 現在のモックシナリオが空状態レスポンスを要求しているか判定する。
+ */
 function shouldReturnEmpty(options?: ApiOptions): boolean {
   return getScenario(options) === 'empty';
 }
 
+/**
+ * @responsibility フロントエンド単体確認で利用する AppClient 互換のモック API クライアントを生成する。
+ */
 export function createMockApiClient(): AppClient {
   return {
     api: {
@@ -143,7 +158,8 @@ export function createMockApiClient(): AppClient {
                 }, false);
               }
 
-              const limit = Number.parseInt(args.query.limit, 10);
+              const parsedLimit = Number.parseInt(args.query.limit, 10);
+              const limit = Number.isNaN(parsedLimit) ? undefined : parsedLimit;
               const sessions = [
                 {
                   id: 1,
@@ -203,6 +219,9 @@ export function createMockApiClient(): AppClient {
   };
 }
 
+/**
+ * @responsibility 投稿作成 API の入力値からモック掲示板投稿を組み立てる。
+ */
 function createCommunityThread(input: CreateCommunityThreadInput): CommunityThread {
   return {
     id: 'mock-thread-new',
