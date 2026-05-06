@@ -4,7 +4,13 @@ import { ZigZagPointSchema } from "../../domain/entities/zigzag";
 import { SessionVolatilitySchema } from "../../domain/entities/session";
 import { SyncStatusSchema } from "../../domain/entities/syncStatus";
 import { ReplayDataResponseSchema } from "../../domain/entities/replay";
-import { CommunityThreadSchema, CreateCommunityThreadInputSchema } from "../../domain/entities/communityThread";
+import {
+  CommunityReplySchema,
+  CommunityThreadDetailSchema,
+  CommunityThreadSchema,
+  CreateCommunityReplyInputSchema,
+  CreateCommunityThreadInputSchema,
+} from "../../domain/entities/communityThread";
 
 /**
  * Health Check ルート
@@ -288,6 +294,82 @@ export const createCommunityThreadRoute = createRoute({
 });
 
 /**
+ * 掲示板スレッド詳細ルート
+ */
+export const communityThreadDetailRoute = createRoute({
+  method: "get",
+  path: "/api/v1/community/threads/{threadId}",
+  request: {
+    params: z.object({
+      threadId: z.string().uuid().openapi({
+        param: { name: "threadId", in: "path" },
+        example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        description: "スレッドID",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: CommunityThreadDetailSchema,
+        },
+      },
+      description: "掲示板スレッド詳細と返信一覧を取得します",
+    },
+    404: {
+      description: "スレッドが見つかりません",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * 掲示板返信作成ルート
+ */
+export const createCommunityReplyRoute = createRoute({
+  method: "post",
+  path: "/api/v1/community/threads/{threadId}/replies",
+  request: {
+    params: z.object({
+      threadId: z.string().uuid().openapi({
+        param: { name: "threadId", in: "path" },
+        example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        description: "スレッドID",
+      }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: CreateCommunityReplyInputSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: CommunityReplySchema,
+        },
+      },
+      description: "掲示板返信を作成して返します",
+    },
+    400: {
+      description: "バリデーションエラー",
+    },
+    404: {
+      description: "スレッドが見つかりません",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
  * データ同期(Push)受取 - シード用 (過去数年分の一括同期など)
  */
 export const syncSeedRoute = createRoute({
@@ -319,4 +401,3 @@ export const syncSeedRoute = createRoute({
     }
   },
 });
-

@@ -11,7 +11,10 @@ type MockQueryBuilder = {
   limit: ReturnType<typeof mock>;
   groupBy: ReturnType<typeof mock>;
   insert: ReturnType<typeof mock>;
+  update: ReturnType<typeof mock>;
   values: ReturnType<typeof mock>;
+  set: ReturnType<typeof mock>;
+  returning: ReturnType<typeof mock>;
   onConflictDoNothing: ReturnType<typeof mock>;
   onConflictDoUpdate: ReturnType<typeof mock>;
   transaction: ReturnType<typeof mock>;
@@ -31,7 +34,10 @@ export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
     limit: mock(() => queryMock),
     groupBy: mock(() => queryMock),
     insert: mock(() => queryMock),
+    update: mock(() => queryMock),
     values: mock(() => queryMock),
+    set: mock(() => queryMock),
+    returning: mock(() => queryMock),
     onConflictDoNothing: mock(() => queryMock),
     onConflictDoUpdate: mock(() => queryMock),
     transaction: mock((cb: (db: unknown) => Promise<unknown>) => cb(queryMock)),

@@ -1,7 +1,7 @@
 import { expect, describe, it, mock } from 'bun:test';
 import { GetCommunityThreadsUseCase } from '../getCommunityThreadsUseCase';
 import { CommunityThreadRepositoryPort } from '../../port/communityThreadRepositoryPort';
-import { CommunityThread } from '../../../domain/entities/communityThread';
+import { CommunityReply, CommunityThread } from '../../../domain/entities/communityThread';
 
 /**
  * GetCommunityThreadsUseCase Unit Tests
@@ -17,13 +17,26 @@ describe('GetCommunityThreadsUseCase (Unit Tests)', () => {
     createdAt: '2026-04-01T12:00:00.000Z',
   };
 
+  const mockReply: CommunityReply = {
+    id: 'b1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    threadId: mockThread.id,
+    body: '同じ観点で見ています。',
+    createdAt: '2026-04-01T12:30:00.000Z',
+  };
+
+  const createMockRepo = (overrides: Partial<CommunityThreadRepositoryPort> = {}): CommunityThreadRepositoryPort => ({
+    findAll: mock(() => Promise.resolve([mockThread])),
+    findById: mock(() => Promise.resolve(mockThread)),
+    findReplies: mock(() => Promise.resolve([mockReply])),
+    create: mock(() => Promise.resolve(mockThread)),
+    createReply: mock(() => Promise.resolve(mockReply)),
+    ...overrides,
+  });
+
   describe('正常系', () => {
     it('リポジトリが返したスレッド一覧をそのまま返すこと', async () => {
       // ## Arrange ##
-      const mockRepo: CommunityThreadRepositoryPort = {
-        findAll: mock(() => Promise.resolve([mockThread])),
-        create: mock(() => Promise.resolve(mockThread)),
-      };
+      const mockRepo = createMockRepo();
       const useCase = new GetCommunityThreadsUseCase(mockRepo);
 
       // ## Act ##
@@ -37,10 +50,7 @@ describe('GetCommunityThreadsUseCase (Unit Tests)', () => {
 
     it('リポジトリが空配列を返した場合、空配列を返すこと', async () => {
       // ## Arrange ##
-      const mockRepo: CommunityThreadRepositoryPort = {
-        findAll: mock(() => Promise.resolve([])),
-        create: mock(() => Promise.resolve(mockThread)),
-      };
+      const mockRepo = createMockRepo({ findAll: mock(() => Promise.resolve([])) });
       const useCase = new GetCommunityThreadsUseCase(mockRepo);
 
       // ## Act ##
@@ -53,10 +63,7 @@ describe('GetCommunityThreadsUseCase (Unit Tests)', () => {
     it('デフォルト limit (50) で findAll を呼び出すこと', async () => {
       // ## Arrange ##
       const findAllMock = mock(() => Promise.resolve([mockThread]));
-      const mockRepo: CommunityThreadRepositoryPort = {
-        findAll: findAllMock,
-        create: mock(() => Promise.resolve(mockThread)),
-      };
+      const mockRepo = createMockRepo({ findAll: findAllMock });
       const useCase = new GetCommunityThreadsUseCase(mockRepo);
 
       // ## Act ##
@@ -70,10 +77,9 @@ describe('GetCommunityThreadsUseCase (Unit Tests)', () => {
   describe('異常系', () => {
     it('リポジトリがエラーをスローした場合、そのまま伝播すること', async () => {
       // ## Arrange ##
-      const mockRepo: CommunityThreadRepositoryPort = {
+      const mockRepo = createMockRepo({
         findAll: mock(() => Promise.reject(new Error('DB接続エラー'))),
-        create: mock(() => Promise.resolve(mockThread)),
-      };
+      });
       const useCase = new GetCommunityThreadsUseCase(mockRepo);
 
       // ## Act & Assert ##

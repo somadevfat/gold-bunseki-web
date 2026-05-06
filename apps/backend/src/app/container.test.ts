@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'bun:test';
 import { CalculateZigZagUseCase } from '../application/use_case/calculateZigZagUseCase';
+import { CreateCommunityReplyUseCase } from '../application/use_case/createCommunityReplyUseCase';
 import { CreateCommunityThreadUseCase } from '../application/use_case/createCommunityThreadUseCase';
+import { GetCommunityThreadDetailUseCase } from '../application/use_case/getCommunityThreadDetailUseCase';
 import { GetCommunityThreadsUseCase } from '../application/use_case/getCommunityThreadsUseCase';
 import { GetLatestPriceUseCase } from '../application/use_case/getLatestPriceUseCase';
 import { GetRecentEventNamesUseCase } from '../application/use_case/getRecentEventNamesUseCase';
@@ -18,7 +20,9 @@ describe('createAppContainer', () => {
     expect(container.repositories.priceRepo).toBeDefined();
     expect(container.repositories.syncRepo).toBeDefined();
     expect(container.useCases.community.getThreads).toBeInstanceOf(GetCommunityThreadsUseCase);
+    expect(container.useCases.community.getThreadDetail).toBeInstanceOf(GetCommunityThreadDetailUseCase);
     expect(container.useCases.community.createThread).toBeInstanceOf(CreateCommunityThreadUseCase);
+    expect(container.useCases.community.createReply).toBeInstanceOf(CreateCommunityReplyUseCase);
     expect(container.useCases.sync.getStatus).toBeInstanceOf(GetSyncStatusUseCase);
     expect(container.useCases.market.getLatestPrice).toBeInstanceOf(GetLatestPriceUseCase);
     expect(container.useCases.market.calculateZigZag).toBeInstanceOf(CalculateZigZagUseCase);

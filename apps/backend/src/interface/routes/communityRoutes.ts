@@ -2,7 +2,12 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { AppContainer } from '../../app/container';
 import { createCommunityController } from '../controller/communityController';
 import { AppVariables, Bindings } from '../types';
-import { communityThreadsRoute, createCommunityThreadRoute } from './openapi';
+import {
+  communityThreadDetailRoute,
+  communityThreadsRoute,
+  createCommunityReplyRoute,
+  createCommunityThreadRoute,
+} from './openapi';
 
 type BackendApp = OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>;
 
@@ -15,4 +20,6 @@ export function registerCommunityRoutes(app: BackendApp, container: AppContainer
 
   app.openapi(communityThreadsRoute, controller.getThreads);
   app.openapi(createCommunityThreadRoute, controller.createThread);
+  app.openapi(communityThreadDetailRoute, controller.getThreadDetail);
+  app.openapi(createCommunityReplyRoute, controller.createReply);
 }

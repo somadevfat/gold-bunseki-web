@@ -1,5 +1,7 @@
 import { CalculateZigZagUseCase } from "../application/use_case/calculateZigZagUseCase";
+import { CreateCommunityReplyUseCase } from "../application/use_case/createCommunityReplyUseCase";
 import { CreateCommunityThreadUseCase } from "../application/use_case/createCommunityThreadUseCase";
+import { GetCommunityThreadDetailUseCase } from "../application/use_case/getCommunityThreadDetailUseCase";
 import { GetCommunityThreadsUseCase } from "../application/use_case/getCommunityThreadsUseCase";
 import { GetLatestPriceUseCase } from "../application/use_case/getLatestPriceUseCase";
 import { GetRecentEventNamesUseCase } from "../application/use_case/getRecentEventNamesUseCase";
@@ -58,7 +60,9 @@ export function createAppContainer(
     useCases: {
       community: {
         getThreads: new GetCommunityThreadsUseCase(communityThreadRepo),
+        getThreadDetail: new GetCommunityThreadDetailUseCase(communityThreadRepo),
         createThread: new CreateCommunityThreadUseCase(communityThreadRepo),
+        createReply: new CreateCommunityReplyUseCase(communityThreadRepo),
       },
       sync: {
         getStatus: new GetSyncStatusUseCase(syncRepo),
