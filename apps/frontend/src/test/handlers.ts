@@ -110,6 +110,27 @@ export const handlers = [
   }),
 
   /* 認証 (better-auth) - セッション取得 */
+  http.post(`${baseUrl}/api/v1/community/threads`, async ({ request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+    if (scenario === 'error') {
+      return new HttpResponse(null, { status: 500 });
+    }
+
+    const body = await request.json() as { title?: string; body?: string; category?: string };
+    if (!body.title || !body.body) {
+      return new HttpResponse(null, { status: 400 });
+    }
+
+    return HttpResponse.json({
+      id: 'thread-new',
+      title: body.title,
+      category: body.category || 'その他',
+      body: body.body,
+      replyCount: 0,
+      createdAt: '2026-05-05T10:00:00Z',
+    }, { status: 201 });
+  }),
+
   http.get(`${baseUrl}/api/auth/get-session`, ({ request }) => {
     const cookie = request.headers.get('cookie');
     if (cookie && cookie.includes('mock_session_token')) {

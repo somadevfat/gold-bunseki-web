@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getCommunityThreads } from "@/features/community/api/getCommunityThreads";
-import { CommunityThreadList } from "@/features/community/components/CommunityThreadList";
+import { CommunityBoard } from "@/features/community/components/CommunityBoard";
 import type { CommunityThread } from "@/lib/api/client";
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export default async function CommunityPage() {
           </div>
 
           {result.status === "success" ? (
-            <CommunityThreadList threads={result.threads} />
+            <CommunityBoard initialThreads={result.threads} />
           ) : (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
               <h3 className="text-lg font-semibold text-red-950">掲示板投稿を取得できませんでした</h3>
