@@ -1,4 +1,4 @@
-import { pgTable, text, real, integer, boolean, uniqueIndex, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, real, integer, boolean, uniqueIndex, timestamp, uuid, index } from 'drizzle-orm/pg-core';
 
 export const prices = pgTable('prices', {
   timestamp: text('timestamp').primaryKey(),
@@ -78,6 +78,16 @@ export const communityThreads = pgTable('community_threads', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const communityReplies = pgTable('community_replies', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  threadId: uuid('thread_id').notNull().references(() => communityThreads.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+  index('idx_community_replies_thread_created').on(table.threadId, table.createdAt),
+]);
+
 // ==========================================
 // Better Auth Core Tables
 // ==========================================
@@ -127,4 +137,3 @@ export const verification = pgTable("verification", {
 	createdAt: timestamp('createdAt'),
 	updatedAt: timestamp('updatedAt')
 });
-
