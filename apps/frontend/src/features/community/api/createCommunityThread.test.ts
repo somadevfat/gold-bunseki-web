@@ -1,20 +1,26 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { createCommunityThread } from "./createCommunityThread";
+import type { AppClient } from "@/lib/api/client";
 
 const postMock = mock();
-mock.module("@/lib/api/client", () => ({
-  apiClient: {
-    api: {
-      v1: {
-        community: {
-          threads: {
-            $post: postMock,
-          },
+
+const createMockClient = (): AppClient => ({
+  api: {
+    v1: {
+      market: {
+        indicators: { $get: mock() },
+        replay: { $get: mock() },
+        sessions: { $get: mock() },
+      },
+      community: {
+        threads: {
+          $get: mock(),
+          $post: postMock,
         },
       },
     },
   },
-}));
+});
 
 describe("createCommunityThread", () => {
   beforeEach(() => {
@@ -39,7 +45,7 @@ describe("createCommunityThread", () => {
       title: "CPI発表後の反応確認",
       body: "初動とNY後半の戻りを比較したいです。",
       category: "経済指標",
-    });
+    }, createMockClient());
 
     expect(result).toEqual(thread);
     expect(postMock).toHaveBeenCalledWith(
@@ -69,6 +75,6 @@ describe("createCommunityThread", () => {
       title: "CPI発表後の反応確認",
       body: "初動とNY後半の戻りを比較したいです。",
       category: "経済指標",
-    })).rejects.toThrow("掲示板投稿の作成に失敗しました");
+    }, createMockClient())).rejects.toThrow("掲示板投稿の作成に失敗しました");
   });
 });
