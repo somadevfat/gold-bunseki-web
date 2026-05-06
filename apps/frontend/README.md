@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gold Vola Bunseki Frontend
 
-## Getting Started
+## 開発サーバー
 
-First, run the development server:
+バックエンドへ接続して開発する場合:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```zsh
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+フロントエンドだけで画面確認する場合:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```zsh
+bun run dev:mock
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`dev:mock` は `NEXT_PUBLIC_USE_MOCK_API=true` を設定し、`src/lib/api/mockClient.ts` の固定レスポンスを使います。バックエンド、DB、認証を起動せずに、掲示板投稿・マーケットセッション・指標一覧・再現データの画面確認ができます。
 
-## Learn More
+## モックシナリオ
 
-To learn more about Next.js, take a look at the following resources:
+追加で `NEXT_PUBLIC_MOCK_API_SCENARIO` を指定すると、代表的な状態を確認できます。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```zsh
+NEXT_PUBLIC_MOCK_API_SCENARIO=empty bun run dev:mock
+NEXT_PUBLIC_MOCK_API_SCENARIO=error bun run dev:mock
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+モックは HTTP を横取りせず、`apiClient` の実装を差し替えます。vinext と Service Worker の相性に依存しないため、日常のフロントエンド確認用として使います。

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite dev --host 127.0.0.1 --port 3001",
+    "dev:mock": "NEXT_PUBLIC_USE_MOCK_API=true vite dev --host 127.0.0.1 --port 3001",
     "build": "vite build",
     "start": "wrangler dev",
     "lint": "eslint",

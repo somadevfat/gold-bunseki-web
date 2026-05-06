@@ -1,7 +1,10 @@
 import { hc } from 'hono/client';
 import type { AppType } from 'backend/src/index';
+import { createMockApiClient } from './mockClient';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const mockApiMode = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true'
+  || process.env.NEXT_PUBLIC_API_MODE === 'mock';
 
 export type AppClient = {
   api: {
@@ -24,7 +27,9 @@ export type AppClient = {
 /**
  * apiClient はバックエンド API を呼び出すための RPC クライアントです。
  */
-export const apiClient = hc<AppType>(baseUrl) as unknown as AppClient;
+export const apiClient = mockApiMode
+  ? createMockApiClient()
+  : hc<AppType>(baseUrl) as unknown as AppClient;
 
 /* --- レスポンス型の定義 (バックエンドの型から推論) --- */
 

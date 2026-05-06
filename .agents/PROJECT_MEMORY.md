@@ -5,6 +5,23 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-06 - フロントエンド用モックAPI切り替え
+
+- **達成したタスク**:
+  - `NEXT_PUBLIC_USE_MOCK_API=true` または `NEXT_PUBLIC_API_MODE=mock` のとき、フロントエンドの `apiClient` が固定レスポンスの mock client を使うように変更。
+  - 掲示板投稿、掲示板投稿作成、指標一覧、マーケットセッション、再現データの mock response を追加。
+  - `NEXT_PUBLIC_MOCK_API_SCENARIO=empty/error` と `x-test-scenario` ヘッダーで空状態・失敗状態を切り替えられるようにした。
+  - `apps/frontend/package.json` に `dev:mock` を追加し、バックエンド・DBを起動せずにフロント画面確認できる入口を用意。
+  - `apps/frontend/README.md` に mock 開発サーバーとシナリオ指定方法を記載。
+- **検証結果**:
+  - `apps/frontend/node_modules/.bin/tsc --noEmit --project apps/frontend/tsconfig.json`: pass
+  - `apps/frontend/node_modules/.bin/eslint apps/frontend/src/lib/api apps/frontend/package.json apps/frontend/README.md`: pass
+  - `node_modules/.bin/vite build`（`apps/frontend` で実行）: pass
+  - `bun test apps/frontend/src/lib/api/mockClient.test.ts`: 未実行（この Codex 環境で `bun` が利用できないため）
+- **次回への申し送り**:
+  - 日常のフロント確認は `cd apps/frontend && bun run dev:mock` を使える。
+  - モックレスポンスを増やす場合は、OpenAPI/Zod schema と `AppClient` 型に合わせて更新する。
+
 ### 2026-05-04 - Issue #83 Sync APIのAppContainer/routes移行PR
 
 - **達成したタスク**:
