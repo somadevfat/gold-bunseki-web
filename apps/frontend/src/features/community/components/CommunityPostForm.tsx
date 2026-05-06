@@ -19,13 +19,14 @@ type CommunityPostFormValues = z.infer<typeof communityPostSchema>;
 
 type CommunityPostFormProps = {
   onCreated: (thread: CommunityThread) => void;
+  createThread?: typeof createCommunityThread;
 };
 
 /**
  * CommunityPostForm は掲示板の新規投稿フォームです。
  * @responsibility 入力検証、投稿API呼び出し、成功・失敗の通知を担当する。
  */
-export function CommunityPostForm({ onCreated }: CommunityPostFormProps) {
+export function CommunityPostForm({ createThread = createCommunityThread, onCreated }: CommunityPostFormProps) {
   const { showToast } = useToast();
   const {
     formState: { errors, isSubmitting },
@@ -43,7 +44,7 @@ export function CommunityPostForm({ onCreated }: CommunityPostFormProps) {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      const thread = await createCommunityThread(values);
+      const thread = await createThread(values);
       onCreated(thread);
       reset();
       showToast({

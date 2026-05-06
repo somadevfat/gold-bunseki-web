@@ -1,11 +1,14 @@
-import { apiClient, type CreateCommunityThreadInput } from "@/lib/api/client";
+import { apiClient, type AppClient, type CreateCommunityThreadInput } from "@/lib/api/client";
 
 /**
  * createCommunityThread は掲示板スレッドを新規作成します。
  * @responsibility 投稿APIの通信結果を検証し、作成済みスレッドを返す。
  */
-export async function createCommunityThread(input: CreateCommunityThreadInput) {
-  const res = await apiClient.api.v1.community.threads.$post(
+export async function createCommunityThread(
+  input: CreateCommunityThreadInput,
+  client: AppClient = apiClient,
+) {
+  const res = await client.api.v1.community.threads.$post(
     { json: input },
     {
       init: {
