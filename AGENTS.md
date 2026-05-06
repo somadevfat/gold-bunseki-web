@@ -11,4 +11,5 @@
 Codex は、Cursor / Copilot 向けの古い記述よりも、上記の Codex 用ルールを優先する。
 
 基本のやり取り、PR本文、PRコメント、レビュー回答は日本語で行う。
+PR の base branch は、ユーザー指定がない限り `develop` とする。
 PR本文は `.github/pull_request_template.md` の固定部分（見出し・HTMLコメント・順序・details構造など）を変更せず、記入欄だけを埋めること。

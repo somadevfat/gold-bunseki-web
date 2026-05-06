@@ -77,7 +77,9 @@ trigger: always_on
 ## 7. Git / PR
 
 - ブランチ名は、ユーザー指定がなければ `codex/<short-description>` を使う。
-- 既存ブランチ上で依頼された場合は、そのブランチを尊重する。base branch は作業元を確認して決める。
+- PR の base branch は、ユーザー指定がない限り `develop` とする。
+- 作業用ブランチを `develop` 以外から切った場合でも、取り込み先は原則 `develop` にする。例外が必要な場合は、PR 作成前に理由を明記してユーザーへ確認する。
+- 既存ブランチ上で依頼された場合も、作業元ブランチをそのまま base branch にしない。必ず `develop` との差分、ユーザー指定、既存PRの向き先を確認する。
 - コミットメッセージは英語のみ。例: `feat: add community thread creation form`
 - pre-commit が環境依存で失敗した場合、代替検証を行ったうえで `--no-verify` は許容する。ただし PR Evidence と最終報告に必ず書く。
 - PR は `.github/pull_request_template.md` に沿って作成する。

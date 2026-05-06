@@ -12,11 +12,13 @@
   - Gemini Code Assist のレビューコメント対応後、PRコメント・レビュー回答は日本語で行う方針を再確認。
   - `.agents/rules/rules.md` に、回答・PR本文・PRコメント・レビュー回答は基本日本語で行うことを明記。
   - `.agents/rules/rules.md` と `.agents/skills/create-pr/SKILL.md` に、PRテンプレートの固定部分を勝手に変更・削除せず、記入欄だけを埋めるルールを追加。
+  - PR の base branch はユーザー指定がない限り `develop` とし、作業元ブランチをそのまま base にしないルールを追加。
   - `.github/copilot-instructions.md` と `AGENTS.md` にも同じ要点を追記。
 - **検証結果**:
   - PR #88 の本文は GitHub MCP でテンプレート固定コメントを含む日本語本文として確認済み。
 - **次回への申し送り**:
   - 今後 PR 作成・更新では `.github/pull_request_template.md` を壊さず、固定部分を保持したまま Evidence と Todo の記入欄のみ編集する。
+  - PR 作成後は GitHub 側の PR 情報で base branch が `develop` になっていることを確認する。
   - コミットメッセージは引き続き英語 / ASCII のみ。
 
 ### 2026-05-05 - Codex向けルール・スキル整備

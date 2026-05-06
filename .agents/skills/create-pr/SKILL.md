@@ -90,7 +90,10 @@ apps/frontend/node_modules/.bin/eslint <changed-files-or-dirs>
 ### 6. PR作成
 
 - デフォルトは draft PR。
-- base branch は作業元ブランチを確認して決める。現在ブランチの upstream や `git merge-base`、ユーザー指定を優先する。
+- base branch は、ユーザー指定がない限り `develop` とする。
+- 作業用ブランチが `develop` 以外のブランチから分岐していても、取り込み先は原則 `develop` にする。
+- `develop` 以外を base branch にする必要がある場合は、PR 作成前に理由を明記してユーザーへ確認する。
+- PR 作成後に base branch が `develop` 以外になっていないか、GitHub 上の PR 情報で必ず確認する。
 - title は領域プレフィックスを必要に応じて付ける。例: `[FE] feat: add community thread creation form`
 
 ### 7. 完了報告
