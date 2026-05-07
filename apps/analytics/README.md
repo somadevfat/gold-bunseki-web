@@ -66,3 +66,24 @@ python api/server.py
 ```bash
 curl -X POST http://localhost:8000/api/sync
 ```
+
+### 3. 指定時刻のJSON差分同期
+`SCHEDULED_SYNC_TIMES` を設定して FastAPI サーバーを常時起動すると、指定時刻に
+`gold_calendar_cache.json` の内容ハッシュを確認し、前回Honoへ送信したJSONと差分がある場合だけ
+既存の同期処理を実行します。差分がない時刻はスキップされます。
+
+```powershell
+$env:API_TOKEN="backendと同じtoken"
+$env:HONO_SYNC_URL="https://api.example.com/api/v1/sync/data"
+$env:SCHEDULED_SYNC_TIMES="08:00,21:30"
+$env:SCHEDULED_SYNC_TIMEZONE="Asia/Tokyo"
+python api/server.py
+```
+
+任意設定:
+- `CALENDAR_CACHE_PATH`: MT5の共通フォルダ以外にJSONを置く場合のパス
+- `SCHEDULED_SYNC_STATE_PATH`: 前回POST済みハッシュを保存するstateファイル
+- `SCHEDULED_SYNC_POLL_SECONDS`: 指定時刻を確認する間隔（デフォルト30秒）
+- `SCHEDULED_SYNC_DUE_WINDOW_SECONDS`: 指定時刻から何秒以内を実行対象にするか（デフォルト90秒）
+- `SCHEDULED_SYNC_SYMBOL`: MT5から取得する銘柄（デフォルト`GOLD`）
+- `SCHEDULED_SYNC_FETCH_COUNT`: 取得する直近1分足の本数（デフォルト`500`）
