@@ -5,6 +5,25 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-08 - Issue #41/#43 フッター導線ページ追加
+
+- **達成したタスク**:
+  - ノートPC同期系以外で依存が軽い Issue #41 `Privacy & Securityページ` と Issue #43 `APIドキュメントページ導線` に対応。
+  - `feature/issues-41-43-footer-pages` ブランチを `develop` から作成。
+  - `/privacy` ページを追加し、収集情報、利用目的、Cookie/認証、MT5同期データ、セキュリティ、問い合わせ先を説明。
+  - `/api-docs` ページを追加し、Swagger UI / OpenAPI JSON へのリンクと Market / Sync / Community API の用途を説明。
+  - フッターの `API` リンクを `/api-docs` に修正し、`/privacy` と `/api-docs` を sitemap に追加。
+  - ページ表示、SEO metadata、フッターリンクのテストを追加。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/privacy/page.test.tsx src/app/api-docs/page.test.tsx src/features/common/components/SiteFooter.test.tsx`: 5 pass / 0 fail
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 58 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - #41/#43 はPRマージ後に完了コメント付きでクローズする。
+  - 次に同期以外で進めるなら、依存が満たされた #32 掲示板スレッド詳細/返信UI、または #37 リサーチメモ保存API が進めやすい。
+
 ### 2026-05-06 - Issue #75 MT5定時POSTスケジューラ実装
 
 - **達成したタスク**:
