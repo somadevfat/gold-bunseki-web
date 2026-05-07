@@ -9,6 +9,7 @@ from scheduled_sync import (
     JsonDiffSyncScheduler,
     ScheduledSyncConfig,
     build_slot_key,
+    find_due_time,
     hash_file,
     parse_scheduled_times,
     read_state,
@@ -105,7 +106,7 @@ class JsonDiffSyncSchedulerTest(unittest.TestCase):
             state_path = tmp / "state.json"
             calendar_path.write_text('[{"name":"CPI"}]', encoding="utf-8")
             now = datetime(2026, 5, 6, 8, 0, 30, tzinfo=ZoneInfo("Asia/Tokyo"))
-            slot_key = build_slot_key(now, time(8, 0))
+            slot_key = build_slot_key(now.date(), time(8, 0))
             state_path.write_text(
                 json.dumps({"last_slot_key": slot_key}),
                 encoding="utf-8",
@@ -153,6 +154,19 @@ class JsonDiffSyncSchedulerTest(unittest.TestCase):
             # ## Assert ##
             self.assertEqual(result.status, "idle")
             self.assertEqual(calls, [])
+
+    def test_find_due_time_detects_previous_day_slot_across_midnight(self):
+        # ## Arrange ##
+        now = datetime(2026, 5, 7, 0, 0, 10, tzinfo=ZoneInfo("Asia/Tokyo"))
+
+        # ## Act ##
+        due_at = find_due_time(now, (time(23, 59, 50),), 30)
+
+        # ## Assert ##
+        self.assertEqual(
+            due_at,
+            datetime(2026, 5, 6, 23, 59, 50, tzinfo=ZoneInfo("Asia/Tokyo")),
+        )
 
 
 if __name__ == "__main__":

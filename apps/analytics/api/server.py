@@ -30,82 +30,115 @@ HONO_SYNC_URL = os.environ.get(
 SCHEDULED_SYNC_SYMBOL = os.environ.get("SCHEDULED_SYNC_SYMBOL", "GOLD")
 SCHEDULED_SYNC_FETCH_COUNT = int(os.environ.get("SCHEDULED_SYNC_FETCH_COUNT", "500"))
 scheduled_sync_scheduler: JsonDiffSyncScheduler | None = None
+_mt5_lock = threading.Lock()
+
 
 def run_analysis_and_push(symbol: str = "GOLD", fetch_count: int = 500):
-    """MT5から直近の価格を取得し、カレンダーと合わせて分析、HonoへPOSTする"""
+    """
+    MT5から直近の価格を取得し、カレンダーと合わせて分析、HonoへPOSTします。
+    @responsibility MT5接続を排他制御しながら、
+    価格取得・分析・認証付きPush同期を一連で実行する。
+    """
     print("=====================================================")
     print(f"[Sync] {symbol} の差分同期を開始します...")
 
-    if not mt5.initialize():
-        print("[Sync] ❌ MT5の初期化に失敗しました。MT5が起動中か確認してください。")
-        return
-
-    try:
-        # 1. MT5から直近の価格データ取得
-        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, fetch_count)
-        if rates is None or len(rates) == 0:
-            print(f"[Sync] ❌ {symbol} の価格データが取得できませんでした。")
-            return
-
-        price_df = pd.DataFrame(rates)
-        price_df['Datetime_JST'] = pd.to_datetime(price_df['time'], unit='s')
-        price_df = price_df.rename(
-            columns={"open": "OPEN", "high": "HIGH", "low": "LOW", "close": "CLOSE"}
-        )
-        price_df.set_index('Datetime_JST', inplace=True)
-
-        # 2. カレンダーデータの読み込み
-        analyzer = MarketAnalyzer(xm_to_jst_offset_hours=7)
-        calendar_df = analyzer.load_calendar_data('auto')
-
-        # 3. MarketAnalyzerで分析実行
-        result_df = analyzer.analyze_sessions(price_df, calendar_df)
-
-        # 4. JSONペイロード構築
-        payload = analyzer.prepare_api_payload(result_df, calendar_df, price_df)
-
-        # 5. Hono DBへPOST送信
-        print(f"[Sync] Honoバックエンド ({HONO_SYNC_URL}) へ POST 送信中...")
-        headers = {"Content-Type": "application/json"}
-
-        api_token = os.environ.get("API_TOKEN")
-        if not api_token:
+    with _mt5_lock:
+        if not mt5.initialize():
             print(
-                "[Sync] 💣 致命的エラー: API_TOKEN 環境変数が設定されていません。"
-                "終了します。"
+                "[Sync] ❌ MT5の初期化に失敗しました。"
+                "MT5が起動中か確認してください。"
             )
             return
 
-        headers["Authorization"] = f"Bearer {api_token}"
+        try:
+            # 1. MT5から直近の価格データ取得
+            rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, fetch_count)
+            if rates is None or len(rates) == 0:
+                print(f"[Sync] ❌ {symbol} の価格データが取得できませんでした。")
+                return
 
-        res = requests.post(HONO_SYNC_URL, json=payload, headers=headers, timeout=30)
+            price_df = pd.DataFrame(rates)
+            price_df['Datetime_JST'] = pd.to_datetime(price_df['time'], unit='s')
+            price_df = price_df.rename(
+                columns={
+                    "open": "OPEN",
+                    "high": "HIGH",
+                    "low": "LOW",
+                    "close": "CLOSE",
+                }
+            )
+            price_df.set_index('Datetime_JST', inplace=True)
 
-        if res.status_code == 200:
-            print("[Sync] ✅ HonoへのPush同期が完了しました！ (HTTP 200)")
-        else:
-            print(f"[Sync] ❌ HonoへのPush失敗: HTTP {res.status_code}")
-            print(res.text)
+            # 2. カレンダーデータの読み込み
+            analyzer = MarketAnalyzer(xm_to_jst_offset_hours=7)
+            calendar_df = analyzer.load_calendar_data('auto')
 
-    except Exception as e:
-        print(f"[Sync] エラー発生: {e}")
-    finally:
-        mt5.shutdown()
-        print("=====================================================")
+            # 3. MarketAnalyzerで分析実行
+            result_df = analyzer.analyze_sessions(price_df, calendar_df)
+
+            # 4. JSONペイロード構築
+            payload = analyzer.prepare_api_payload(result_df, calendar_df, price_df)
+
+            # 5. Hono DBへPOST送信
+            print(f"[Sync] Honoバックエンド ({HONO_SYNC_URL}) へ POST 送信中...")
+            headers = {"Content-Type": "application/json"}
+
+            api_token = os.environ.get("API_TOKEN")
+            if not api_token:
+                print(
+                    "[Sync] 💣 致命的エラー: API_TOKEN 環境変数が設定されていません。"
+                    "終了します。"
+                )
+                return
+
+            headers["Authorization"] = f"Bearer {api_token}"
+
+            res = requests.post(
+                HONO_SYNC_URL,
+                json=payload,
+                headers=headers,
+                timeout=30,
+            )
+
+            if res.status_code == 200:
+                print("[Sync] ✅ HonoへのPush同期が完了しました！ (HTTP 200)")
+            else:
+                print(f"[Sync] ❌ HonoへのPush失敗: HTTP {res.status_code}")
+                print(res.text)
+
+        except Exception as e:
+            print(f"[Sync] エラー発生: {e}")
+        finally:
+            mt5.shutdown()
+            print("=====================================================")
 
 @app.post("/api/sync")
 def trigger_sync():
-    """Honoや外部スケジューラーから手動/定期で同期処理を呼び出すエンドポイント"""
+    """
+    Honoや外部スケジューラーから手動/定期で同期処理を呼び出すエンドポイントです。
+    @responsibility HTTPトリガーをバックグラウンド同期実行へ変換し、
+    呼び出し元へ即時応答する。
+    """
     threading.Thread(target=run_analysis_and_push).start()
     return {"status": "Processing in background"}
 
 @app.get("/health")
 def health_check():
+    """
+    Analytics APIのヘルスチェックを返します。
+    @responsibility 常駐FastAPIサーバーが起動していることを確認できる
+    最小応答を提供する。
+    """
     return {"status": "ok"}
 
 
 @app.on_event("startup")
 def start_scheduled_sync():
-    """環境変数が設定されている場合のみ、JSON差分同期スケジューラを開始する"""
+    """
+    環境変数が設定されている場合のみ、JSON差分同期スケジューラを開始します。
+    @responsibility FastAPI起動時に定時同期設定を読み、
+    必要な場合だけ常駐スケジューラを起動する。
+    """
     global scheduled_sync_scheduler
 
     config = ScheduledSyncConfig.from_env()
@@ -125,7 +158,10 @@ def start_scheduled_sync():
 
 @app.on_event("shutdown")
 def stop_scheduled_sync():
-    """FastAPI終了時にスケジューラを停止する"""
+    """
+    FastAPI終了時にスケジューラを停止します。
+    @responsibility アプリ終了時に定時同期スレッドへ停止要求を出し、後始末を行う。
+    """
     if scheduled_sync_scheduler is not None:
         scheduled_sync_scheduler.stop()
 
