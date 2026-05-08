@@ -5,6 +5,24 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-08 - PR #97 Geminiレビューコメント対応
+
+- **達成したタスク**:
+  - PR #97 の未解決レビューコメント6件を `gh-address-comments` ワークフローで確認。
+  - `apps/frontend/src/app/status/page.tsx` の `formatDateTime`, `getHealthView`, `buildStatusItems`, `StatusContent`, `StatusPage` に `@responsibility` 付きJSDocを追加・位置修正。
+  - `apps/frontend/src/app/status/page.test.tsx` に `syncHealth: "Stale"` の表示分岐テストを追加。
+  - 修正コミット `851a800 fix: address status page review comments` をPRブランチへpush。
+  - 各レビューコメントへ対応内容を返信し、6件すべてのレビューThreadを resolved に変更。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/status/page.test.tsx`: 4 pass / 0 fail
+  - `cd apps/frontend && bun run lint`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 66 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - PR #97 はレビューコメント対応済み。追加CI/レビュー結果を確認して問題なければマージ可能。
+
 ### 2026-05-08 - Issue #42 Statusページ実装 / PR #97
 
 - **達成したタスク**:
