@@ -21,6 +21,19 @@ describe("StatusPage", () => {
     expect(screen.getByText("10,000")).toBeDefined();
   });
 
+  it("同期ステータスが Stale の場合、遅延案内を表示すること", () => {
+    render(<StatusContent status={{
+      lastCandleAt: "2026-04-01T10:00:00Z",
+      lastSessionAt: "2026-04-01",
+      lastEventAt: "2026-04-01T10:00:00Z",
+      totalCandles: 10000,
+      syncHealth: "Stale",
+    }} />);
+
+    expect(screen.getByText("Stale")).toBeDefined();
+    expect(screen.getByText("同期データの更新が遅れている可能性があります。")).toBeDefined();
+  });
+
   it("同期ステータスの取得に失敗した場合、案内を表示すること", () => {
     render(<StatusContent status={null} errorMessage="同期ステータスの取得に失敗しました" />);
 

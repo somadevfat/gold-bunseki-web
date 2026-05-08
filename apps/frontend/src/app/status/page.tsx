@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   },
 };
 
-const formatDateTime = (value: string) => {
+/**
+ * formatDateTime は日時文字列を日本時間の読みやすい形式に変換します。
+ * @responsibility 空値や不正値を扱いながら、ja-JP ロケールで日時を整形する。
+ */
+function formatDateTime(value: string) {
   if (!value) {
     return "未取得";
   }
@@ -26,9 +30,13 @@ const formatDateTime = (value: string) => {
     timeStyle: "short",
     timeZone: "Asia/Tokyo",
   }).format(date);
-};
+}
 
-const getHealthView = (syncHealth: string) => {
+/**
+ * getHealthView は同期状態に応じた表示用データを返します。
+ * @responsibility ステータス文字列をラベル、説明文、Tailwind クラスにマッピングする。
+ */
+function getHealthView(syncHealth: string) {
   const normalized = syncHealth.toLowerCase();
 
   if (normalized === "healthy") {
@@ -55,40 +63,46 @@ const getHealthView = (syncHealth: string) => {
     className: "border-rose-200 bg-rose-50 text-rose-900",
     dotClassName: "bg-rose-500",
   };
-};
-
-const buildStatusItems = (status: SyncStatusResponse) => [
-  {
-    label: "Latest Candle",
-    value: formatDateTime(status.lastCandleAt),
-    description: "価格足データの最終同期時刻",
-  },
-  {
-    label: "Latest Session",
-    value: formatDateTime(status.lastSessionAt),
-    description: "セッション集計データの最終更新日",
-  },
-  {
-    label: "Latest Event",
-    value: formatDateTime(status.lastEventAt),
-    description: "経済指標データの最終同期時刻",
-  },
-  {
-    label: "Stored Candles",
-    value: status.totalCandles.toLocaleString("ja-JP"),
-    description: "バックエンドで確認できる価格足件数",
-  },
-];
+}
 
 /**
- * StatusPage はバックエンドと同期データの現在状態を表示するページです。
- * @responsibility 同期APIの状態を取得し、正常時と取得失敗時の案内を出し分ける。
+ * buildStatusItems は同期ステータスレスポンスを表示用の項目配列に変換します。
+ * @responsibility 各ステータス項目のラベル、フォーマット済み値、説明文を整理する。
  */
+function buildStatusItems(status: SyncStatusResponse) {
+  return [
+    {
+      label: "Latest Candle",
+      value: formatDateTime(status.lastCandleAt),
+      description: "価格足データの最終同期時刻",
+    },
+    {
+      label: "Latest Session",
+      value: formatDateTime(status.lastSessionAt),
+      description: "セッション集計データの最終更新日",
+    },
+    {
+      label: "Latest Event",
+      value: formatDateTime(status.lastEventAt),
+      description: "経済指標データの最終同期時刻",
+    },
+    {
+      label: "Stored Candles",
+      value: status.totalCandles.toLocaleString("ja-JP"),
+      description: "バックエンドで確認できる価格足件数",
+    },
+  ];
+}
+
 type StatusContentProps = {
   status: SyncStatusResponse | null;
   errorMessage?: string;
 };
 
+/**
+ * StatusContent はバックエンドと同期データの現在状態を表示するコンポーネントです。
+ * @responsibility 正常時と取得失敗時の表示内容を出し分ける。
+ */
 export function StatusContent({ status, errorMessage = "" }: StatusContentProps) {
   const health = getHealthView(status?.syncHealth ?? "Unknown");
 
@@ -138,6 +152,10 @@ export function StatusContent({ status, errorMessage = "" }: StatusContentProps)
   );
 }
 
+/**
+ * StatusPage はステータスページのルートコンポーネントです。
+ * @responsibility 同期ステータスを取得し、StatusContent に渡して表示する。
+ */
 export default async function StatusPage() {
   let status: SyncStatusResponse | null = null;
   let errorMessage = "";
