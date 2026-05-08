@@ -5,6 +5,30 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-08 - Issue #42 Statusページ実装 / PR #97
+
+- **達成したタスク**:
+  - GitHub Issue一覧を取得し、ノートPC同期サーバー運用系（#76/#78）を除外して依存関係を確認。
+  - 依存なしで進められる #42 `[FE] Statusページを実装する` を選定し、`develop` から `feature/issue-42-status-page` を作成。
+  - `/status` ページを追加し、`/api/v1/sync/status` の `syncHealth`, 最終Candle/Session/Event、保存済みCandle件数を表示。
+  - 同期ステータス取得用の `getSyncStatus` フロントAPIラッパーと `SyncStatusResponse` 型を追加。
+  - API取得失敗時の案内表示、StatusページのSEO metadata、`/status` の sitemap 追加を実装。
+  - Statusページ、同期ステータス取得、sitemap のテストを追加。
+  - 既存の `getCommunityThreads.test.ts` が `excerpt` を使っていて `CommunityThread.body` 型とずれていたため、型チェック通過のため `body` に修正。
+  - PR #97 `https://github.com/somadevfat/gold-bunseki-web/pull/97` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/status/page.test.tsx src/features/sync/api/getSyncStatus.test.ts src/app/sitemap.test.ts`: 7 pass / 0 fail
+  - `cd apps/frontend && ./node_modules/.bin/tsc --noEmit`: pass
+  - `cd apps/frontend && bun run build`: pass（Wranglerのホーム配下ログ書き込みで `EROFS` warning は出たが終了コード0）
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 65 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - PR #97 のCI確認とレビュー対応を行う。
+  - ノートPC同期運用そのものは今回スコープ外。同期状態の精度をさらに高める場合は #77 を先に進める。
+  - 同期以外の次候補は、依存なしの #37 リサーチメモ保存API、または #33 考察ブログ記事ソース方式のSpike。
+
 ### 2026-05-08 - Issue #41/#43 フッター導線ページ追加
 
 - **達成したタスク**:
