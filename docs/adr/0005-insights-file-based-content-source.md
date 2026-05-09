@@ -17,7 +17,7 @@
 ## 決定事項
 初期実装では、考察ブログの記事ソースをリポジトリ管理の型付きファイルベースにする。
 
-具体的には、Frontend内に `features/insights` ドメインを作り、記事データを以下の構造で扱う。
+具体的には、Frontend内に `src/features/insights` ドメインを作り、記事データを以下の構造で扱う。
 
 - `slug`: URLに使う一意な識別子
 - `title`: 記事タイトル
@@ -26,7 +26,7 @@
 - `publishedAt`: 公開日
 - `body`: 初期は構造化済みの段落配列として保持
 
-初期の本文はTSオブジェクトの配列で実装し、MDXレンダラーやCMS連携は導入しない。UI側は `getInsightPosts`, `getInsightPostBySlug` のような読み取り関数だけに依存させ、将来MDX/DB/Notionに移す場合もページ側の変更を小さくする。
+初期の本文はTSオブジェクトの配列で実装し、MDXレンダラーやCMS連携は導入しない。UI側は `getInsightPosts`, `getInsightPostBySlug` のような読み取り関数（リポジトリ基準に従い `@responsibility` を付与）だけに依存させ、将来MDX/DB/Notionに移す場合もページ側の変更を小さくする。
 
 ## 結果
 メリット:

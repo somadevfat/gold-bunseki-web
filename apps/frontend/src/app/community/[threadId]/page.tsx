@@ -13,6 +13,10 @@ type CommunityThreadDetailPageProps = {
   params: Promise<{ threadId: string }>;
 };
 
+/**
+ * resolveCommunityThreadDetail は掲示板スレッド詳細を取得し、失敗時は null を返します。
+ * @responsibility API エラーをキャッチして、ページコンポーネントで扱いやすい形式に変換する。
+ */
 async function resolveCommunityThreadDetail(threadId: string): Promise<CommunityThreadDetailResponse | null> {
   try {
     return await getCommunityThreadDetail(threadId);
@@ -49,7 +53,7 @@ export default async function CommunityThreadDetailPage({ params }: CommunityThr
       <Link href="/community" className="text-sm font-semibold text-amber-700 hover:text-amber-800">
         掲示板一覧へ戻る
       </Link>
-      <CommunityThreadDetail thread={detail.thread} initialReplies={detail.replies} />
+      <CommunityThreadDetail key={threadId} thread={detail.thread} initialReplies={detail.replies} />
     </section>
   );
 }

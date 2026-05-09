@@ -31,4 +31,17 @@ describe("insights content", () => {
   it("存在しないslugの場合 null を返すこと", () => {
     expect(getInsightPostBySlug("missing")).toBeNull();
   });
+
+  it("取得した記事オブジェクトを変更しても元のデータに影響しないこと", () => {
+    const post = getInsightPostBySlug("event-replay-checklist");
+    if (post) {
+      post.title = "MODIFIED";
+      post.body.push("NEW PARAGRAPH");
+    }
+
+    const original = getInsightPostBySlug("event-replay-checklist");
+
+    expect(original?.title).not.toBe("MODIFIED");
+    expect(original?.body).not.toContain("NEW PARAGRAPH");
+  });
 });

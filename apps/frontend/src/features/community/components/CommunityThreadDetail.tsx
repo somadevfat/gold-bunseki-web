@@ -11,12 +11,18 @@ type CommunityThreadDetailProps = {
   createReply?: typeof createCommunityReply;
 };
 
+const dateTimeFormatter = new Intl.DateTimeFormat("ja-JP", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Tokyo",
+});
+
+/**
+ * formatDateTime は ISO 日時文字列を日本語形式に変換します。
+ * @responsibility 日時表示のフォーマットを統一する。
+ */
 function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Tokyo",
-  }).format(new Date(value));
+  return dateTimeFormatter.format(new Date(value));
 }
 
 /**
