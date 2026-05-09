@@ -7,6 +7,10 @@ export type InsightPost = {
   body: string[];
 };
 
+/**
+ * copyInsightPost は記事データを呼び出し側で変更しても元データへ影響しない形で返します。
+ * @responsibility 記事ソースの不変性を保ち、一覧・詳細の利用側が安全に表示データを扱えるようにする。
+ */
 function copyInsightPost(post: InsightPost): InsightPost {
   return {
     ...post,
