@@ -16,6 +16,9 @@ export type AppClient = {
           $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThreadsResponse> }>;
           $post: (args: { json: CreateCommunityThreadInput }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<CommunityThread> }>;
         };
+      };
+      sync: {
+        status: { $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<SyncStatusResponse> }> };
       }
     }
   }
@@ -77,6 +80,14 @@ export type CommunityThread = {
 
 export type CommunityThreadsResponse = {
   threads: CommunityThread[];
+};
+
+export type SyncStatusResponse = {
+  lastCandleAt: string;
+  lastSessionAt: string;
+  lastEventAt: string;
+  totalCandles: number;
+  syncHealth: string;
 };
 
 export type CreateCommunityThreadInput = {
