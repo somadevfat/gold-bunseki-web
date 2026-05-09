@@ -6,6 +6,11 @@ type InsightDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+const publishedDateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  dateStyle: "medium",
+  timeZone: "Asia/Tokyo",
+});
+
 /**
  * generateMetadata は考察記事詳細のメタ情報を生成します。
  * @responsibility 記事タイトルと説明文をSEO metadataへ反映する。
@@ -61,15 +66,12 @@ export default async function InsightDetailPage({ params }: InsightDetailPagePro
       <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">{post.category}</p>
       <h1 className="mt-4 text-3xl font-semibold leading-tight text-slate-950 md:text-4xl">{post.title}</h1>
       <time className="mt-4 block text-xs font-medium text-slate-400" dateTime={post.publishedAt}>
-        {new Intl.DateTimeFormat("ja-JP", {
-          dateStyle: "medium",
-          timeZone: "Asia/Tokyo",
-        }).format(new Date(post.publishedAt))}
+        {publishedDateFormatter.format(new Date(post.publishedAt))}
       </time>
       <p className="mt-6 text-base leading-8 text-slate-600">{post.description}</p>
       <div className="mt-8 space-y-6 border-t border-slate-100 pt-8">
-        {post.body.map((paragraph) => (
-          <p key={paragraph} className="text-base leading-9 text-slate-700">
+        {post.body.map((paragraph, index) => (
+          <p key={index} className="text-base leading-9 text-slate-700">
             {paragraph}
           </p>
         ))}

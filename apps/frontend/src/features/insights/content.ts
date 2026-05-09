@@ -7,6 +7,13 @@ export type InsightPost = {
   body: string[];
 };
 
+function copyInsightPost(post: InsightPost): InsightPost {
+  return {
+    ...post,
+    body: [...post.body],
+  };
+}
+
 const insightPosts: InsightPost[] = [
   {
     slug: "xauusd-cpi-session-volatility",
@@ -51,7 +58,7 @@ const insightPosts: InsightPost[] = [
  * @responsibility 記事一覧ページが記事ソースの保持形式へ依存しないようにする。
  */
 export function getInsightPosts(): InsightPost[] {
-  return [...insightPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  return [...insightPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).map(copyInsightPost);
 }
 
 /**
@@ -59,5 +66,6 @@ export function getInsightPosts(): InsightPost[] {
  * @responsibility 詳細ページが記事ソースの保持形式へ依存しないようにする。
  */
 export function getInsightPostBySlug(slug: string): InsightPost | null {
-  return insightPosts.find((post) => post.slug === slug) ?? null;
+  const post = insightPosts.find((item) => item.slug === slug);
+  return post ? copyInsightPost(post) : null;
 }
