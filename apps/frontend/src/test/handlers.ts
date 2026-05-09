@@ -109,6 +109,35 @@ export const handlers = [
     });
   }),
 
+  /* 掲示板投稿詳細 */
+  http.get(`${baseUrl}/api/v1/community/threads/:threadId`, ({ params, request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+    const threadId = String(params.threadId);
+
+    if (scenario === 'error' || threadId === 'missing') {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    return HttpResponse.json({
+      thread: {
+        id: threadId,
+        title: 'CPI発表前後のXAUUSDの値幅をどう見ていますか？',
+        category: 'Market Discussion',
+        body: '前回CPIでは発表直後の初動より、NY後半の戻りが大きかったです。',
+        replyCount: 1,
+        createdAt: '2026-04-01T12:00:00Z',
+      },
+      replies: [
+        {
+          id: 'reply-1',
+          threadId,
+          body: 'NY後半の戻りは出来高も合わせて確認したいです。',
+          createdAt: '2026-04-01T12:30:00Z',
+        },
+      ],
+    });
+  }),
+
   /* 認証 (better-auth) - セッション取得 */
   http.post(`${baseUrl}/api/v1/community/threads`, async ({ request }) => {
     const scenario = request.headers.get('x-test-scenario');
@@ -128,6 +157,26 @@ export const handlers = [
       body: body.body,
       replyCount: 0,
       createdAt: '2026-05-05T10:00:00Z',
+    }, { status: 201 });
+  }),
+
+  /* 掲示板返信作成 */
+  http.post(`${baseUrl}/api/v1/community/threads/:threadId/replies`, async ({ params, request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+    if (scenario === 'error') {
+      return new HttpResponse(null, { status: 500 });
+    }
+
+    const body = await request.json() as { body?: string };
+    if (!body.body) {
+      return new HttpResponse(null, { status: 400 });
+    }
+
+    return HttpResponse.json({
+      id: 'reply-new',
+      threadId: String(params.threadId),
+      body: body.body,
+      createdAt: '2026-05-05T10:30:00Z',
     }, { status: 201 });
   }),
 
