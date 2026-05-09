@@ -30,6 +30,7 @@ describe("InsightDetailPage", () => {
       url: "https://fanda-dev.com/insights/event-replay-checklist",
       title: "指標リプレイを見るときのチェックリスト",
       publishedTime: "2026-05-05",
+      locale: "ja_JP",
     }));
     expect(metadata.twitter).toEqual(expect.objectContaining({
       card: "summary",
