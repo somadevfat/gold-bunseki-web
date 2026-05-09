@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getInsightPosts } from "./content";
+import { getInsightPostBySlug, getInsightPosts } from "./content";
 
 describe("insights content", () => {
   it("公開日が新しい順で記事一覧を返すこと", () => {
@@ -20,5 +20,15 @@ describe("insights content", () => {
     expect(post.title).toBeTruthy();
     expect(post.description).toBeTruthy();
     expect(post.publishedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("slugで記事を取得できること", () => {
+    const post = getInsightPostBySlug("event-replay-checklist");
+
+    expect(post?.title).toBe("指標リプレイを見るときのチェックリスト");
+  });
+
+  it("存在しないslugの場合 null を返すこと", () => {
+    expect(getInsightPostBySlug("missing")).toBeNull();
   });
 });

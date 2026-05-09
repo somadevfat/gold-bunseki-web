@@ -53,3 +53,11 @@ export const insightPosts: InsightPost[] = [
 export function getInsightPosts(): InsightPost[] {
   return [...insightPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 }
+
+/**
+ * getInsightPostBySlug はslugに一致する考察記事を返します。
+ * @responsibility 詳細ページが記事ソースの保持形式へ依存しないようにする。
+ */
+export function getInsightPostBySlug(slug: string): InsightPost | null {
+  return insightPosts.find((post) => post.slug === slug) ?? null;
+}
