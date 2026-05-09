@@ -15,6 +15,15 @@ type InsightPostsResult =
   | { status: "success"; posts: InsightPost[] }
   | { status: "error" };
 
+const publishedDateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  dateStyle: "long",
+  timeZone: "Asia/Tokyo",
+});
+
+/**
+ * resolveInsightPosts は記事取得処理をラップし、成功または失敗の状態を返します。
+ * @responsibility 記事取得処理のエラーをハンドリングし、結果を統一された形式で提供する。
+ */
 function resolveInsightPosts(getPosts: () => InsightPost[]): InsightPostsResult {
   try {
     return { status: "success", posts: getPosts() };
@@ -75,10 +84,7 @@ export default function InsightsPage({ getPosts = getInsightPosts }: InsightsPag
                     </Link>
                   </h3>
                   <time className="mt-3 block text-xs font-medium text-slate-400" dateTime={post.publishedAt}>
-                    {new Intl.DateTimeFormat("ja-JP", {
-                      dateStyle: "medium",
-                      timeZone: "Asia/Tokyo",
-                    }).format(new Date(post.publishedAt))}
+                    {publishedDateFormatter.format(new Date(post.publishedAt))}
                   </time>
                   <p className="mt-4 text-sm leading-7 text-slate-600">{post.description}</p>
                 </article>
