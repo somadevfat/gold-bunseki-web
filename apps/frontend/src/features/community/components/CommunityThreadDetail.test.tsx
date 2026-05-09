@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ToastProvider } from "@/features/common/components/ToastProvider";
 import { CommunityThreadDetail } from "./CommunityThreadDetail";
@@ -43,9 +43,20 @@ describe("CommunityThreadDetail", () => {
   });
 
   it("返信投稿後、返信一覧へ即時反映すること", async () => {
+    const createReply = mock(() => Promise.resolve({
+      id: "reply-new",
+      threadId: "thread-1",
+      body: "新しい返信です。",
+      createdAt: "2026-05-05T11:00:00Z",
+    }));
+
     render(
       <ToastProvider>
-        <CommunityThreadDetail thread={{ ...thread, replyCount: 0 }} initialReplies={[]} />
+        <CommunityThreadDetail
+          createReply={createReply}
+          thread={{ ...thread, replyCount: 0 }}
+          initialReplies={[]}
+        />
       </ToastProvider>,
     );
 
@@ -55,6 +66,7 @@ describe("CommunityThreadDetail", () => {
     fireEvent.click(screen.getByRole("button", { name: "返信する" }));
 
     await waitFor(() => {
+      expect(createReply).toHaveBeenCalledWith("thread-1", { body: "新しい返信です。" });
       expect(screen.getByText("新しい返信です。")).toBeDefined();
     });
   });
