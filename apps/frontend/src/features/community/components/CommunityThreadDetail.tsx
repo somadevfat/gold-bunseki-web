@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { createCommunityReply } from "@/features/community/api/createCommunityReply";
 import { CommunityReplyForm } from "@/features/community/components/CommunityReplyForm";
 import type { CommunityReply, CommunityThread } from "@/lib/api/client";
 
 type CommunityThreadDetailProps = {
   thread: CommunityThread;
   initialReplies: CommunityReply[];
+  createReply?: typeof createCommunityReply;
 };
 
 function formatDateTime(value: string): string {
@@ -21,7 +23,11 @@ function formatDateTime(value: string): string {
  * CommunityThreadDetail は掲示板スレッド本文と返信一覧を表示します。
  * @responsibility 詳細表示、返信追加後の即時反映、空状態を担当する。
  */
-export function CommunityThreadDetail({ initialReplies, thread }: CommunityThreadDetailProps) {
+export function CommunityThreadDetail({
+  createReply = createCommunityReply,
+  initialReplies,
+  thread,
+}: CommunityThreadDetailProps) {
   const [replies, setReplies] = useState(initialReplies);
 
   return (
@@ -38,6 +44,7 @@ export function CommunityThreadDetail({ initialReplies, thread }: CommunityThrea
       </article>
 
       <CommunityReplyForm
+        createReply={createReply}
         threadId={thread.id}
         onCreated={(reply) => setReplies((current) => [...current, reply])}
       />
