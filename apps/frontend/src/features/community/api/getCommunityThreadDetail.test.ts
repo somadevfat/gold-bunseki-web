@@ -4,6 +4,10 @@ import type { AppClient } from "@/lib/api/client";
 
 const getMock = mock();
 
+/**
+ * createMockClient はテスト用の AppClient モックを作成します。
+ * @responsibility スレッド詳細APIのテストに必要なエンドポイントを提供し、外部依存を排除する。
+ */
 const createMockClient = (): AppClient => ({
   api: {
     v1: {

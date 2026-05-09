@@ -7,7 +7,7 @@ export type InsightPost = {
   body: string[];
 };
 
-export const insightPosts: InsightPost[] = [
+const insightPosts: InsightPost[] = [
   {
     slug: "xauusd-cpi-session-volatility",
     category: "XAUUSD分析",

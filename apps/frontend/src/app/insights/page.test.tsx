@@ -20,6 +20,7 @@ describe("InsightsPage", () => {
     expect(screen.getByRole("link", { name: "テスト記事" }).getAttribute("href")).toBe("/insights/test-post");
     expect(screen.getByText("XAUUSD分析")).toBeDefined();
     expect(screen.getByText("テスト記事の抜粋です。")).toBeDefined();
+    expect(screen.getByText("2026年5月5日")).toBeDefined();
   });
 
   it("記事が0件の場合、空状態を表示すること", () => {
