@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getInsightPostBySlug } from "@/features/insights/content";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fanda-dev.com";
+
 type InsightDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -26,6 +28,19 @@ export async function generateMetadata({ params }: InsightDetailPageProps): Prom
     description: post.description,
     alternates: {
       canonical: `/insights/${post.slug}`,
+    },
+    openGraph: {
+      type: "article",
+      url: `${siteUrl}/insights/${post.slug}`,
+      title: post.title,
+      description: post.description,
+      publishedTime: post.publishedAt,
+      siteName: "fanda-dev",
+    },
+    twitter: {
+      card: "summary",
+      title: post.title,
+      description: post.description,
     },
   };
 }
