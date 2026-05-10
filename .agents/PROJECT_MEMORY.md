@@ -5,6 +5,31 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-10 - Issue #37-#40 リサーチメモ機能スタックPR作成
+
+- **達成したタスク**:
+  - ノートPC同期系を除いた残Issueとして #37 -> #38 -> #39 -> #40 を依存順に実装し、スタックPR #104-#107 を作成。
+  - #37: Backendに `research_notes` テーブル、Drizzle migration `0004_dry_magdalene.sql`、Entity/Port/UseCase/Repository/Controller/OpenAPI routeを追加。
+  - #38: `ResearchNoteForm` を保存API接続へ変更し、成功/失敗Toast、送信中disabled、APIラッパーを追加。
+  - #39: ダッシュボード右カラムに `ResearchNotesPanel` を追加し、保存済みメモ一覧、ローディング、空状態、取得失敗表示を実装。
+  - #40: リサーチメモ更新/削除API、Frontend APIラッパー、編集モーダル、削除確認UI、zodバリデーション、成功/失敗Toastを追加。
+
+- **主要PR/ブランチ**:
+  - #104 `features/issue-37-research-notes-api` base `develop`
+  - #105 `features/issue-38-connect-research-form` base `features/issue-37-research-notes-api`
+  - #106 `features/issue-39-research-notes-list` base `features/issue-38-connect-research-form`
+  - #107 `features/issue-40-edit-delete-research-notes` base `features/issue-39-research-notes-list`
+
+- **検証結果**:
+  - `PATH="/home/somah/.bun/bin:$PATH" bun run lint:all`: pass
+  - `PATH="/home/somah/.bun/bin:$PATH" bun run test:all`: frontend 118 pass / backend 127 pass
+  - GitHub Actions `lint-and-test`: PR #104, #105, #106, #107 すべて pass / mergeState CLEAN
+
+- **次回への申し送り事項**:
+  - マージ順は #107 -> #106 -> #105 -> #104 ではなく、上位差分から下位ブランチへ取り込むスタック運用に合わせて、まず #107 を #106 へ、#106 を #105 へ、#105 を #104 へ、最後に #104 を `develop` へ反映する。
+  - PRマージ後、baseが `develop` ではないPRの `Closes` が自動クローズされない場合は #37-#40 を手動で完了コメント付きクローズする。
+  - 残Open IssueはノートPC同期運用系 #76-#78 のみになる想定。
+
 ### 2026-05-09 - Issue/PR最新同期と次Issue依存整理
 
 - **達成したタスク**:
