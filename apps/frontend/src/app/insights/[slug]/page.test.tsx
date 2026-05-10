@@ -25,6 +25,17 @@ describe("InsightDetailPage", () => {
     expect(metadata.title).toBe("指標リプレイを見るときのチェックリスト");
     expect(metadata.description).toContain("発表前レンジ");
     expect(metadata.alternates).toEqual({ canonical: "/insights/event-replay-checklist" });
+    expect(metadata.openGraph).toEqual(expect.objectContaining({
+      type: "article",
+      url: "https://fanda-dev.com/insights/event-replay-checklist",
+      title: "指標リプレイを見るときのチェックリスト",
+      publishedTime: "2026-05-05",
+      locale: "ja_JP",
+    }));
+    expect(metadata.twitter).toEqual(expect.objectContaining({
+      card: "summary",
+      title: "指標リプレイを見るときのチェックリスト",
+    }));
   });
 
   it("存在しない記事のmetadataを生成すること", async () => {
