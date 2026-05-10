@@ -14,6 +14,7 @@ import {
 import {
   CreateResearchNoteInputSchema,
   ResearchNoteSchema,
+  UpdateResearchNoteInputSchema,
 } from "../../domain/entities/researchNote";
 
 /**
@@ -422,6 +423,82 @@ export const createResearchNoteRoute = createRoute({
     },
     400: {
       description: "バリデーションエラー",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * リサーチメモ更新ルート
+ */
+export const updateResearchNoteRoute = createRoute({
+  method: "patch",
+  path: "/api/v1/research-notes/{noteId}",
+  request: {
+    params: z.object({
+      noteId: z.string().uuid().openapi({
+        param: { name: "noteId", in: "path" },
+        example: "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        description: "メモID",
+      }),
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: UpdateResearchNoteInputSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: ResearchNoteSchema,
+        },
+      },
+      description: "リサーチメモを更新して返します",
+    },
+    400: {
+      description: "バリデーションエラー",
+    },
+    404: {
+      description: "リサーチメモが見つかりません",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * リサーチメモ削除ルート
+ */
+export const deleteResearchNoteRoute = createRoute({
+  method: "delete",
+  path: "/api/v1/research-notes/{noteId}",
+  request: {
+    params: z.object({
+      noteId: z.string().uuid().openapi({
+        param: { name: "noteId", in: "path" },
+        example: "c1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        description: "メモID",
+      }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.boolean() }),
+        },
+      },
+      description: "リサーチメモを削除します",
+    },
+    404: {
+      description: "リサーチメモが見つかりません",
     },
     500: {
       description: "サーバー内部エラー",
