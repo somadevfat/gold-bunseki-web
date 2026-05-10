@@ -20,7 +20,7 @@ export function SiteFooter() {
         <Link href="/status" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           Status
         </Link>
-        <Link href="/api" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
+        <Link href="/api-docs" className="border-b border-transparent pb-1 transition-colors hover:border-slate-900 hover:text-slate-900">
           API
         </Link>
       </div>

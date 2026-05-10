@@ -5,6 +5,108 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-09 - Issue/PR最新同期と次Issue依存整理
+
+- **達成したタスク**:
+  - GitHub Issue/PRを最新確認し、Open PRが0件であることを確認。
+  - Open Issueは #32-#40, #42, #76-#78。ノートPC同期運用系として #76-#78 は今回の次着手候補から除外。
+  - `git fetch --prune origin` を実行し、`origin/develop` が PR #97 まで進んでいることを確認。
+  - ローカル `develop` を `origin/develop` に fast-forward 同期済み。
+  - PR #97 `[FE] Statusページを実装する` は `develop` にマージ済みだが、Issue #42 はOpenのまま。`develop -> main` のリリースPR本文で `Closes #42` を含めるか、main反映後に手動クローズする必要がある。
+
+- **依存整理**:
+  - #32 掲示板スレッド詳細/返信UI: 依存の #30/#31 が完了済みで、ノートPC同期以外の次実装PRとして最有力。
+  - ブログ系: #33 Spikeで記事ソース方式を決めてから #34 一覧実データ化、#35 詳細ページ、#36 SEO の順。
+  - リサーチメモ系: #37 BE保存APIを先に実装し、その後 #38 フォーム接続と #39 一覧表示を並行可能。#40 編集/削除は #39 後、必要ならBE更新/削除API Issueを追加。
+  - #76-#78 はノートPC同期運用系のため保留。
+
+- **次回への申し送り事項**:
+  - ユーザー確認後、`develop` から `feature/issue-32-community-thread-detail` を切って #32 に着手するのが自然。
+  - `develop -> main` リリースPRを作る場合は #75 のノートPC同期スクリプトも含まれるため、今回の「ノートPC同期以外」方針と分けて判断する。
+
+### 2026-05-08 - PR #97 Geminiレビューコメント対応
+
+- **達成したタスク**:
+  - PR #97 の未解決レビューコメント6件を `gh-address-comments` ワークフローで確認。
+  - `apps/frontend/src/app/status/page.tsx` の `formatDateTime`, `getHealthView`, `buildStatusItems`, `StatusContent`, `StatusPage` に `@responsibility` 付きJSDocを追加・位置修正。
+  - `apps/frontend/src/app/status/page.test.tsx` に `syncHealth: "Stale"` の表示分岐テストを追加。
+  - 修正コミット `851a800 fix: address status page review comments` をPRブランチへpush。
+  - 各レビューコメントへ対応内容を返信し、6件すべてのレビューThreadを resolved に変更。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/status/page.test.tsx`: 4 pass / 0 fail
+  - `cd apps/frontend && bun run lint`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 66 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - PR #97 はレビューコメント対応済み。追加CI/レビュー結果を確認して問題なければマージ可能。
+
+### 2026-05-08 - Issue #42 Statusページ実装 / PR #97
+
+- **達成したタスク**:
+  - GitHub Issue一覧を取得し、ノートPC同期サーバー運用系（#76/#78）を除外して依存関係を確認。
+  - 依存なしで進められる #42 `[FE] Statusページを実装する` を選定し、`develop` から `feature/issue-42-status-page` を作成。
+  - `/status` ページを追加し、`/api/v1/sync/status` の `syncHealth`, 最終Candle/Session/Event、保存済みCandle件数を表示。
+  - 同期ステータス取得用の `getSyncStatus` フロントAPIラッパーと `SyncStatusResponse` 型を追加。
+  - API取得失敗時の案内表示、StatusページのSEO metadata、`/status` の sitemap 追加を実装。
+  - Statusページ、同期ステータス取得、sitemap のテストを追加。
+  - 既存の `getCommunityThreads.test.ts` が `excerpt` を使っていて `CommunityThread.body` 型とずれていたため、型チェック通過のため `body` に修正。
+  - PR #97 `https://github.com/somadevfat/gold-bunseki-web/pull/97` を `develop` 向けに作成。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/status/page.test.tsx src/features/sync/api/getSyncStatus.test.ts src/app/sitemap.test.ts`: 7 pass / 0 fail
+  - `cd apps/frontend && ./node_modules/.bin/tsc --noEmit`: pass
+  - `cd apps/frontend && bun run build`: pass（Wranglerのホーム配下ログ書き込みで `EROFS` warning は出たが終了コード0）
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 65 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - PR #97 のCI確認とレビュー対応を行う。
+  - ノートPC同期運用そのものは今回スコープ外。同期状態の精度をさらに高める場合は #77 を先に進める。
+  - 同期以外の次候補は、依存なしの #37 リサーチメモ保存API、または #33 考察ブログ記事ソース方式のSpike。
+
+### 2026-05-08 - Issue #41/#43 フッター導線ページ追加
+
+- **達成したタスク**:
+  - ノートPC同期系以外で依存が軽い Issue #41 `Privacy & Securityページ` と Issue #43 `APIドキュメントページ導線` に対応。
+  - `feature/issues-41-43-footer-pages` ブランチを `develop` から作成。
+  - `/privacy` ページを追加し、収集情報、利用目的、Cookie/認証、MT5同期データ、セキュリティ、問い合わせ先を説明。
+  - `/api-docs` ページを追加し、Swagger UI / OpenAPI JSON へのリンクと Market / Sync / Community API の用途を説明。
+  - フッターの `API` リンクを `/api-docs` に修正し、`/privacy` と `/api-docs` を sitemap に追加。
+  - ページ表示、SEO metadata、フッターリンクのテストを追加。
+
+- **検証結果**:
+  - `cd apps/frontend && bun test src/app/privacy/page.test.tsx src/app/api-docs/page.test.tsx src/features/common/components/SiteFooter.test.tsx`: 5 pass / 0 fail
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 58 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - #41/#43 はPRマージ後に完了コメント付きでクローズする。
+  - 次に同期以外で進めるなら、依存が満たされた #32 掲示板スレッド詳細/返信UI、または #37 リサーチメモ保存API が進めやすい。
+
+### 2026-05-06 - Issue #75 MT5定時POSTスケジューラ実装
+
+- **達成したタスク**:
+  - Issue #75 `[Analytics] MT5から定時POSTするノートPC同期スクリプトを実装する` に対応。
+  - `feature/issue-75-scheduled-sync` ブランチを `develop` から作成。
+  - `apps/analytics/api/scheduled_sync.py` を追加し、`SCHEDULED_SYNC_TIMES` で指定した時刻に `gold_calendar_cache.json` のSHA-256ハッシュを確認する常駐スケジューラを実装。
+  - 前回POST済みハッシュと同一の場合はスキップし、差分がある場合のみ既存 `run_analysis_and_push()` を呼び出して Hono の `/api/v1/sync/data` へPOSTする構成にした。
+  - `HONO_SYNC_URL`, `API_TOKEN`, `SCHEDULED_SYNC_*`, `CALENDAR_CACHE_PATH` の設定を `.env.example`, `apps/analytics/README.md`, `docs/SYNC_AND_SEED.md` に追記。
+  - `apps/analytics/api/test_scheduled_sync.py` を追加し、時刻パース、指定時刻判定、差分ありPOST、差分なしスキップ、同一スロット二重実行防止を検証。
+
+- **検証結果**:
+  - `python3 -m unittest test_scheduled_sync`: 5 pass / 0 fail
+  - `python3 -m py_compile apps/analytics/api/scheduled_sync.py apps/analytics/api/server.py apps/analytics/api/test_scheduled_sync.py`: pass
+  - `.venv/bin/ruff check apps/analytics/api/server.py apps/analytics/api/scheduled_sync.py apps/analytics/api/test_scheduled_sync.py`: pass
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 53 pass / backend 100 pass
+
+- **次回への申し送り事項**:
+  - #76 で Windows タスクスケジューラ/自動起動/ログ保存/スリープ抑止の運用設定を詰める。
+  - #77 で Backend 側の同期状態更新・確認手順を強化する。
+  - 実機ノートPCでは MT5 と `GoldCalendarPush.mq5` を常時起動し、`SCHEDULED_SYNC_TIMES` と本番 `HONO_SYNC_URL` / `API_TOKEN` を設定して疎通確認する。
+
 ### 2026-05-06 - PR #92 掲示板投稿作成APIテストのCI失敗修正確認
 
 - **達成したタスク**:

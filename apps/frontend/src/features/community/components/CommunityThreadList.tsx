@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CommunityThread } from "@/lib/api/client";
 
 type CommunityThreadListProps = {
@@ -27,7 +28,11 @@ export function CommunityThreadList({ threads }: CommunityThreadListProps) {
           <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-slate-400">
             {thread.category} / {thread.replyCount}件の返信
           </p>
-          <h3 className="text-lg font-semibold text-slate-950">{thread.title}</h3>
+          <h3 className="text-lg font-semibold text-slate-950">
+            <Link href={`/community/${thread.id}`} className="hover:text-amber-700">
+              {thread.title}
+            </Link>
+          </h3>
           <p className="mt-3 text-sm leading-6 text-slate-600">{thread.body}</p>
           <time className="mt-4 block text-xs font-medium text-slate-400" dateTime={thread.createdAt}>
             {new Intl.DateTimeFormat("ja-JP", {

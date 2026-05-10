@@ -107,3 +107,24 @@ curl -X POST http://localhost:8000/api/sync
 ```
 
 *(※ `apps/analytics/api/server.py` 内の `HONO_SYNC_URL` は、本番デプロイ時はVPSのドメイン/IPアドレスに書き換えてください)*
+
+### Step 2.4: 指定時刻のJSON差分同期 (任意)
+WindowsPC上で FastAPI サーバーを常時起動し、`SCHEDULED_SYNC_TIMES` を設定すると、指定時刻に
+MT5 EA が出力した `gold_calendar_cache.json` の内容ハッシュを確認します。
+前回Honoへ送信したJSONから変化がある場合だけ、既存の差分同期処理を実行して
+`/api/v1/sync/data` へPOSTします。
+
+```powershell
+$env:API_TOKEN="backendと同じtoken"
+$env:HONO_SYNC_URL="https://api.example.com/api/v1/sync/data"
+$env:SCHEDULED_SYNC_TIMES="08:00,21:30"
+$env:SCHEDULED_SYNC_TIMEZONE="Asia/Tokyo"
+python api/server.py
+```
+
+補足:
+- `SCHEDULED_SYNC_TIMES` が空の場合、スケジューラは無効です。
+- 複数時刻は `08:00,21:30` のようにカンマ区切りで指定します。
+- JSONの場所は通常 `%APPDATA%\MetaQuotes\Terminal\Common\Files\gold_calendar_cache.json` を自動検出します。
+- `CALENDAR_CACHE_PATH` を設定すると、任意のJSONファイルを監視対象にできます。
+- 前回POST済みハッシュは `SCHEDULED_SYNC_STATE_PATH`、未指定時は `apps/analytics/.sync_state.json` に保存されます。

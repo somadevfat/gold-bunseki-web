@@ -159,4 +159,50 @@ describe("MSW abnormal scenarios", () => {
 
     expect(res.status).toBe(400);
   });
+
+  it("掲示板投稿詳細APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads/thread-1");
+    const body = await res.json() as { thread: { id: string }; replies: Array<{ body: string }> };
+
+    expect(res.status).toBe(200);
+    expect(body.thread.id).toBe("thread-1");
+    expect(body.replies[0].body).toContain("NY後半");
+  });
+
+  it("掲示板投稿詳細APIの404応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads/missing");
+
+    expect(res.status).toBe(404);
+  });
+
+  it("掲示板返信作成APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads/thread-1/replies", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        body: "NY後半の戻りを見ています。",
+      }),
+    });
+    const body = await res.json() as { threadId: string; body: string };
+
+    expect(res.status).toBe(201);
+    expect(body.threadId).toBe("thread-1");
+    expect(body.body).toBe("NY後半の戻りを見ています。");
+  });
+
+  it("掲示板返信作成APIのバリデーションエラーを再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/community/threads/thread-1/replies", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        body: "",
+      }),
+    });
+
+    expect(res.status).toBe(400);
+  });
 });
