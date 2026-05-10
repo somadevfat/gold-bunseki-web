@@ -1,6 +1,7 @@
 import { CalculateZigZagUseCase } from "../application/use_case/calculateZigZagUseCase";
 import { CreateCommunityReplyUseCase } from "../application/use_case/createCommunityReplyUseCase";
 import { CreateCommunityThreadUseCase } from "../application/use_case/createCommunityThreadUseCase";
+import { CreateResearchNoteUseCase } from "../application/use_case/createResearchNoteUseCase";
 import { GetCommunityThreadDetailUseCase } from "../application/use_case/getCommunityThreadDetailUseCase";
 import { GetCommunityThreadsUseCase } from "../application/use_case/getCommunityThreadsUseCase";
 import { GetLatestPriceUseCase } from "../application/use_case/getLatestPriceUseCase";
@@ -8,6 +9,7 @@ import { GetRecentEventNamesUseCase } from "../application/use_case/getRecentEve
 import { GetRecentSessionsUseCase } from "../application/use_case/getRecentSessionsUseCase";
 import { GetRecentSessionsWithAutoSyncUseCase } from "../application/use_case/getRecentSessionsWithAutoSyncUseCase";
 import { GetReplayDataUseCase } from "../application/use_case/getReplayDataUseCase";
+import { GetResearchNotesUseCase } from "../application/use_case/getResearchNotesUseCase";
 import { GetSyncStatusUseCase } from "../application/use_case/getSyncStatusUseCase";
 import { db, DbType } from "../infrastructure/database/db";
 import { HttpAnalyticsService } from "../infrastructure/external/analyticsServiceImpl";
@@ -15,6 +17,7 @@ import { HttpAnalyticsSyncPull } from "../infrastructure/external/analyticsSyncP
 import { DrizzleBatchRepository } from "../infrastructure/repository/drizzleBatchRepository";
 import { DrizzleCommunityThreadRepository } from "../infrastructure/repository/drizzleCommunityThreadRepository";
 import { DrizzlePriceRepository } from "../infrastructure/repository/drizzlePriceRepository";
+import { DrizzleResearchNoteRepository } from "../infrastructure/repository/drizzleResearchNoteRepository";
 import { DrizzleSessionRepository } from "../infrastructure/repository/drizzleSessionRepository";
 import { DrizzleSyncRepository } from "../infrastructure/repository/drizzleSyncRepository";
 import { DrizzleZigZagRepository } from "../infrastructure/repository/drizzleZigZagRepository";
@@ -33,6 +36,7 @@ export function createAppContainer(
   options: CreateAppContainerOptions = {},
 ) {
   const communityThreadRepo = new DrizzleCommunityThreadRepository(database);
+  const researchNoteRepo = new DrizzleResearchNoteRepository(database);
   const syncRepo = new DrizzleSyncRepository(database);
   const batchRepo = new DrizzleBatchRepository(database);
   const priceRepo = new DrizzlePriceRepository(database);
@@ -56,6 +60,7 @@ export function createAppContainer(
       syncRepo,
       batchRepo,
       communityThreadRepo,
+      researchNoteRepo,
     },
     useCases: {
       community: {
@@ -63,6 +68,10 @@ export function createAppContainer(
         getThreadDetail: new GetCommunityThreadDetailUseCase(communityThreadRepo),
         createThread: new CreateCommunityThreadUseCase(communityThreadRepo),
         createReply: new CreateCommunityReplyUseCase(communityThreadRepo),
+      },
+      researchNotes: {
+        getNotes: new GetResearchNotesUseCase(researchNoteRepo),
+        createNote: new CreateResearchNoteUseCase(researchNoteRepo),
       },
       sync: {
         getStatus: new GetSyncStatusUseCase(syncRepo),
@@ -94,6 +103,7 @@ export type AppContainer = ReturnType<typeof createAppContainer>;
 export function freezeAppContainer(container: AppContainer): AppContainer {
   Object.freeze(container.repositories);
   Object.freeze(container.useCases.community);
+  Object.freeze(container.useCases.researchNotes);
   Object.freeze(container.useCases.sync);
   Object.freeze(container.useCases.market);
   Object.freeze(container.useCases);

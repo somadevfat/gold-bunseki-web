@@ -89,6 +89,20 @@ export const communityReplies = pgTable('community_replies', {
 ]);
 
 // ==========================================
+// Research Notes Tables
+// ==========================================
+
+export const researchNotes = pgTable('research_notes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+  index('idx_research_notes_created').on(table.createdAt),
+]);
+
+// ==========================================
 // Better Auth Core Tables
 // ==========================================
 
