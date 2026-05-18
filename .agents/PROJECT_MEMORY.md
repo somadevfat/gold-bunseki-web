@@ -5,6 +5,33 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-18 - AI 実装代行を停止し、手動実装支援へ方針変更
+
+- **達成したタスク**:
+  - ユーザー方針として、今後は時間効率よりも本人理解を優先し、AI がコードを直接実装しない運用へ切り替えることを決定。
+  - `.agents/rules/rules.md` の冒頭にあった「AI主導・実装代行モード」を削除し、AI は設計整理、手順分解、説明、レビュー、デバッグ支援に徹するルールへ更新。
+  - チャットルールに「AI はサポート専任」を追加し、明示依頼がない限りコード編集・ファイル作成・依存追加・コミットを直接行わない方針を明文化。
+
+- **次回への申し送り事項**:
+  - Express 移行は、ユーザーが手動で進める前提で、AI は実装順、差分レビュー、詰まりどころの整理、確認観点の提示に徹する。
+
+### 2026-05-18 - Hono から Express への移行判断と当日実行プラン作成
+
+- **達成したタスク**:
+  - 現在ブランチが `features/issue-40-edit-delete-research-notes` であることを確認。
+  - backend の Hono 依存範囲を調査し、`createApp`, routes, controller, middleware, error handling, test helpers, frontend の `hono/client` まで移行対象になることを整理。
+  - 17 本の Hono route 定義、36 本の backend test file があることを確認し、API 契約維持を前提にすれば 2026-05-18 当日中の移行完了は可能と判断。
+  - `docs/hono-to-express-migration-plan.md` を追加し、実行順、時間配分、リスク、完了条件を文書化。
+  - `docs/adr/0006-migrate-backend-from-hono-to-express.md` を追加し、ポートフォリオ説明性を理由に Express へ移行する判断を記録。
+
+- **主要な追加ファイル**:
+  - `docs/hono-to-express-migration-plan.md`
+  - `docs/adr/0006-migrate-backend-from-hono-to-express.md`
+
+- **次回への申し送り事項**:
+  - 実装開始時は Express 側の validation/OpenAPI 方式を最初に固定し、`GET /health` を先に通してから middleware、route、frontend client、test の順で進める。
+  - `@hono/zod-openapi` と `hono/client` の代替を雑に決めると作業が長引くため、API 契約維持を優先し、OpenAPI の見栄え改善は後回しにする。
+
 ### 2026-05-10 - Issue #37-#40 リサーチメモ機能スタックPR作成
 
 - **達成したタスク**:
