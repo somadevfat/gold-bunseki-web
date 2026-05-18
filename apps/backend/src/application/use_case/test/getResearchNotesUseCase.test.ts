@@ -14,6 +14,8 @@ const mockNote: ResearchNote = {
 const createMockRepo = (overrides: Partial<ResearchNoteRepositoryPort> = {}): ResearchNoteRepositoryPort => ({
   findAll: mock(() => Promise.resolve([mockNote])),
   create: mock(() => Promise.resolve(mockNote)),
+  update: mock(() => Promise.resolve(mockNote)),
+  delete: mock(() => Promise.resolve(true)),
   ...overrides,
 });
 

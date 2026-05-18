@@ -2,6 +2,7 @@ import { CalculateZigZagUseCase } from "../application/use_case/calculateZigZagU
 import { CreateCommunityReplyUseCase } from "../application/use_case/createCommunityReplyUseCase";
 import { CreateCommunityThreadUseCase } from "../application/use_case/createCommunityThreadUseCase";
 import { CreateResearchNoteUseCase } from "../application/use_case/createResearchNoteUseCase";
+import { DeleteResearchNoteUseCase } from "../application/use_case/deleteResearchNoteUseCase";
 import { GetCommunityThreadDetailUseCase } from "../application/use_case/getCommunityThreadDetailUseCase";
 import { GetCommunityThreadsUseCase } from "../application/use_case/getCommunityThreadsUseCase";
 import { GetLatestPriceUseCase } from "../application/use_case/getLatestPriceUseCase";
@@ -11,6 +12,7 @@ import { GetRecentSessionsWithAutoSyncUseCase } from "../application/use_case/ge
 import { GetReplayDataUseCase } from "../application/use_case/getReplayDataUseCase";
 import { GetResearchNotesUseCase } from "../application/use_case/getResearchNotesUseCase";
 import { GetSyncStatusUseCase } from "../application/use_case/getSyncStatusUseCase";
+import { UpdateResearchNoteUseCase } from "../application/use_case/updateResearchNoteUseCase";
 import { db, DbType } from "../infrastructure/database/db";
 import { HttpAnalyticsService } from "../infrastructure/external/analyticsServiceImpl";
 import { HttpAnalyticsSyncPull } from "../infrastructure/external/analyticsSyncPullImpl";
@@ -72,6 +74,8 @@ export function createAppContainer(
       researchNotes: {
         getNotes: new GetResearchNotesUseCase(researchNoteRepo),
         createNote: new CreateResearchNoteUseCase(researchNoteRepo),
+        updateNote: new UpdateResearchNoteUseCase(researchNoteRepo),
+        deleteNote: new DeleteResearchNoteUseCase(researchNoteRepo),
       },
       sync: {
         getStatus: new GetSyncStatusUseCase(syncRepo),

@@ -225,6 +225,37 @@ export const handlers = [
     }, { status: 201 });
   }),
 
+  /* リサーチメモ更新 */
+  http.patch(`${baseUrl}/api/v1/research-notes/:noteId`, async ({ params, request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+    if (scenario === 'error' || params.noteId === 'missing') {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    const body = await request.json() as { title?: string; body?: string };
+    if (!body.title || !body.body) {
+      return new HttpResponse(null, { status: 400 });
+    }
+
+    return HttpResponse.json({
+      id: String(params.noteId),
+      title: body.title,
+      body: body.body,
+      createdAt: '2026-05-05T10:00:00Z',
+      updatedAt: '2026-05-05T11:00:00Z',
+    });
+  }),
+
+  /* リサーチメモ削除 */
+  http.delete(`${baseUrl}/api/v1/research-notes/:noteId`, ({ params, request }) => {
+    const scenario = request.headers.get('x-test-scenario');
+    if (scenario === 'error' || params.noteId === 'missing') {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    return HttpResponse.json({ success: true });
+  }),
+
   http.get(`${baseUrl}/api/auth/get-session`, ({ request }) => {
     const cookie = request.headers.get('cookie');
     if (cookie && cookie.includes('mock_session_token')) {

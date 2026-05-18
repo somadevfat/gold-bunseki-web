@@ -3,6 +3,7 @@ import { CalculateZigZagUseCase } from '../application/use_case/calculateZigZagU
 import { CreateCommunityReplyUseCase } from '../application/use_case/createCommunityReplyUseCase';
 import { CreateCommunityThreadUseCase } from '../application/use_case/createCommunityThreadUseCase';
 import { CreateResearchNoteUseCase } from '../application/use_case/createResearchNoteUseCase';
+import { DeleteResearchNoteUseCase } from '../application/use_case/deleteResearchNoteUseCase';
 import { GetCommunityThreadDetailUseCase } from '../application/use_case/getCommunityThreadDetailUseCase';
 import { GetCommunityThreadsUseCase } from '../application/use_case/getCommunityThreadsUseCase';
 import { GetLatestPriceUseCase } from '../application/use_case/getLatestPriceUseCase';
@@ -11,6 +12,7 @@ import { GetRecentSessionsWithAutoSyncUseCase } from '../application/use_case/ge
 import { GetReplayDataUseCase } from '../application/use_case/getReplayDataUseCase';
 import { GetResearchNotesUseCase } from '../application/use_case/getResearchNotesUseCase';
 import { GetSyncStatusUseCase } from '../application/use_case/getSyncStatusUseCase';
+import { UpdateResearchNoteUseCase } from '../application/use_case/updateResearchNoteUseCase';
 import { createAppContainer, freezeAppContainer } from './container';
 import { createMockDrizzle } from '../interface/test/testHelpers';
 
@@ -28,6 +30,8 @@ describe('createAppContainer', () => {
     expect(container.useCases.community.createReply).toBeInstanceOf(CreateCommunityReplyUseCase);
     expect(container.useCases.researchNotes.getNotes).toBeInstanceOf(GetResearchNotesUseCase);
     expect(container.useCases.researchNotes.createNote).toBeInstanceOf(CreateResearchNoteUseCase);
+    expect(container.useCases.researchNotes.updateNote).toBeInstanceOf(UpdateResearchNoteUseCase);
+    expect(container.useCases.researchNotes.deleteNote).toBeInstanceOf(DeleteResearchNoteUseCase);
     expect(container.useCases.sync.getStatus).toBeInstanceOf(GetSyncStatusUseCase);
     expect(container.useCases.market.getLatestPrice).toBeInstanceOf(GetLatestPriceUseCase);
     expect(container.useCases.market.calculateZigZag).toBeInstanceOf(CalculateZigZagUseCase);

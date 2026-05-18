@@ -79,4 +79,70 @@ describe('DrizzleResearchNoteRepository', () => {
       expect(result.updatedAt).toBe(updatedAt.toISOString());
     });
   });
+
+  describe('update', () => {
+    it('入力値で既存メモを更新し、更新されたメモを返すこと', async () => {
+      // ## Arrange ##
+      const mockDb = createMockDrizzle([mockRow]);
+      const repo = new DrizzleResearchNoteRepository(mockDb);
+
+      // ## Act ##
+      const result = await repo.update(mockRow.id, {
+        title: 'CPI発表後の観察メモ',
+        body: '初動とNY後半の戻りを比較する。',
+      });
+
+      // ## Assert ##
+      expect(mockDb.update).toHaveBeenCalledTimes(1);
+      expect(mockDb.set).toHaveBeenCalledWith(expect.objectContaining({
+        title: 'CPI発表後の観察メモ',
+        body: '初動とNY後半の戻りを比較する。',
+      }));
+      expect(mockDb.where).toHaveBeenCalledTimes(1);
+      expect(result?.id).toBe(mockRow.id);
+    });
+
+    it('対象メモが存在しない場合、null を返すこと', async () => {
+      // ## Arrange ##
+      const mockDb = createMockDrizzle([]);
+      const repo = new DrizzleResearchNoteRepository(mockDb);
+
+      // ## Act ##
+      const result = await repo.update(mockRow.id, {
+        title: 'CPI発表後の観察メモ',
+        body: '初動とNY後半の戻りを比較する。',
+      });
+
+      // ## Assert ##
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('delete', () => {
+    it('対象メモを削除し、削除成功を返すこと', async () => {
+      // ## Arrange ##
+      const mockDb = createMockDrizzle([{ id: mockRow.id }]);
+      const repo = new DrizzleResearchNoteRepository(mockDb);
+
+      // ## Act ##
+      const result = await repo.delete(mockRow.id);
+
+      // ## Assert ##
+      expect(mockDb.delete).toHaveBeenCalledTimes(1);
+      expect(mockDb.where).toHaveBeenCalledTimes(1);
+      expect(result).toBe(true);
+    });
+
+    it('対象メモが存在しない場合、false を返すこと', async () => {
+      // ## Arrange ##
+      const mockDb = createMockDrizzle([]);
+      const repo = new DrizzleResearchNoteRepository(mockDb);
+
+      // ## Act ##
+      const result = await repo.delete(mockRow.id);
+
+      // ## Assert ##
+      expect(result).toBe(false);
+    });
+  });
 });

@@ -34,3 +34,11 @@ export const CreateResearchNoteInputSchema = z.object({
 }).openapi('CreateResearchNoteInput');
 
 export type CreateResearchNoteInput = z.infer<typeof CreateResearchNoteInputSchema>;
+
+/**
+ * UpdateResearchNoteInputSchema はリサーチメモ更新時のバリデーションスキーマです。
+ * @responsibility: 編集フォームから送られるタイトル・本文の必須入力と最大文字数を検証する。
+ */
+export const UpdateResearchNoteInputSchema = CreateResearchNoteInputSchema.openapi('UpdateResearchNoteInput');
+
+export type UpdateResearchNoteInput = z.infer<typeof UpdateResearchNoteInputSchema>;

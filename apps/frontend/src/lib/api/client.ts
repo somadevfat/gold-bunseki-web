@@ -26,6 +26,10 @@ export type AppClient = {
       "research-notes": {
         $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<ResearchNotesResponse> }>;
         $post: (args: { json: CreateResearchNoteInput }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<ResearchNote> }>;
+        ":noteId": {
+          $patch: (args: { param: { noteId: string }; json: UpdateResearchNoteInput }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<ResearchNote> }>;
+          $delete: (args: { param: { noteId: string } }, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<{ success: boolean }> }>;
+        };
       };
       sync: {
         status: { $get: (args?: Record<string, never>, options?: { init?: RequestInit }) => Promise<{ ok: boolean; json: () => Promise<SyncStatusResponse> }> };
@@ -138,6 +142,8 @@ export type CreateResearchNoteInput = {
   title: string;
   body: string;
 };
+
+export type UpdateResearchNoteInput = CreateResearchNoteInput;
 
 export type Candle = {
   datetimeJst: string;

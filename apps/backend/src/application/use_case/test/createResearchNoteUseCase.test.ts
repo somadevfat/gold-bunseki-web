@@ -19,6 +19,8 @@ const validInput: CreateResearchNoteInput = {
 const createMockRepo = (overrides: Partial<ResearchNoteRepositoryPort> = {}): ResearchNoteRepositoryPort => ({
   findAll: mock(() => Promise.resolve([])),
   create: mock(() => Promise.resolve(mockCreated)),
+  update: mock(() => Promise.resolve(mockCreated)),
+  delete: mock(() => Promise.resolve(true)),
   ...overrides,
 });
 
