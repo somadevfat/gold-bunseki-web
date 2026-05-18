@@ -5,6 +5,56 @@
 
 ## 🏗️ 最近の作業ログ (Recent Work Logs)
 
+### 2026-05-10 - Issue #37-#40 リサーチメモ機能スタックPR作成
+
+- **達成したタスク**:
+  - ノートPC同期系を除いた残Issueとして #37 -> #38 -> #39 -> #40 を依存順に実装し、スタックPR #104-#107 を作成。
+  - #37: Backendに `research_notes` テーブル、Drizzle migration `0004_dry_magdalene.sql`、Entity/Port/UseCase/Repository/Controller/OpenAPI routeを追加。
+  - #38: `ResearchNoteForm` を保存API接続へ変更し、成功/失敗Toast、送信中disabled、APIラッパーを追加。
+  - #39: ダッシュボード右カラムに `ResearchNotesPanel` を追加し、保存済みメモ一覧、ローディング、空状態、取得失敗表示を実装。
+  - #40: リサーチメモ更新/削除API、Frontend APIラッパー、編集モーダル、削除確認UI、zodバリデーション、成功/失敗Toastを追加。
+
+- **主要PR/ブランチ**:
+  - #104 `features/issue-37-research-notes-api` base `develop`
+  - #105 `features/issue-38-connect-research-form` base `features/issue-37-research-notes-api`
+  - #106 `features/issue-39-research-notes-list` base `features/issue-38-connect-research-form`
+  - #107 `features/issue-40-edit-delete-research-notes` base `features/issue-39-research-notes-list`
+
+- **検証結果**:
+  - `PATH="/home/somah/.bun/bin:$PATH" bun run lint:all`: pass
+  - `PATH="/home/somah/.bun/bin:$PATH" bun run test:all`: frontend 118 pass / backend 127 pass
+  - GitHub Actions `lint-and-test`: PR #104, #105, #106, #107 すべて pass / mergeState CLEAN
+
+- **次回への申し送り事項**:
+  - マージ順は #107 -> #106 -> #105 -> #104 ではなく、上位差分から下位ブランチへ取り込むスタック運用に合わせて、まず #107 を #106 へ、#106 を #105 へ、#105 を #104 へ、最後に #104 を `develop` へ反映する。
+  - PRマージ後、baseが `develop` ではないPRの `Closes` が自動クローズされない場合は #37-#40 を手動で完了コメント付きクローズする。
+  - 残Open IssueはノートPC同期運用系 #76-#78 のみになる想定。
+
+### 2026-05-09 - Issue #32-#36 スタックPR作成・CI修正・レビューコメント対応
+
+- **達成したタスク**:
+  - ノートPC同期系以外のIssueとして #32 -> #33 -> #34 -> #35 -> #36 を依存順に実装し、スタックPR #98-#102 を作成。
+  - #98 のCI失敗を確認し、`CommunityThreadDetail` の返信作成APIを依存注入できるようにしてテスト安定化。
+  - `.github/workflows/ci.yml` の `pull_request.branches` 制限を外し、`develop` 以外をbaseにするスタックPRでもCIが走るように修正。
+  - PR #98-#102 のGeminiレビューコメントを確認し、JSDoc `@responsibility` 追加、`Intl.DateTimeFormat` のhoist、記事データコピー返却、表示日付/OG localeテスト、`NEXT_PUBLIC_SITE_URL` 末尾スラッシュ除去などを対応。
+  - #101 で追加した `copyInsightPost` helper にも `@responsibility` 付きJSDocを補い、#102へ再マージ済み。
+
+- **主要PR/ブランチ**:
+  - #98 `feature/issue-32-community-thread-detail` base `develop`
+  - #99 `feature/issue-33-insights-content-source` base `feature/issue-32-community-thread-detail`
+  - #100 `feature/issue-34-insights-list-data` base `feature/issue-33-insights-content-source`
+  - #101 `feature/issue-35-insights-detail-page` base `feature/issue-34-insights-list-data`
+  - #102 `feature/issue-36-insights-seo-sitemap` base `feature/issue-35-insights-detail-page`
+
+- **検証結果**:
+  - `bun run lint:all`: pass
+  - `bun run test:all`: frontend 96 pass / backend 100 pass
+  - GitHub Actions `lint-and-test`: PR #98, #99, #100, #101, #102 すべて pass
+
+- **次回への申し送り事項**:
+  - GitHub上のレビューThreadはコード対応済みだが、明示的なresolve/reply操作は未実施。必要なら各PRコメントへ対応内容を返信し、Threadをresolvedにする。
+  - 次に進むなら #37 リサーチメモ保存APIを #36 の後続として積むか、スタックPRを順にマージしてから着手する。
+
 ### 2026-05-09 - Issue/PR最新同期と次Issue依存整理
 
 - **達成したタスク**:

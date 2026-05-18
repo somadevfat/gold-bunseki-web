@@ -5,7 +5,7 @@ import ReplaySkeleton from '@/features/market-replay/components/ReplaySkeleton';
 import { SessionFactTimeline } from '@/features/sessions/components/SessionFactTimeline';
 import { getIndicators } from '@/features/common/api/getIndicators';
 import { LiveStatusBadge } from '@/features/sessions/components/LiveStatusBadge';
-import { ResearchNoteForm } from '@/features/forms/components/ResearchNoteForm';
+import { ResearchNotesPanel } from '@/features/forms/components/ResearchNotesPanel';
 
 const valueHighlights = [
   {
@@ -172,7 +172,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     <SessionFactTimeline />
                   </Suspense>
                 </div>
-                <ResearchNoteForm />
+                <ResearchNotesPanel />
               </div>
             </aside>
           </div>

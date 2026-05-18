@@ -12,6 +12,7 @@ type MockQueryBuilder = {
   groupBy: ReturnType<typeof mock>;
   insert: ReturnType<typeof mock>;
   update: ReturnType<typeof mock>;
+  delete: ReturnType<typeof mock>;
   values: ReturnType<typeof mock>;
   set: ReturnType<typeof mock>;
   returning: ReturnType<typeof mock>;
@@ -35,6 +36,7 @@ export const createMockDrizzle = <T = unknown>(results: T[] = []) => {
     groupBy: mock(() => queryMock),
     insert: mock(() => queryMock),
     update: mock(() => queryMock),
+    delete: mock(() => queryMock),
     values: mock(() => queryMock),
     set: mock(() => queryMock),
     returning: mock(() => queryMock),
