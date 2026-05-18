@@ -15,6 +15,7 @@ import { syncBearerAuth } from "../interface/middleware/syncBearerAuth";
 import { Bindings, AppVariables } from "../interface/types";
 import { registerCommunityRoutes } from "../interface/routes/communityRoutes";
 import { registerMarketRoutes } from "../interface/routes/marketRoutes";
+import { registerResearchNoteRoutes } from "../interface/routes/researchNoteRoutes";
 import { registerSyncRoutes } from "../interface/routes/syncRoutes";
 
 const defaultAllowedOrigins = getAllowedOrigins();
@@ -82,6 +83,7 @@ export function createApp(
   registerSyncRoutes(app, container);
   registerMarketRoutes(app, container);
   registerCommunityRoutes(app, container);
+  registerResearchNoteRoutes(app, container);
 
   app.notFound(handleNotFound);
   app.onError(handleAppError);

@@ -11,6 +11,10 @@ import {
   CreateCommunityReplyInputSchema,
   CreateCommunityThreadInputSchema,
 } from "../../domain/entities/communityThread";
+import {
+  CreateResearchNoteInputSchema,
+  ResearchNoteSchema,
+} from "../../domain/entities/researchNote";
 
 /**
  * Health Check ルート
@@ -362,6 +366,62 @@ export const createCommunityReplyRoute = createRoute({
     },
     404: {
       description: "スレッドが見つかりません",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * リサーチメモ一覧ルート
+ */
+export const researchNotesRoute = createRoute({
+  method: "get",
+  path: "/api/v1/research-notes",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            notes: z.array(ResearchNoteSchema),
+          }),
+        },
+      },
+      description: "保存済みリサーチメモ一覧を新しい順で取得します",
+    },
+    500: {
+      description: "サーバー内部エラー",
+    },
+  },
+});
+
+/**
+ * リサーチメモ作成ルート
+ */
+export const createResearchNoteRoute = createRoute({
+  method: "post",
+  path: "/api/v1/research-notes",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: CreateResearchNoteInputSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      content: {
+        "application/json": {
+          schema: ResearchNoteSchema,
+        },
+      },
+      description: "リサーチメモを作成して返します",
+    },
+    400: {
+      description: "バリデーションエラー",
     },
     500: {
       description: "サーバー内部エラー",

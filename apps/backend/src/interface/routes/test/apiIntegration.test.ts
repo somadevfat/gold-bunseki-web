@@ -77,6 +77,16 @@ describe("API Response Integrity Tests (Integration)", () => {
       expect(body.lastCandleAt).toBeDefined();
       expect(body.syncHealth).toBeDefined();
     });
+
+    it("GET /api/v1/research-notes: 保存済みメモ一覧を取得できること", async () => {
+      // ## Act ##
+      const res = await app.request("/api/v1/research-notes", {}, mockEnv);
+
+      // ## Assert ##
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { notes: unknown[] };
+      expect(body.notes).toBeInstanceOf(Array);
+    });
   });
 
   // ==========================================
@@ -110,6 +120,25 @@ describe("API Response Integrity Tests (Integration)", () => {
     it("GET /api/v1/market/replay: eventパラメータが未指定の場合 400 エラーを返すこと", async () => {
       // ## Act ##
       const res = await app.request("/api/v1/market/replay", {}, mockEnv);
+
+      // ## Assert ##
+      expect(res.status).toBe(400);
+    });
+
+    it("POST /api/v1/research-notes: タイトルが空の場合 400 エラーを返すこと", async () => {
+      // ## Act ##
+      const res = await app.request(
+        "/api/v1/research-notes",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: "",
+            body: "本文です。",
+          }),
+        },
+        mockEnv,
+      );
 
       // ## Assert ##
       expect(res.status).toBe(400);
