@@ -205,4 +205,84 @@ describe("MSW abnormal scenarios", () => {
 
     expect(res.status).toBe(400);
   });
+
+  it("リサーチメモ一覧APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes");
+    const body = await res.json() as { notes: Array<{ title: string }> };
+
+    expect(res.status).toBe(200);
+    expect(body.notes[0].title).toBe("CPI前後の値動き");
+  });
+
+  it("x-test-scenario=empty で空のリサーチメモ一覧を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes", {
+      headers: {
+        "x-test-scenario": "empty",
+      },
+    });
+    const body = await res.json() as { notes: unknown[] };
+
+    expect(res.status).toBe(200);
+    expect(body.notes).toEqual([]);
+  });
+
+  it("リサーチメモ作成APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "CPI前後の値動き",
+        body: "発表直後とNY後半の戻りを比較する",
+      }),
+    });
+    const body = await res.json() as { title: string; body: string };
+
+    expect(res.status).toBe(201);
+    expect(body.title).toBe("CPI前後の値動き");
+  });
+
+  it("リサーチメモ作成APIのバリデーションエラーを再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "",
+        body: "",
+      }),
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("リサーチメモ更新APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes/note-1", {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "CPI発表後の観察メモ",
+        body: "初動とNY後半の戻りを比較する",
+      }),
+    });
+    const body = await res.json() as { id: string; title: string };
+
+    expect(res.status).toBe(200);
+    expect(body.id).toBe("note-1");
+    expect(body.title).toBe("CPI発表後の観察メモ");
+  });
+
+  it("リサーチメモ削除APIの正常応答を再現できること", async () => {
+    const res = await fetch("http://localhost:3000/api/v1/research-notes/note-1", {
+      method: "DELETE",
+    });
+    const body = await res.json() as { success: boolean };
+
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+  });
 });

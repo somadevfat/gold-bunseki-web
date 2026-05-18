@@ -9,6 +9,7 @@ interface MockResponse {
     notes?: ResearchNote[];
     id?: string;
     title?: string;
+    success?: boolean;
   };
   status: number;
 }
@@ -29,15 +30,21 @@ describe('ResearchNoteController', () => {
   let container: AppContainer;
   let getNotesExecute: ReturnType<typeof mock>;
   let createNoteExecute: ReturnType<typeof mock>;
+  let updateNoteExecute: ReturnType<typeof mock>;
+  let deleteNoteExecute: ReturnType<typeof mock>;
 
   beforeEach(() => {
     getNotesExecute = mock(() => Promise.resolve([mockNote]));
     createNoteExecute = mock(() => Promise.resolve(mockNote));
+    updateNoteExecute = mock(() => Promise.resolve(mockNote));
+    deleteNoteExecute = mock(() => Promise.resolve(true));
     container = {
       useCases: {
         researchNotes: {
           getNotes: { execute: getNotesExecute },
           createNote: { execute: createNoteExecute },
+          updateNote: { execute: updateNoteExecute },
+          deleteNote: { execute: deleteNoteExecute },
         },
       },
     } as unknown as AppContainer;
@@ -118,6 +125,73 @@ describe('ResearchNoteController', () => {
 
       // ## Act & Assert ##
       await expect(controller.createNote(c)).rejects.toThrow('INSERT失敗');
+    });
+  });
+
+  describe('updateNote', () => {
+    it('有効な入力でリサーチメモを更新して 200 を返すこと', async () => {
+      // ## Arrange ##
+      const body = {
+        title: 'CPI発表後の観察メモ',
+        body: '初動とNY後半の戻りを比較する。',
+      };
+      const controller = createResearchNoteController(container);
+      const c = createMockContext({}, {}, { noteId: mockNote.id }, body);
+
+      // ## Act ##
+      const res = (await controller.updateNote(c)) as unknown as MockResponse;
+
+      // ## Assert ##
+      expect(res.status).toBe(200);
+      expect(res.body.id).toBe(mockNote.id);
+      expect(updateNoteExecute).toHaveBeenCalledWith(mockNote.id, body);
+    });
+
+    it('対象メモが存在しない場合 404 を返すこと', async () => {
+      // ## Arrange ##
+      updateNoteExecute = mock(() => Promise.resolve(null));
+      container.useCases.researchNotes.updateNote.execute = updateNoteExecute;
+      const controller = createResearchNoteController(container);
+      const c = createMockContext({}, {}, { noteId: mockNote.id }, {
+        title: mockNote.title,
+        body: mockNote.body,
+      });
+
+      // ## Act ##
+      const res = (await controller.updateNote(c)) as unknown as MockResponse;
+
+      // ## Assert ##
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('deleteNote', () => {
+    it('対象メモを削除して 200 を返すこと', async () => {
+      // ## Arrange ##
+      const controller = createResearchNoteController(container);
+      const c = createMockContext({}, {}, { noteId: mockNote.id });
+
+      // ## Act ##
+      const res = (await controller.deleteNote(c)) as unknown as MockResponse;
+
+      // ## Assert ##
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(deleteNoteExecute).toHaveBeenCalledWith(mockNote.id);
+    });
+
+    it('対象メモが存在しない場合 404 を返すこと', async () => {
+      // ## Arrange ##
+      deleteNoteExecute = mock(() => Promise.resolve(false));
+      container.useCases.researchNotes.deleteNote.execute = deleteNoteExecute;
+      const controller = createResearchNoteController(container);
+      const c = createMockContext({}, {}, { noteId: mockNote.id });
+
+      // ## Act ##
+      const res = (await controller.deleteNote(c)) as unknown as MockResponse;
+
+      // ## Assert ##
+      expect(res.status).toBe(404);
     });
   });
 });
