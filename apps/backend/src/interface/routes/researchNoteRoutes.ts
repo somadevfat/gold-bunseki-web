@@ -3,8 +3,10 @@ import { AppContainer } from '../../app/container';
 import { createResearchNoteController } from '../controller/researchNoteController';
 import { AppVariables, Bindings } from '../types';
 import {
+  deleteResearchNoteRoute,
   createResearchNoteRoute,
   researchNotesRoute,
+  updateResearchNoteRoute,
 } from './openapi';
 
 type BackendApp = OpenAPIHono<{ Bindings: Bindings; Variables: AppVariables }>;
@@ -18,4 +20,6 @@ export function registerResearchNoteRoutes(app: BackendApp, container: AppContai
 
   app.openapi(researchNotesRoute, controller.getNotes);
   app.openapi(createResearchNoteRoute, controller.createNote);
+  app.openapi(updateResearchNoteRoute, controller.updateNote);
+  app.openapi(deleteResearchNoteRoute, controller.deleteNote);
 }

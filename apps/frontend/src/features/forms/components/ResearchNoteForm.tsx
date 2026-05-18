@@ -7,12 +7,12 @@ import { useToast } from "@/features/common/components/ToastProvider";
 import { createResearchNote } from "@/features/forms/api/createResearchNote";
 import type { ResearchNote } from "@/lib/api/client";
 
-const researchNoteSchema = z.object({
+export const researchNoteSchema = z.object({
   title: z.string().min(1, "タイトルを入力してください").max(60, "タイトルは60文字以内で入力してください"),
   body: z.string().min(10, "メモは10文字以上で入力してください").max(240, "メモは240文字以内で入力してください"),
 });
 
-type ResearchNoteFormValues = z.infer<typeof researchNoteSchema>;
+export type ResearchNoteFormValues = z.infer<typeof researchNoteSchema>;
 
 type ResearchNoteFormProps = {
   createNote?: typeof createResearchNote;

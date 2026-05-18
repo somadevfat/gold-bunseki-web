@@ -1,4 +1,8 @@
-import { CreateResearchNoteInput, ResearchNote } from '../../domain/entities/researchNote';
+import {
+  CreateResearchNoteInput,
+  ResearchNote,
+  UpdateResearchNoteInput,
+} from '../../domain/entities/researchNote';
 
 /**
  * ResearchNoteRepositoryPort はリサーチメモを管理するリポジトリインターフェースです。
@@ -14,4 +18,14 @@ export interface ResearchNoteRepositoryPort {
    * 新規リサーチメモを作成して返します。
    */
   create(input: CreateResearchNoteInput): Promise<ResearchNote>;
+
+  /**
+   * 既存リサーチメモを更新して返します。
+   */
+  update(noteId: string, input: UpdateResearchNoteInput): Promise<ResearchNote | null>;
+
+  /**
+   * 既存リサーチメモを削除します。
+   */
+  delete(noteId: string): Promise<boolean>;
 }
